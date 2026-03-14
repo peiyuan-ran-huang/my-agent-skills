@@ -3,7 +3,7 @@ name: qc-zh
 description: >
   QC skill 中文版（参考翻译）。主版本为 SKILL.md（英文）。此文件不会被 Claude Code 自动加载，仅供参考。
   ONLY trigger when user types ---qc (case-insensitive).
-  Do NOT activate on "检查", "审查", "复核", "审计", "check", "review", "verify", "inspect", "audit" or any other words.
+  Do NOT activate on "检查", "审查", "复核", "审计", "check", "review", "verify", "inspect", "audit" or any similar words.
 ---
 
 <!-- 同步规则：此文件的任何改动必须同步到 SKILL.md，反之亦然。 -->
