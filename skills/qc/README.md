@@ -1,0 +1,56 @@
+# QC: Five-Dimensional Deep Review / 五维深度审查
+
+**Version**: v0.1
+**Last Updated**: 2026-03-14
+**Author**: Peiyuan Huang, with significant assistance from Claude Code
+
+---
+
+## What is this? / 这是什么？
+
+A stupidly simple prompt-based skill for Claude Code that runs a structured five-dimensional review (Correctness, Completeness, Optimality, Consistency, Standards) on whatever you just produced. No code, no dependencies, no magic — just a well-crafted prompt template.
+
+一个极其轻量的 Claude Code prompt skill，对你刚产出的东西做五维结构化审查（正确性、完整性、最优性、一致性、规范性）。没有代码，没有依赖，没有黑魔法——就是一个精心打磨的 prompt 模板。
+
+## Why? / 为什么做这个？
+
+Honestly? I was too lazy to manually double-check my own work every time. So I automated my laziness into a structured framework. Self-entertainment at its finest.
+
+说实话？每次自己核查产出物太累了，于是把"懒"系统化成了一个审查框架。纯属自娱自乐。
+
+## Disclaimers / 免责声明
+
+I'm a biomedical researcher, not a programmer. This isn't even vibe coding — there's literally no code here, haha. It's just prompt engineering with extra steps.
+
+我是个生物医学研究者，编程小白一枚。这甚至算不上 vibe coding——因为根本没有 code，哈哈。充其量是 prompt engineering with extra steps。
+
+This project does **not** represent the views of my employer or affiliated institutions. Please do **not** use this to cheat on assignments, fabricate data, or engage in any form of academic misconduct. QC is meant to *catch* problems, not *create* them.
+
+本项目**不**代表本人所属机构的立场或观点。请**不要**用它来作弊、捏造数据或进行任何形式的学术不端行为。QC 的初衷是*发现*问题，不是*制造*问题。
+
+**Important**: AI only provides suggestions. The final call is always yours, and so is the responsibility. Use your own judgement — this tool is an assistant, not a substitute for critical thinking.
+
+**重要提示**：AI 只是提供建议。最终决策权始终在你手里，最终责任也是。请运用自己的判断力——这个工具是助手，不是替代你独立思考的借口。
+
+## Files / 文件说明
+
+| File | Language | Role |
+|------|----------|------|
+| `SKILL.md` | English | Primary (loaded by Claude Code) |
+| `SKILL_ZH.md` | 中文 | Translation reference (not auto-loaded) |
+
+Changes to either file **must** be mirrored in the other.
+任一文件的改动**必须**同步到另一个。
+
+## Trigger / 触发方式
+
+```
+---qc [target] [extra criteria]
+```
+
+Three dashes + two characters. / 三个短横线加两个字符。
+
+---
+
+*Built with ☕ and Claude Code. Peer review, but make it instant and free.*
+*用 ☕ 和 Claude Code 打造。同行评审，但秒出结果且免费。*
