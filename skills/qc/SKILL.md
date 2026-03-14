@@ -73,5 +73,5 @@ Use the following template:
 
 - **Review only — no auto-fixes**: Output the review report only. Do not modify any content automatically. Fixes are the user's decision.
 - **Strict standards**: Better to flag one extra suspicion than to miss one hidden risk.
-- **Reference academic-workflow.md**: If this file is present in the current context, prioritize its QC principles (citation verification, numerical reporting standards).
+- **Reference project-level academic rules**: If academic workflow rules (e.g., citation verification, numerical reporting standards) are present in the current context, prioritize them.
 - **Additional criteria take priority**: User-specified additional criteria are checked first, on top of the five-dimensional framework.
