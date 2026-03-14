@@ -1,4 +1,4 @@
-# claude-personal-skills
+# personal-agentic-skills
 
 Private repository for personal Claude Code skills, synced across devices.
 
@@ -13,7 +13,7 @@ skills/
 ## First-time setup (new device)
 
 ```bash
-git clone https://github.com/peiyuan-ran-huang/claude-personal-skills.git ~/claude-personal-skills
+git clone https://github.com/peiyuan-ran-huang/personal-agentic-skills.git ~/claude-personal-skills
 bash ~/claude-personal-skills/sync.sh
 ```
 
