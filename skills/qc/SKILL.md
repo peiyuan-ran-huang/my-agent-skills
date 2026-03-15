@@ -6,7 +6,7 @@ description: >
   Do NOT activate on "检查", "审查", "复核", "审计", "check", "review", "verify", "inspect", "audit" or any similar words.
 ---
 
-<!-- SYNC RULE: Any changes to this file MUST be mirrored in SKILL_ZH.md, and vice versa. -->
+<!-- version: 0.2 | SYNC RULE: Any changes to this file MUST be mirrored in SKILL_ZH.md, and vice versa. -->
 
 # QC: Deep Review
 

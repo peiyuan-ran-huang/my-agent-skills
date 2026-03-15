@@ -9,27 +9,27 @@ Use these examples to calibrate output format and severity judgement.
 
 ## Good Example / 正确示例
 
-Reviewing a shell script (`sync.sh`).
-审查对象：shell 脚本（`sync.sh`）。
+Reviewing a hypothetical deployment script (`deploy.sh`).
+审查对象：一个假设的部署脚本（`deploy.sh`）。
 
 ```
 ## QC Review Report
 
-**Review Target**: sync.sh (Code)
+**Review Target**: deploy.sh (Code)
 
 ### Findings
 
 #### Standards — Minor
-- **Evidence**: `cp "$skill_dir"SKILL.md ...` (line 8)
-- **Issue**: Only copies SKILL.md; SKILL_ZH.md and examples.md are not synced.
-- **Suggested fix**: Use `cp "$skill_dir"*.md` to copy all Markdown files.
+- **Evidence**: `rm -rf /tmp/build_*` (line 15)
+- **Issue**: Glob pattern cleanup without confirming the directory exists first; silent failure on empty match.
+- **Suggested fix**: Add `shopt -s nullglob` before the rm command, or guard with an existence check.
 
 ✓ Correctness / Completeness / Optimality / Consistency: No issues
 
 ### Summary
 - **Overall Rating**: Minor
-- One file coverage gap; core logic is sound.
-- [ ] Update cp command to use *.md wildcard
+- One defensive coding gap; deployment logic is sound.
+- [ ] Add nullglob or existence guard before rm glob
 ```
 
 ---

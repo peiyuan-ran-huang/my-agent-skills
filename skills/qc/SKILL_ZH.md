@@ -6,7 +6,7 @@ description: >
   Do NOT activate on "检查", "审查", "复核", "审计", "check", "review", "verify", "inspect", "audit" or any similar words.
 ---
 
-<!-- 同步规则：此文件的任何改动必须同步到 SKILL.md，反之亦然。 -->
+<!-- version: 0.2 | 同步规则：此文件的任何改动必须同步到 SKILL.md，反之亦然。 -->
 
 # QC：深度审查
 
