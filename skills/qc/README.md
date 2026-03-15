@@ -77,11 +77,11 @@ Three dashes + two characters (no space). Target can be a word, quoted phrase, o
 
 ## Acknowledgements / 致谢
 
-Special thanks to [Codex](https://openai.com/index/codex/) (desktop app) for reviewing this skill and pointing out that a QC skill without evidence requirements is like a peer reviewer without citations — technically possible, but not very convincing. v0.2 is significantly better thanks to its feedback.
+Special thanks to [Codex](https://chatgpt.com/codex) for reviewing this skill and pointing out that a QC skill without evidence requirements is like a research paper without citations😂. v0.2 is significantly better thanks to its feedback.
 
-特别感谢 [Codex](https://openai.com/index/codex/)（桌面版）对本 skill 的审查和改进建议。Codex 指出，一个不要求附带证据的 QC skill，就像一个不引用文献的审稿人——理论上可以，但说服力嘛……v0.2 的质量提升很大程度上归功于它的反馈。
+特别感谢 [Codex](https://chatgpt.com/codex) 对本 skill 的审查和改进建议。Codex 指出，一个不要求附带证据的 QC skill，就像一篇不引用文献的科研论文😂。v0.2 的质量提升很大程度上归功于它的反馈。
 
 ---
 
-*Built with ☕ and Claude Code. Peer review, but make it instant and free.*
-*用 ☕ 和 Claude Code 打造。同行评审，但秒出结果且免费。*
+*Built with ☕, 🧠, and Claude Code. Peer review, but make it instant and free.*
+*用 ☕、🧠 和 Claude Code 打造。同行评审，但秒出结果且免费。*
