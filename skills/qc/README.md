@@ -38,9 +38,10 @@ This project does **not** represent the views of my employer or affiliated insti
 |------|----------|------|
 | `SKILL.md` | English | Primary (loaded by Claude Code) |
 | `SKILL_ZH.md` | 中文 | Translation reference (not auto-loaded) |
+| `examples.md` | EN/ZH | Output calibration: good example + anti-patterns |
 
-Changes to either file **must** be mirrored in the other.
-任一文件的改动**必须**同步到另一个。
+Changes to `SKILL.md` and `SKILL_ZH.md` **must** be mirrored in each other.
+`SKILL.md` 和 `SKILL_ZH.md` 的改动**必须**互相同步。
 
 ## Trigger / 触发方式
 
