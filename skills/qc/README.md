@@ -1,6 +1,6 @@
 # QC: Five-Dimensional Deep Review / 五维深度审查
 
-**Version**: v0.3.1
+**Version**: v0.4
 **Last Updated**: 2026-03-16
 **Author**: Peiyuan (Ran) Huang, with (*significant*) assistance from Claude Code
 
@@ -8,9 +8,9 @@
 
 ## What is this? / 这是什么？
 
-A stupidly simple prompt-based skill for Claude Code that runs a structured five-dimensional review (Correctness, Completeness, Optimality, Consistency, Standards) on whatever you just produced. v0.3 adds a **Blast Radius Scan** that automatically checks cross-file dependencies when reviewing file modifications — so stale references in MEMORY.md or changelog never slip through again. No code, no dependencies, no magic — just a well-crafted prompt template.
+A stupidly simple prompt-based skill for Claude Code that runs a structured five-dimensional review (Correctness, Completeness, Optimality, Consistency, Standards) on whatever you just produced. v0.3 adds a **Blast Radius Scan** that automatically checks cross-file dependencies when reviewing file modifications. v0.4 adds a **Pitfalls** mechanism ("错题本") — a user-supplied file where you record domain-specific mistakes and gotchas, which QC then checks automatically. No code, no dependencies, no magic — just a well-crafted prompt template.
 
-一个极其轻量的 Claude Code prompt skill，对你刚产出的东西做五维结构化审查（正确性、完整性、最优性、一致性、规范性）。v0.3 新增**影响范围扫描**，在审查文件修改时自动检查跨文件依赖——MEMORY.md 或 changelog 中的过时引用再也不会漏网。没有代码，没有依赖，没有黑魔法——就是一个精心打磨的 prompt 模板。
+一个极其轻量的 Claude Code prompt skill，对你刚产出的东西做五维结构化审查（正确性、完整性、最优性、一致性、规范性）。v0.3 新增**影响范围扫描**，在审查文件修改时自动检查跨文件依赖。v0.4 新增**错题本**机制——用户自行记录领域特定的易错点，QC 时自动检查。没有代码，没有依赖，没有黑魔法——就是一个精心打磨的 prompt 模板。
 
 ## Why? / 为什么做这个？
 
@@ -39,6 +39,7 @@ This project does **not** represent the views of my employer or affiliated insti
 | `SKILL.md` | English | Primary (loaded by Claude Code) |
 | `SKILL_ZH.md` | 中文 | Translation reference (not auto-loaded) |
 | `examples.md` | EN/ZH | Output calibration: good example + anti-patterns |
+| `pitfalls.md` | Any | User-supplied pitfalls ("错题本"); template shipped, user fills in |
 
 Changes to `SKILL.md` and `SKILL_ZH.md` **must** be mirrored in each other.
 `SKILL.md` 和 `SKILL_ZH.md` 的改动**必须**互相同步。
@@ -58,6 +59,7 @@ Three dashes + two characters (no space). Target can be a word, quoted phrase, o
 ## QC Review Report
 **Review Target**: analysis.R
 **Blast Radius**: N/A — standalone content
+**Pitfalls Check**: N/A — no pitfalls file
 
 ### Findings
 #### Consistency — Minor
@@ -71,6 +73,15 @@ Three dashes + two characters (no space). Target can be a word, quoted phrase, o
 - **Overall Rating**: Minor
 - One style inconsistency found; analysis logic is sound.
 ```
+
+## Pitfalls / 错题本
+
+`pitfalls.md` is your personal "错题本" (pitfall log). Record mistakes and easily-overlooked issues you encounter in daily work — each entry becomes an additional check item during QC reviews. The template ships blank; add your own entries in any language.
+
+`pitfalls.md` 是你的个人错题本。把日常工作中遇到的易错点、容易遗漏的问题记录在里面，QC 审查时会自动将每条作为额外检查项。模板初始为空，用任意语言添加你自己的条目即可。
+
+*Note: `sync.sh` will never overwrite your local `pitfalls.md` once it exists — your entries are safe across syncs.*
+*注意：一旦本地存在 `pitfalls.md`，`sync.sh` 不会覆盖它——你的条目在同步时不会丢失。*
 
 ## See Also / 相关
 

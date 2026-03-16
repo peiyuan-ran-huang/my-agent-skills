@@ -17,6 +17,7 @@ Reviewing a hypothetical deployment script (`deploy.sh`).
 
 **Review Target**: deploy.sh (Code)
 **Blast Radius**: N/A — standalone content
+**Pitfalls Check**: N/A — no pitfalls file
 
 ### Findings
 

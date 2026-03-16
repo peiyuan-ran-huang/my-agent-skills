@@ -16,7 +16,14 @@ echo "Syncing skills to $SKILLS_DIR ..."
 for skill_dir in "$REPO_DIR/skills/"/*/; do
   skill_name=$(basename "$skill_dir")
   mkdir -p "$SKILLS_DIR/$skill_name"
-  cp "$skill_dir"/*.md "$SKILLS_DIR/$skill_name/"
+  for f in "$skill_dir"/*.md; do
+    fname=$(basename "$f")
+    if [[ "$fname" == "pitfalls.md" && -f "$SKILLS_DIR/$skill_name/$fname" ]]; then
+      echo "  ⏭ $skill_name/$fname (user file exists, skipping)"
+      continue
+    fi
+    cp "$f" "$SKILLS_DIR/$skill_name/"
+  done
   echo "  ✓ $skill_name"
 done
 

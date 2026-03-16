@@ -6,7 +6,7 @@ description: >
   Do NOT activate on "检查", "审查", "复核", "审计", "check", "review", "verify", "inspect", "audit" or any similar words.
 ---
 
-<!-- version: 0.3.1 | SYNC RULE: Any changes to this file MUST be mirrored in SKILL_ZH.md, and vice versa. -->
+<!-- version: 0.4 | SYNC RULE: Any changes to this file MUST be mirrored in SKILL_ZH.md, and vice versa. -->
 
 # QC: Deep Review
 
@@ -67,6 +67,7 @@ Use the following template:
 **Review Target**: [auto-detected / user-specified]
 **Additional Criteria**: [user-specified content; omit this line if none]
 **Blast Radius**: [N/A — standalone content | scanned X files; Y stale references found]
+**Pitfalls Check**: [N/A — no pitfalls file | checked X entries; Y triggered]
 
 ### Findings
 
@@ -90,7 +91,7 @@ Use the following template:
 
 ## Key Principles
 
-- **Output calibration**: Before writing the report, read `examples.md` from this skill's directory (`~/.claude/skills/qc/examples.md`) for format and severity calibration. If the file is unavailable, proceed without it.
+- **Output calibration**: Before writing the report, read `examples.md` (format/severity calibration) and `pitfalls.md` (user-specified check items) from this skill's directory (`~/.claude/skills/qc/`). For each pitfall entry, apply it as an additional check item across the relevant dimension(s). If either file is unavailable or empty, proceed without it.
 - **Review only — no auto-fixes**: Output the review report only. Do not modify any content automatically. Fixes are the user's decision.
 - **Strict standards**: Better to flag one extra suspicion than to miss one hidden risk.
 - **Reference project-level academic rules**: If academic workflow rules (e.g., citation verification, numerical reporting standards) are present in the current context, prioritise them.
