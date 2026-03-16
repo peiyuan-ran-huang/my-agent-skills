@@ -91,7 +91,7 @@ Use the following template:
 
 ## Key Principles
 
-- **Output calibration**: Before writing the report, read `examples.md` (format/severity calibration) and `pitfalls.md` (user-specified check items) from this skill's directory (`~/.claude/skills/qc/`). For each pitfall entry, apply it as an additional check item across the relevant dimension(s). If either file is unavailable or empty, proceed without it.
+- **Output calibration**: Before writing the report, read `examples.md` (format/severity calibration) and `pitfalls.md` (user-specified check items) from this skill's directory (`~/.claude/skills/qc/`). For each pitfall entry, first assess whether its trigger tag (if present) matches the current review target type and context; only apply matching entries. In the Pitfalls Check output line, report: checked X entries; Y matched context; Z triggered findings. If either file is unavailable or empty, proceed without it.
 - **Review only — no auto-fixes**: Output the review report only. Do not modify any content automatically. Fixes are the user's decision.
 - **Strict standards**: Better to flag one extra suspicion than to miss one hidden risk.
 - **Reference project-level academic rules**: If academic workflow rules (e.g., citation verification, numerical reporting standards) are present in the current context, prioritise them.
