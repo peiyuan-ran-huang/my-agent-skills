@@ -1,16 +1,22 @@
 # QC: Five-Dimensional Deep Review / 五维深度审查
 
-**Version**: v0.4
-**Last Updated**: 2026-03-16
+**Version**: v0.5.1
+**Last Updated**: 2026-03-17
 **Author**: Peiyuan (Ran) Huang, with (*significant*) assistance from Claude Code
 
 ---
 
 ## What is this? / 这是什么？
 
-A stupidly simple prompt-based skill for Claude Code that runs a structured five-dimensional review (Correctness, Completeness, Optimality, Consistency, Standards) on whatever you just produced. v0.3 adds a **Blast Radius Scan** that automatically checks cross-file dependencies when reviewing file modifications. v0.4 adds a **Pitfalls** mechanism ("错题本") — a user-supplied file where you record domain-specific mistakes and gotchas, which QC then checks automatically. No code, no dependencies, no magic — just a well-crafted prompt template.
+A stupidly simple prompt template (despite its name "Deep Review") that runs a structured five-dimensional review (Correctness, Completeness, Optimality, Consistency, Standards) on whatever you just produced. No code, no dependencies, no magic — built for Claude Code (uses Read, Grep, and session-aware context detection). Other AI agents that read markdown instructions can use the core review framework, but blast radius scanning and auto-detection require Claude Code-compatible tool access.
 
-一个极其轻量的 Claude Code prompt skill，对你刚产出的东西做五维结构化审查（正确性、完整性、最优性、一致性、规范性）。v0.3 新增**影响范围扫描**，在审查文件修改时自动检查跨文件依赖。v0.4 新增**错题本**机制——用户自行记录领域特定的易错点，QC 时自动检查。没有代码，没有依赖，没有黑魔法——就是一个精心打磨的 prompt 模板。
+一个极其轻量的 prompt 模板（尽管它名叫"深度审查"），对你刚产出的东西做五维结构化审查（正确性、完整性、最优性、一致性、规范性）。没有代码，没有依赖，没有黑魔法——为 Claude Code 设计（使用 Read、Grep 和会话感知的上下文检测）。其他能读取 markdown 指令的 AI agent 可使用核心审查框架，但影响范围扫描和自动检测需要 Claude Code 兼容的工具访问。
+
+### Changelog / 版本历史
+
+- **v0.3**: **Blast Radius Scan** — automatically checks cross-file dependencies when reviewing file modifications. / **影响范围扫描**——审查文件修改时自动检查跨文件依赖。
+- **v0.4**: **Pitfalls** mechanism ("错题本") — user-supplied domain-specific mistake log, checked automatically. Inline severity definitions (Critical / Major / Minor). / **错题本**机制 + 内联严重性定义。
+- **v0.5**: **Skill/Prompt** target overlay, **Open Questions** section for ambiguous findings, explicit **Coverage** + **Target Type** + **Blast Radius scope** declarations, formalized pitfalls tag semantics, omission-based evidence support, evidence-led principle. / **技能/提示词**对象叠加、**开放问题**部分、显式**覆盖范围** + **对象类型** + **影响范围边界声明**、形式化标签语义、缺失型证据支持、循证原则。
 
 ## Why? / 为什么做这个？
 
@@ -36,12 +42,15 @@ This project does **not** represent the views of my employer or affiliated insti
 
 | File | Language | Role |
 |------|----------|------|
-| `SKILL.md` | English | Primary (loaded by Claude Code) |
+| `SKILL.md` | English | Primary (loaded by Claude Code; core framework adaptable to other agents) |
 | `SKILL_ZH.md` | 中文 | Translation reference (not auto-loaded) |
 | `examples.md` | EN/ZH | Output calibration: good example + anti-patterns |
-| `pitfalls.md` | Any | User-supplied pitfalls ("错题本"); template shipped, user fills in |
+| `pitfalls.md` | Any | User pitfalls ("错题本"); ships with illustrative defaults |
+| `CHANGELOG.md` | EN/ZH | Version history (0.1+ increments only) |
+| `README.md` | EN/ZH | This file; project overview and usage guide |
 
 Changes to `SKILL.md` and `SKILL_ZH.md` **must** be mirrored in each other.
+
 `SKILL.md` 和 `SKILL_ZH.md` 的改动**必须**互相同步。
 
 ## Trigger / 触发方式
@@ -50,16 +59,21 @@ Changes to `SKILL.md` and `SKILL_ZH.md` **must** be mirrored in each other.
 ---qc [target] [extra criteria]
 ```
 
-Three dashes + two characters (no space). Target can be a word, quoted phrase, or file path.
-三个短横线加两个字符（中间不加空格）。目标可以是一个词、引号短语或文件路径。
+**Rules / 规则**:
+- `---qc` must be the **first token** of your message / `---qc` 必须是消息的**首个 token**
+- File paths with spaces must be **double-quoted** / 含空格的文件路径必须用**双引号**包裹: `---qc "OneDrive - University of Bristol/file.R"`
+- Natural language (review / check / 审查 / 检查) does **not** trigger / 自然语言不会触发
+- Target can be a word, quoted phrase, or file path / 目标可以是一个词、引号短语或文件路径
 
 ## Example Output / 输出示例
 
 ```text
 ## QC Review Report
 **Review Target**: analysis.R
+**Target Type**: Code
+**Coverage**: Full — all 95 lines reviewed
 **Blast Radius**: N/A — standalone content
-**Pitfalls Check**: N/A — no pitfalls file
+**Pitfalls Check**: checked N entries; 2 matched context; 0 triggered findings
 
 ### Findings
 #### Consistency — Minor
@@ -76,25 +90,32 @@ Three dashes + two characters (no space). Target can be a word, quoted phrase, o
 
 ## Pitfalls / 错题本
 
-`pitfalls.md` is your personal "错题本" (pitfall log). Record mistakes and easily-overlooked issues you encounter in daily work — each entry becomes an additional check item during QC reviews. The template ships blank; add your own entries in any language.
+`pitfalls.md` is your personal pitfall log. Record mistakes and easily-overlooked issues you encounter in daily work — each entry becomes an additional check item during QC reviews. The template ships with illustrative default entries drawn from the author's workflow; add, modify, or remove entries in any language to match your own.
 
-`pitfalls.md` 是你的个人错题本。把日常工作中遇到的易错点、容易遗漏的问题记录在里面，QC 审查时会自动将每条作为额外检查项。模板初始为空，用任意语言添加你自己的条目即可。
+`pitfalls.md` 是你的个人错题本。把日常工作中遇到的易错点、容易遗漏的问题记录在里面，QC 审查时会自动将每条作为额外检查项。模板附带作者工作流中的示例条目；可按需增删改，用任意语言编写。
 
 *Note: `sync.sh` will never overwrite your local `pitfalls.md` once it exists — your entries are safe across syncs.*
+
 *注意：一旦本地存在 `pitfalls.md`，`sync.sh` 不会覆盖它——你的条目在同步时不会丢失。*
 
 ## See Also / 相关
 
 *For heavier-duty multi-round audits, see the `audit` skill (`---audit`) (local only; not yet published to this repo). qc is the quick scan; audit is the deep dive.*
+
 *如需更重量级的多轮深度审计，请看 `audit` skill（`---audit`）（仅本地可用，尚未发布至本仓库）。qc 是快速扫描，audit 是深度审计。*
 
 ## Acknowledgements / 致谢
 
 Special thanks to [Codex](https://chatgpt.com/codex) for reviewing this skill and pointing out that a QC skill without evidence requirements is like a research paper without citations😂. v0.2 is significantly better thanks to its feedback.
 
+v0.5 is based on a comprehensive second review by Codex (2026-03-16) — 4 parallel subagents + single-agent deep pass — which identified 17 issues across all skill files and sharpened the product boundary, evidence model, and portability claims.
+
 特别感谢 [Codex](https://chatgpt.com/codex) 对本 skill 的审查和改进建议。Codex 指出，一个不要求附带证据的 QC skill，就像一篇不引用文献的科研论文😂。v0.2 的质量提升很大程度上归功于它的反馈。
+
+v0.5 基于 Codex 的第二次全面审查（2026-03-16）——4 个并行 subagent + 单 agent 深度二审——共发现 17 个问题，涉及所有 skill 文件，强化了产品边界定义、证据模型和可移植性声明。
 
 ---
 
 *Built with ☕, 🧠, and Claude Code. Peer review, but make it instant and free.*
+
 *用 ☕、🧠 和 Claude Code 打造。同行评审，但秒出结果且免费。*

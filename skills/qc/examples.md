@@ -16,8 +16,10 @@ Reviewing a hypothetical deployment script (`deploy.sh`).
 ## QC Review Report
 
 **Review Target**: deploy.sh (Code)
+**Target Type**: Code
+**Coverage**: Full — all 45 lines reviewed
 **Blast Radius**: N/A — standalone content
-**Pitfalls Check**: N/A — no pitfalls file
+**Pitfalls Check**: checked N entries; 1 matched context; 0 triggered findings
 
 ### Findings
 
@@ -57,7 +59,129 @@ Reviewing a hypothetical deployment script (`deploy.sh`).
 - ✓ 严格遵循整体评级判定规则。
 
 **4. Narrow scope miss (blast radius) / 范围过窄遗漏（影响范围）**
-- ✗ Credentials moved from `.bashrc` to `.secrets` — QC checks only the three modified files and rates Pass. MEMORY.md still says "credentials in `.bashrc`"; changelog not updated.
-- ✓ For file modifications, grep for references to modified files; flag stale references as Completeness issues.
-- ✗ 凭据从 `.bashrc` 迁移到 `.secrets` — QC 只检查了三个被修改的文件，评为 Pass。MEMORY.md 仍写着"凭据在 `.bashrc`"；changelog 未更新。
-- ✓ 修改文件时，搜索引用了被修改文件的其他文件，将过时引用标记为完整性问题。
+- ✗ Blast Radius says "scanned 3 files" but doesn't declare scope — reader can't tell if key files were missed. MEMORY.md still says "credentials in `.bashrc`" after migration to `.secrets`.
+- ✓ Declare scope explicitly: "Scope: 3 files in diff + imports/refs in cwd and ~/.claude/". Flag stale references as Completeness issues.
+- ✗ 影响范围写"扫描了 3 个文件"但未声明范围——读者无法判断是否遗漏了关键文件。MEMORY.md 仍写着"凭据在 `.bashrc`"。
+- ✓ 显式声明范围："范围：diff 中 3 个文件 + cwd 和 ~/.claude/ 的引用搜索"。将过时引用标记为完整性问题。
+
+**5. Suspicion without evidence as finding / 无证据疑点列为发现**
+- ✗ "This function might have a race condition" listed as Major under Correctness, with no evidence of concurrent access
+- ✓ If evidence is ambiguous, place in Open Questions with a "Would resolve if" criterion. Findings require concrete evidence.
+- ✗ 将"这个函数可能有竞态条件"列为 Correctness 下的 Major，但无并发访问的证据
+- ✓ 证据不足时放入 Open Questions 并注明"可通过以下方式确认"。Findings 必须有实证。
+
+---
+
+## Major Example — Omission Evidence / Major 示例 — 缺失型证据
+
+Reviewing a hypothetical MR analysis script (`mr_analysis.R`).
+审查对象：一个假设的 MR 分析脚本（`mr_analysis.R`）。
+
+```
+## QC Review Report
+
+**Review Target**: mr_analysis.R
+**Target Type**: Code
+**Coverage**: Full — all 85 lines reviewed
+**Blast Radius**: N/A — standalone content
+**Pitfalls Check**: checked N entries; 3 matched context; 1 triggered finding
+
+### Findings
+
+#### Completeness — Major
+- **Evidence**: absent: expected `set.seed()` call before `sample()` on line 42, but not found in file
+- **Issue**: Random sampling without seed compromises reproducibility
+- **Suggested fix**: Add `set.seed(19705)` before line 42
+
+#### Standards — Major
+- **Evidence**: `p_value < 0.05` (line 67) used to label results as "significant"
+- **Issue**: Binary significance framing; should report effect size with 95% CI
+- **Suggested fix**: Replace with: "beta = X.XX (95% CI: X.XX, X.XX), P = 0.XXX"
+
+✓ Correctness / Optimality / Consistency: No issues
+
+### Summary
+- **Overall Rating**: Major
+- Two standards/completeness gaps in statistical reporting and reproducibility.
+- [ ] Add set.seed(19705) before random operations
+- [ ] Replace significance labels with effect sizes and CIs
+```
+
+---
+
+## Critical Example / Critical 示例
+
+Reviewing a hypothetical data processing script (`clean_data.R`).
+审查对象：一个假设的数据清洗脚本（`clean_data.R`）。
+
+```
+## QC Review Report
+
+**Review Target**: clean_data.R
+**Target Type**: Code
+**Coverage**: Full — all 120 lines reviewed
+**Blast Radius**: Scope: cwd; scanned 4 files; 0 stale references
+**Pitfalls Check**: checked N entries; 2 matched context; 0 triggered findings
+
+### Findings
+
+#### Correctness — Critical
+- **Evidence**: `bmi <- weight / height` (line 34)
+- **Issue**: BMI formula requires height squared (kg/m²); current code divides by height, not height²
+- **Suggested fix**: Change to `bmi <- weight / height^2`
+
+✓ Completeness / Optimality / Consistency / Standards: No issues
+
+### Summary
+- **Overall Rating**: Critical
+- Incorrect BMI calculation produces wrong values for all records.
+- [ ] Fix BMI formula to use height squared
+```
+
+---
+
+## Skill/Prompt Example / 技能/提示词示例
+
+Reviewing a hypothetical agent skill (`summarize.md`).
+审查对象：一个假设的 agent skill（`summarize.md`）。
+
+```
+## QC Review Report
+
+**Review Target**: summarize.md
+**Target Type**: Skill/Prompt
+**Coverage**: Full — all 40 lines reviewed
+**Blast Radius**: N/A — standalone content
+**Pitfalls Check**: checked N entries; 1 matched context; 0 triggered findings
+
+### Findings
+
+#### Consistency — Minor
+- **Evidence**: Frontmatter `description` says "triggered by /summarize or 'please summarize'" but body § Trigger says "only activate on /summarize"
+- **Issue**: Natural-language trigger claim in description contradicts the explicit-only rule in body
+- **Suggested fix**: Remove "or 'please summarize'" from description to match body
+
+✓ Correctness / Completeness / Optimality / Standards: No issues
+
+### Summary
+- **Overall Rating**: Minor
+- One trigger-boundary inconsistency between frontmatter and body.
+- [ ] Align description with body trigger rule
+```
+
+---
+
+## Open Questions Example / 开放问题示例
+
+Demonstrating how to handle ambiguous findings.
+展示如何处理证据不足的疑点。
+
+```
+### Open Questions
+
+- **Question**: Line 15 hardcodes `n_bootstrap = 100`; this may be insufficient for stable CI estimation, but adequacy depends on the data distribution
+- **Would resolve if**: Run convergence diagnostic or cite a power analysis justifying 100 iterations
+
+- **问题**：第 15 行硬编码 `n_bootstrap = 100`；可能不足以得到稳定的 CI 估计，但充分性取决于数据分布
+- **可通过以下方式确认**：运行收敛诊断或引用证明 100 次迭代足够的 power analysis
+```
