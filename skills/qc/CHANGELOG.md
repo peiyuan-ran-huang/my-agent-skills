@@ -7,6 +7,20 @@ Dates represent when the version was committed to the repo, not when development
 本文件记录所有重要变更。仅记录 0.1 及以上的版本增量；0.0.1 级别的修补不记录。
 日期为提交至 repo 的时间，非开发开始时间。
 
+## [v0.6] — 2026-03-17
+
+### Added
+
+- **Evolution Protocol**: post-review self-reflection mechanism that proposes new pitfalls/examples entries when QC encounters scenarios not covered by existing rules. Propose-and-confirm design: skill suggests, user approves before any file is written.
+- **Write Mechanics**: specifies append location, provenance comments (`<!-- via: evolution-proposal, YYYY-MM-DD -->`), and semantic overlap detection before writing.
+- **Provenance comments** in `pitfalls.md`: optional `<!-- via: -->` trailing comment to distinguish auto-proposed from manually added entries.
+- **Prerequisites section** in README.md: documents runtime requirements and broadens compatibility claim to AI agents with file-reading and text-searching capabilities.
+
+### Changed
+
+- Evolution Protocol placed after Key Principles (end of SKILL.md) as a post-review section.
+- "When to Propose" uses "pattern worth capturing" instead of "recurring pattern" (single review cannot judge recurrence).
+
 ## [v0.5] — 2026-03-17
 
 ### Added

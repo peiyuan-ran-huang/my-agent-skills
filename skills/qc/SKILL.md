@@ -154,7 +154,7 @@ Append this block to the report output:
 
 ### Write Mechanics (on user approval)
 
-- Append new entry after the last entry in the `## Entries` section of pitfalls.md (or the relevant section of examples.md)
+- Append new entry after the last entry in the `## Entries / 条目` section of pitfalls.md (or the relevant section of examples.md)
 - Auto-include provenance comment: `<!-- via: evolution-proposal, YYYY-MM-DD -->`
 - Before writing, scan existing entries for semantic overlap; if found, warn user and suggest merging instead of adding
 
