@@ -21,6 +21,6 @@
 ## Entries / 条目
 
 <!-- FORMAT EXAMPLES (delete these and add your own):
-- **p-value formatting**: Always "P = 0.XXX", never "p < 0.05". Check tables and inline text.
-- **MEMORY.md 同步**: 修改配置文件后检查 MEMORY.md 是否需要更新。
+- **MEMORY.md 同步** `[config]`: 修改配置文件后检查 MEMORY.md 是否需要更新。
+- **引用真实性** `[academic]`: 参考文献引用可能不准确，或参考文献根本不存在，必须 PubMed/DOI 交叉验证。
 -->

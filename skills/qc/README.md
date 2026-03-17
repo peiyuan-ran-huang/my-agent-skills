@@ -1,6 +1,6 @@
 # QC: Five-Dimensional Deep Review / 五维深度审查
 
-**Version**: v0.5.1
+**Version**: v0.6.0
 **Last Updated**: 2026-03-17
 **Author**: Peiyuan (Ran) Huang, with (*significant*) assistance from Claude Code
 
@@ -17,6 +17,7 @@ A stupidly simple prompt template (despite its name "Deep Review") that runs a s
 - **v0.3**: **Blast Radius Scan** — automatically checks cross-file dependencies when reviewing file modifications. / **影响范围扫描**——审查文件修改时自动检查跨文件依赖。
 - **v0.4**: **Pitfalls** mechanism ("错题本") — user-supplied domain-specific mistake log, checked automatically. Inline severity definitions (Critical / Major / Minor). / **错题本**机制 + 内联严重性定义。
 - **v0.5**: **Skill/Prompt** target overlay, **Open Questions** section for ambiguous findings, explicit **Coverage** + **Target Type** + **Blast Radius scope** declarations, formalized pitfalls tag semantics, omission-based evidence support, evidence-led principle. / **技能/提示词**对象叠加、**开放问题**部分、显式**覆盖范围** + **对象类型** + **影响范围边界声明**、形式化标签语义、缺失型证据支持、循证原则。
+- **v0.6**: **Evolution Protocol** — post-review self-reflection that proposes new pitfalls/examples when QC encounters uncovered scenarios. Propose-and-confirm: skill suggests, user approves. / **进化协议**——审查后自我反思，遇到未覆盖场景时提议新的错题本/样例条目。提议确认制：skill 提议，用户批准。
 
 For full version history, see `CHANGELOG.md`. / 完整版本历史见 `CHANGELOG.md`。
 
@@ -54,6 +55,24 @@ This project does **not** represent the views of my employer or affiliated insti
 Changes to `SKILL.md` and `SKILL_ZH.md` **must** be mirrored in each other.
 
 `SKILL.md` 和 `SKILL_ZH.md` 的改动**必须**互相同步。
+
+## Prerequisites / 前置条件
+
+**Required for full functionality / 完整功能必需**: [Claude Code](https://claude.ai/claude-code) or other similar AI agents with file-reading and text-searching capabilities — provides the Read and Grep tools used for file loading, blast radius scanning, and session-aware auto-detection. The core five-dimensional review framework can also be used by any AI agent that reads markdown instructions, with reduced automation. No additional software, packages, or API keys needed — zero external dependencies beyond the runtime itself.
+
+**完整功能必需**：[Claude Code](https://claude.ai/claude-code) 或其他类似的具备文件读取和文本搜索能力的 AI agents——提供 Read 和 Grep 工具，用于文件加载、影响范围扫描和会话感知的自动检测。核心五维审查框架也可被任何能读取 markdown 指令的 AI agent 使用，但自动化程度会降低。无需额外安装软件、包或 API 密钥——除运行时本身外零外部依赖。
+
+**Included & customisable / 随附且可自定义**:
+
+- `examples.md` — output format and severity calibration; edit to adjust how strict or lenient reviews are
+- `pitfalls.md` — user pitfall log ("错题本"); ships with illustrative defaults, but its real value comes from adding your own domain-specific entries over time
+
+- `examples.md`——输出格式与严重性校准；可编辑以调整审查的严格/宽松程度
+- `pitfalls.md`——用户错题本；附带示例默认条目，但其真正价值在于随时间积累你自己的领域特定条目
+
+**Optional enhancement / 可选增强**: If your Claude Code environment includes project-level rule files (e.g., `rules/academic-workflow.md` for citation and statistical reporting standards), qc will automatically incorporate them into relevant dimensions — no configuration needed.
+
+**可选增强**：如果你的 Claude Code 环境中有项目级规则文件（如 `rules/academic-workflow.md` 用于引用和统计报告标准），qc 会自动将其纳入相关维度——无需配置。
 
 ## Trigger / 触发方式
 

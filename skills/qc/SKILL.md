@@ -3,7 +3,7 @@ name: qc
 description: Use when the user explicitly invokes ---qc for a structured five-dimensional review of code, plans, documents, data, advice, or skills/prompts.
 ---
 
-<!-- version: 0.5.1 | SYNC RULE: Changes to this file MUST be mirrored in SKILL_ZH.md.
+<!-- version: 0.6.0 | SYNC RULE: Changes to this file MUST be mirrored in SKILL_ZH.md.
 Allowed differences: (1) frontmatter `name` (qc vs qc-zh), (2) frontmatter `description` language,
 (3) loading behavior note in SKILL_ZH.md. Sync metric: semantic equivalence per section, NOT line-count equality. -->
 
@@ -119,3 +119,48 @@ Use the following template:
 - **Reference project-level academic rules**: If academic workflow rules (e.g., citation verification, numerical reporting standards) are present in the current context, prioritise them.
 - **Additional criteria take priority**: User-specified additional criteria are checked first, on top of the five-dimensional framework.
 - **Never skip Blast Radius Scan**: For any review involving file modifications, MUST perform the Blast Radius Scan before the five dimensions. When in doubt about whether it applies, perform it — false negatives are costlier than false positives.
+
+## Evolution Protocol
+
+After completing the QC report, self-reflect on whether the review surfaced knowledge worth preserving. This is a **post-review** step — never let it interfere with the review itself.
+
+### When to Propose
+
+Ask yourself:
+- Did I encounter a target type with no matching overlay?
+- Did I discover a pattern worth capturing for future reviews that is not in pitfalls.md?
+- Did I find a calibration gap not in examples.md (e.g., a new anti-pattern or severity edge case)?
+- Did I apply domain knowledge that should be formalized?
+
+If YES to any → append an Evolution Proposal section **after the Summary section** (as the final section of the QC report). If NO to all → end normally; do not force a proposal.
+
+### Proposal Format
+
+Append this block to the report output:
+
+```
+### Evolution Proposal
+
+> 🔄 **Proposed Evolution**
+>
+> **Type**: pitfall | example | overlay-gap
+> **Draft entry**:
+> `- **Title** [tag1/tag2]: One-line description`
+> **Rationale**: Why existing rules don't cover this.
+> **Action**: "Add to pitfalls.md" / "Add to examples.md" / "Flag for SKILL.md review"
+>
+> *Approve / modify / reject?*
+```
+
+### Write Mechanics (on user approval)
+
+- Append new entry after the last entry in the `## Entries` section of pitfalls.md (or the relevant section of examples.md)
+- Auto-include provenance comment: `<!-- via: evolution-proposal, YYYY-MM-DD -->`
+- Before writing, scan existing entries for semantic overlap; if found, warn user and suggest merging instead of adding
+
+### Constraints
+
+- Max 1 proposal per QC review (avoid proposal fatigue; if 2+ genuinely novel patterns surface, pick the highest-value one)
+- Never auto-write to any file; always wait for user confirmation
+- Never propose changes to the 5 core dimensions or severity definitions
+- Proposals for SKILL.md structural changes (new overlays, new dimensions) → flag only, defer to a dedicated review session
