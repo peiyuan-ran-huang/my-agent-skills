@@ -7,6 +7,18 @@ Dates represent when the version was committed to the repo, not when development
 本文件记录所有重要变更。仅记录 0.1 及以上的版本增量；0.0.1 级别的修补不记录。
 日期为提交至 repo 的时间，非开发开始时间。
 
+## [v0.7] — 2026-03-20
+
+### Added
+
+- **Meta-calibration principle**: New Key Principle — before writing the Summary, re-read all findings and check for severity inflation/deflation bias.
+- **3 new Skill/Prompt overlay items**: Degradation path coverage (Major if missing), self-review bias risk (Minor), runtime vs development material boundary (Minor).
+- **Tighter auto-detect step 2**: No-argument cascade step 2 now has explicit inclusion criteria (code ≥3 lines, plan ≥5 items, prose ≥5 lines) and exclusion criteria (pure tables, data dumps, tool-status output); uncertain → skip to step 3.
+
+### Changed
+
+- README version updated to v0.7.0, date to 2026-03-20.
+
 ## [v0.6] — 2026-03-17 (patched 2026-03-19)
 
 ### Patched (2026-03-19)

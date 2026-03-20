@@ -1,7 +1,7 @@
 # QC: Five-Dimensional Deep Review / 五维深度审查
 
-**Version**: v0.6.0
-**Last Updated**: 2026-03-19
+**Version**: v0.7.0
+**Last Updated**: 2026-03-20
 **Author**: Peiyuan (Ran) Huang, with (*significant*) assistance from Claude Code
 
 ---
@@ -18,6 +18,7 @@ A stupidly simple prompt template (despite its name "Deep Review") that runs a s
 - **v0.4**: **Pitfalls** mechanism ("错题本") — user-supplied domain-specific mistake log, checked automatically. Inline severity definitions (Critical / Major / Minor). / **错题本**机制 + 内联严重性定义。
 - **v0.5**: **Skill/Prompt** target overlay, **Open Questions** section for ambiguous findings, explicit **Coverage** + **Target Type** + **Blast Radius scope** declarations, formalized pitfalls tag semantics, omission-based evidence support, evidence-led principle. / **技能/提示词**对象叠加、**开放问题**部分、显式**覆盖范围** + **对象类型** + **影响范围边界声明**、形式化标签语义、缺失型证据支持、循证原则。
 - **v0.6**: **Evolution Protocol** — post-review self-reflection that proposes new pitfalls/examples when QC encounters uncovered scenarios. Propose-and-confirm: skill suggests, user approves. / **进化协议**——审查后自我反思，遇到未覆盖场景时提议新的错题本/样例条目。提议确认制：skill 提议，用户批准。
+- **v0.7**: **Calibration refinements** — meta-calibration principle (check severity bias before finalizing), expanded Skill/Prompt overlay (8 items: +degradation path, self-review bias, runtime/dev boundary), tighter auto-detect step 2 filtering. / **校准细化**——元校准原则（定稿前检查严重性偏差）、Skill/Prompt 叠加检查扩展至 8 项（+降级路径、自审偏差、运行时/开发边界）、自动检测步骤 2 过滤收紧。
 
 For full version history, see `CHANGELOG.md`. / 完整版本历史见 `CHANGELOG.md`。
 

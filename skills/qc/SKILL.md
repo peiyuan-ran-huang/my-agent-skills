@@ -3,7 +3,7 @@ name: qc
 description: Use when the user's message starts with ---qc to request a structured five-dimensional review of code, plans, documents, data, advice, or skills/prompts.
 ---
 
-<!-- version: 0.6.0 | SYNC RULE: Changes to this file MUST be mirrored in SKILL_ZH.md.
+<!-- version: 0.7.0 | SYNC RULE: Changes to this file MUST be mirrored in SKILL_ZH.md.
 Allowed differences: (1) frontmatter `name` (qc vs qc-zh), (2) frontmatter `description` language,
 (3) loading behavior note in SKILL_ZH.md. Sync metric: semantic equivalence per section, NOT line-count equality. -->
 
@@ -24,7 +24,7 @@ You now assume the role of **strict reviewer**. Conduct a thorough, meticulous, 
 2. Target mapping: 代码/code → Code | 方案/plan → Plan | 文档/doc → Document | 数据/data → Data | 建议/advice → Advice | skill/prompt/技能/提示词 → Skill/Prompt | diff/changeset/directory/目录 → Code overlay (blast-radius scope = diff/directory); for mixed content → select the primary type based on the user's question focus or content proportion; overlay checks from secondary types
 3. No arguments → auto-detect using this priority:
    1. File path mentioned in the user's current message
-   2. Most recent substantive assistant output (code block ≥3 lines, numbered plan, document draft — skip short confirmations, error messages, and tool-status lines)
+   2. Most recent substantive assistant output — must be: (a) code block ≥3 lines, numbered plan ≥5 items, or continuous prose ≥5 lines (excludes pure tables, pure data output, or single-line answers); (b) classifiable as code, plan, document, or advice (excludes tool-status output, error messages, data dumps); if uncertain, skip to step 3
    3. Most recently edited or read file in the session
    4. (Fallback) Prompt the user to specify
 4. If target content is not in current context but a clear file path or recently edited file exists → use Read to load the file before reviewing; for oversized files → read in segments, prioritising core logic sections
@@ -65,7 +65,7 @@ Examine each dimension and render a verdict:
 - **Document**: +Citation authenticity +Fact-checking +Academic standards (STROBE / CONSORT, etc.) +Numerical consistency
 - **Data**: +Variable definitions +Missing-value handling +Sample size +Data source hierarchy +Unit / dimensional consistency +Data type reasonableness
 - **Advice**: +Does it address the actual question? +Any better alternatives? +Potential side effects or negative consequences +Applicable boundaries and prerequisites
-- **Skill/Prompt**: +Trigger/activation boundary clarity +Parameter parsing edge cases (spaces, quotes, empty input) +Consistency between instruction text and examples +Token cost awareness (mandatory pre-reads, growing reference files) +Portability assumptions (which runtime features are required?)
+- **Skill/Prompt**: +Trigger/activation boundary clarity +Parameter parsing edge cases (spaces, quotes, empty input) +Consistency between instruction text and examples +Token cost awareness (mandatory pre-reads, growing reference files) +Portability assumptions (which runtime features are required?) +Degradation path coverage (does the skill define behavior when tools are unavailable or context is insufficient? — missing → Major) +Self-review bias risk (does the same agent both generate and review output without isolation? — Minor, design limitation) +Runtime vs development material boundary (are files clearly marked as runtime-loaded vs development-only reference? — Minor, cognitive burden)
 
 ## Output Format
 
@@ -120,6 +120,7 @@ Use the following template:
 - **Reference project-level academic rules**: If academic workflow rules (e.g., citation verification, numerical reporting standards) are present in the current context, prioritise them.
 - **Additional criteria take priority**: User-specified additional criteria are checked first, on top of the five-dimensional framework.
 - **Never skip Blast Radius Scan**: For any review involving file modifications, MUST perform the Blast Radius Scan before the five dimensions. When in doubt about whether it applies, perform it — false negatives are costlier than false positives.
+- **Meta-calibration before finalizing**: Before writing the Summary section, re-read all findings and ask: (1) Would I rate this the same severity if it appeared in isolation? (2) Am I inflating because I found too few issues, or deflating because I found too many? Adjust if needed.
 
 ## Evolution Protocol
 
