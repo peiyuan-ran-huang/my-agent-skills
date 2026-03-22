@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # sync-skills.sh — Pull updates from GitHub and sync to ~/.claude/skills/
-# Usage: bash ~/personal-agentic-skills/sync.sh
+# Usage: bash ~/my-agent-skills/sync.sh
 # Run this on any device to get the latest skills.
 
 set -e
 shopt -s nullglob
 
-REPO_DIR="$HOME/personal-agentic-skills"
+REPO_DIR="$HOME/my-agent-skills"
 SKILLS_DIR="$HOME/.claude/skills"
 
 echo "Pulling latest from GitHub..."

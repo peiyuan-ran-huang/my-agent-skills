@@ -1,4 +1,4 @@
-# personal-agentic-skills
+# my-agent-skills
 
 Private repository for personal AI agent skills, synced across devices.
 
@@ -14,14 +14,14 @@ skills/
 ## First-time setup (new device)
 
 ```bash
-git clone https://github.com/peiyuan-ran-huang/personal-agentic-skills.git ~/personal-agentic-skills
-bash ~/personal-agentic-skills/sync.sh
+git clone https://github.com/peiyuan-ran-huang/my-agent-skills.git ~/my-agent-skills
+bash ~/my-agent-skills/sync.sh
 ```
 
 ## Update (existing device)
 
 ```bash
-bash ~/personal-agentic-skills/sync.sh
+bash ~/my-agent-skills/sync.sh
 ```
 
 ## Skills
