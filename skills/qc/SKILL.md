@@ -3,7 +3,7 @@ name: qc
 description: Use when the user's message starts with ---qc to request a structured five-dimensional review of code, plans, documents, data, advice, or skills/prompts.
 ---
 
-<!-- version: 0.9.1 | SYNC RULE: Changes to this file MUST be mirrored in SKILL_ZH.md.
+<!-- version: 0.9.2 | SYNC RULE: Changes to this file MUST be mirrored in SKILL_ZH.md.
 Allowed differences: (1) frontmatter `name` (qc vs qc-zh), (2) frontmatter `description` language,
 (3) loading behavior note in SKILL_ZH.md. Sync metric: semantic equivalence per section, NOT line-count equality. -->
 

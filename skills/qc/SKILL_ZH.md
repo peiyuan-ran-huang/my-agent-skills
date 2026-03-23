@@ -3,7 +3,7 @@ name: qc-zh
 description: 当用户消息以 ---qc 开头时触发，对代码、方案、文档、数据、建议或技能/提示词进行五维结构化审查。中文参考版（不会被自动加载）。
 ---
 
-<!-- version: 0.9.1 | 同步规则：此文件的任何改动必须同步到 SKILL.md，反之亦然。
+<!-- version: 0.9.2 | 同步规则：此文件的任何改动必须同步到 SKILL.md，反之亦然。
 允许差异：(1) frontmatter name 字段 (qc vs qc-zh)，(2) frontmatter description 语言，(3) SKILL_ZH.md 的加载说明。
 同步标准：逐节语义等价，非行数相等。 -->
 
@@ -77,7 +77,12 @@ if --sub 激活:
 - **输入**：写入两个临时文件到 `~/.claude/tmp/qc_sub/`（目录不存在时自动创建）：
   - `target_temp.md` — 审查目标内容（文件目标则复制文件内容；上下文中的内容则写入临时文件）
   - `findings_temp.md` — 五维审查发现，使用 QC 报告格式（每条发现以 `#### [维度] — [严重性]` 为标题）
-- **Prompt**：必须完全自包含（子代理无法访问主 agent 上下文）。包含：角色定义、任务说明、目标类型与领域上下文、严重性定义、JSON 输出格式（`verdict`, `area_examined`, `reasoning`, `severity_adjustments`, `new_findings`）
+- **Prompt**：必须完全自包含（子代理无法访问主 agent 上下文）。包含：
+  - 角色：未参与过生成或初审的独立审查者
+  - 任务：(1) 发现初审遗漏的问题，(2) 核验现有发现的严重性评级
+  - 目标类型与领域上下文（如：文档 → 学术规范，代码 → 安全检查）
+  - 严重性定义（Critical/Major/Minor）
+  - 输出格式：JSON，字段包括 `verdict`（"confirmed"/"reopened"）、`area_examined`、`reasoning`、`severity_adjustments`（数组；每项：`finding_ref` 为"维度 — 严重性"、`proposed`、`reason`）、`new_findings`（数组；每项：`dimension`、`severity`、`evidence`、`issue`、`suggested_fix`）
 - **清理**：整合完成后删除 `~/.claude/tmp/qc_sub/` 下所有临时文件
 
 ### 降级

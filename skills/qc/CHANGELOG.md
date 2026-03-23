@@ -9,6 +9,14 @@ Dates represent when the version was committed to the repo, not when development
 
 ## [v0.9] — 2026-03-23
 
+### Patched (2026-03-23) — v0.9.2
+
+- **Loop Mode WNF specification** (Major fix): Added explicit rejected-fix handling — when the user declines a proposed fix, the finding is marked won't-fix (WNF); WNF items are excluded from subsequent severity ratings and tracked in the round status header (e.g., `History: [M, P(1 WNF), P, P]`). Previously this was only an optional pitfalls.md entry, leaving the loop behavior undefined.
+- **Emoji override comment on Loop Mode header**: The `🔄 Round X/10 | Passes: Y/N` status header template now carries `<!-- emoji is part of this template's format spec; overrides default no-emoji rule -->`, consistent with the Evolution Proposal template.
+- **Emoji override comment in examples.md**: The good-example Evolution Proposal block in `examples.md` now mirrors the SKILL.md template with the override comment on its `🔄 **Proposed Evolution**` line.
+- **Rating-aware counterfactual test**: Counterfactual question is now selected by current rating — for Pass/Minor: "would I still find no Critical or Major issues?"; for Major/Critical: "Am I understating severity?". Previous phrasing presupposed a near-Pass state and was unhelpful when the overall rating was already Major or Critical.
+- Fixes applied to: `SKILL.md`, `SKILL_ZH.md`, `examples.md` (local and repo).
+
 ### Patched (2026-03-23) — v0.9.1
 
 - **Portability fix**: subagent temp path changed from `C:/tmp/qc_sub/` to `~/.claude/tmp/qc_sub/` — previous path failed silently on Linux/Mac

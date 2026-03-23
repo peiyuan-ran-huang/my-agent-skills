@@ -1,6 +1,6 @@
 # QC: Five-Dimensional Deep Review / 五维深度审查
 
-**Version**: v0.9.1
+**Version**: v0.9.2
 **Last Updated**: 2026-03-23
 
 ---
@@ -118,15 +118,15 @@ Changes to `SKILL.md` and `SKILL_ZH.md` **must** be mirrored in each other.
 
 `pitfalls.md` 是你的个人错题本。把日常工作中遇到的易错点、容易遗漏的问题记录在里面，QC 审查时会自动将每条作为额外检查项。文件附带作者工作流中的初始条目（审查时会被实际检查）；可按需增删改，用任意语言编写。
 
-*Note: `sync.sh` will never overwrite your local `pitfalls.md` once it exists — your entries are safe across syncs.*
+*Note: `sync.sh` will never overwrite your local `pitfalls.md` or `examples.md` once they exist — your entries are safe across syncs.*
 
-*注意：一旦本地存在 `pitfalls.md`，`sync.sh` 不会覆盖它——你的条目在同步时不会丢失。*
+*注意：一旦本地存在 `pitfalls.md` 或 `examples.md`，`sync.sh` 不会覆盖它们——你的条目在同步时不会丢失。*
 
 ## See Also / 相关
 
-*For heavier-duty multi-round audits, see the `audit` skill (`---audit`) (local only; not yet published to this repo). qc is the quick scan; audit is the deep dive.*
+*For heavier-duty multi-round audits, see the `audit` skill (`---audit`), also available in this repo. qc is the quick scan; audit is the deep dive.*
 
-*如需更重量级的多轮深度审计，请看 `audit` skill（`---audit`）（仅本地可用，尚未发布至本仓库）。qc 是快速扫描，audit 是深度审计。*
+*如需更重量级的多轮深度审计，请看 `audit` skill（`---audit`），同样收录在本仓库中。qc 是快速扫描，audit 是深度审计。*
 
 ## Acknowledgements / 致谢
 

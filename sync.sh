@@ -17,22 +17,44 @@ for skill_dir in "$REPO_DIR/skills/"/*/; do
   skill_name=$(basename "$skill_dir")
   dest="$SKILLS_DIR/$skill_name"
 
-  # Preserve user's pitfalls.md if it already exists at the destination
+  # No-clobber list: these user-extensible files are preserved during sync.
+  # Only pitfalls.md and examples.md are protected. All other files
+  # (SKILL.md, taxonomy.md, references/*, etc.) are overwritten by the
+  # repo version. If you customise other files locally, back them up
+  # before running sync.sh.
   pitfalls_backup=""
+  examples_backup=""
   if [[ -f "$dest/pitfalls.md" ]]; then
     pitfalls_backup=$(mktemp)
     cp "$dest/pitfalls.md" "$pitfalls_backup"
   fi
+  if [[ -f "$dest/examples.md" ]]; then
+    examples_backup=$(mktemp)
+    cp "$dest/examples.md" "$examples_backup"
+  fi
+
+  # Trap: restore user files if interrupted between cp and mv
+  cleanup() {
+    [[ -n "$pitfalls_backup" && -f "$pitfalls_backup" ]] && mv "$pitfalls_backup" "$dest/pitfalls.md" 2>/dev/null || true
+    [[ -n "$examples_backup" && -f "$examples_backup" ]] && mv "$examples_backup" "$dest/examples.md" 2>/dev/null || true
+  }
+  trap cleanup EXIT INT TERM
 
   # Full recursive copy (handles flat and nested skill layouts)
   mkdir -p "$dest"
   cp -r "$skill_dir/." "$dest/"
 
-  # Restore user's pitfalls.md (overrides the repo template just copied)
+  # Restore user-maintained files (overrides repo templates just copied)
   if [[ -n "$pitfalls_backup" ]]; then
     mv "$pitfalls_backup" "$dest/pitfalls.md"
     echo "  ⏭ $skill_name/pitfalls.md (user file preserved)"
   fi
+  if [[ -n "$examples_backup" ]]; then
+    mv "$examples_backup" "$dest/examples.md"
+    echo "  ⏭ $skill_name/examples.md (user file preserved)"
+  fi
+
+  trap - EXIT INT TERM  # Clear trap after successful restore
 
   echo "  ✓ $skill_name"
 done
