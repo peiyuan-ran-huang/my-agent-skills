@@ -20,8 +20,8 @@ You now assume the role of **strict reviewer**. Conduct a thorough, meticulous, 
 
 ## Parameter Parsing
 
-1. Read args after `---qc`: the first semantic unit that is not a recognized flag is the review target (a single word, a quoted phrase, or a file path — **file paths containing spaces must be quoted with double quotes**, e.g., `---qc "OneDrive - University of Bristol/file.R"`; if unquoted path-like tokens containing spaces are detected, ask the user to re-invoke with quotes); the rest are additional criteria. Scan all tokens for recognized flags — flag tokens (identified by `--` prefix matching known flags below) are excluded from target/criteria identification regardless of position:
-   - `--loop`/`--循环` [N]: activate **Loop Mode** (N defaults to 3; if the token immediately following this flag is a positive integer, it is consumed as N and not treated as the review target)
+1. Read args after `---qc`: the first semantic unit that is not a recognized flag is the review target (a single word, a quoted phrase, or a file path — **file paths containing spaces must be quoted with double quotes**, e.g., `---qc "my project/analysis.R"`; if unquoted path-like tokens containing spaces are detected, ask the user to re-invoke with quotes); the rest are additional criteria. Scan all tokens for recognized flags — flag tokens (identified by `--` prefix matching known flags below) are excluded from target/criteria identification regardless of position:
+   - `--loop`/`--循环` [N]: activate **Loop Mode** (N defaults to 3; if the token immediately following this flag is a positive integer, it is consumed as N and not treated as the review target; non-positive integers, e.g., `--loop 0`, and non-numeric tokens are NOT consumed as N)
    - `--sub`/`--子代理`: activate **Subagent Counterfactual Mode** (see below)
 2. Target mapping: 代码/code → Code | 方案/plan → Plan | 文档/doc → Document | 数据/data → Data | 建议/advice → Advice | skill/prompt/技能/提示词 → Skill/Prompt | diff/changeset/directory/目录 → Code overlay (blast-radius scope = diff/directory); for mixed content → select the primary type based on the user's question focus or content proportion; overlay checks from secondary types
 3. No arguments → auto-detect using this priority:
@@ -38,11 +38,11 @@ When `--loop` is present, execute a review-fix-review cycle:
 1. Run standard QC review on the target
 2. **Pass** → increment consecutive pass counter; **Not Pass** → reset counter to 0, fix all findings (Critical → Major → Minor), then re-review
 3. Exit when: consecutive passes >= N (default 3), or total rounds >= 10
-4. Each round starts with: `🔄 Round X/10 | Passes: Y/N | History: [P, M, m, P, ...]` (P=Pass, C=Critical, M=Major, m=Minor)
+4. Each round starts with: `🔄 Round X/10 | Passes: Y/N | History: [P, M, m, P, ...]` (P=Pass, C=Critical, M=Major, m=Minor)  <!-- emoji is part of this template's format spec; overrides default no-emoji rule -->
 5. Target is resolved once at invocation; subsequent rounds re-review the same target (files: re-read from disk; in-context content: review latest version)
 6. Calibration files (examples.md, pitfalls.md): read once at start. Evolution Protocol: final round only.
 
-In loop mode, the "review only — no auto-fixes" principle is suspended: Claude fixes findings between rounds. If a fix requires user input, pause and ask. For consecutive pass rounds, a brief confirmation suffices (state header + overall rating).
+In loop mode, the "review only — no auto-fixes" principle is suspended: Claude fixes findings between rounds. If a fix requires user input, pause and ask. If the user rejects a proposed fix, treat the finding as **won't-fix (WNF)**. Exclude WNF items from subsequent round severity ratings. Track WNF items in the round status header for audit trail (e.g., `History: [M, P(1 WNF), P, P]`). For consecutive pass rounds, a brief confirmation suffices (state header + overall rating).
 
 **Adversarial re-framing**: In rounds 2+, before reviewing, adopt the stance: "This was written by someone else. My job is to find problems, not confirm correctness." This counteracts the natural tendency to validate your own fixes.
 
@@ -52,7 +52,7 @@ When `--sub` is present, the counterfactual test (see Meta-calibration in Key Pr
 
 ### Dispatch Logic
 
-```
+```python
 # After five-dimension review, before writing Summary:
 if --sub active:
     if --loop active:
@@ -192,7 +192,7 @@ Use the following template:
 - **Meta-calibration before finalizing**: Before writing the Summary section, re-read all findings and ask:
   1. Would I rate this the same severity if it appeared in isolation?
   2. Am I inflating because I found too few issues, or deflating because I found too many?
-  3. **Counterfactual test** (mandatory for all ratings): "If this exact target were submitted by a stranger for first-time review, would I still find no Critical or Major issues?" If uncertain, pick the weakest area and re-examine it with adversarial intent before confirming. In Loop Mode rounds 2+, the reasoning must specifically address whether the fixes applied in the previous round are correct and complete.
+  3. **Counterfactual test** (mandatory for all ratings): Ask the question matching the current rating — for Pass/Minor: "If this exact target were submitted by a stranger for first-time review, would I still find no Critical or Major issues?"; for Major/Critical: "Am I understating severity — could this be Critical / is this truly Major?". If uncertain, pick the weakest area and re-examine it with adversarial intent before confirming. In Loop Mode rounds 2+, the reasoning must specifically address whether the fixes applied in the previous round are correct and complete.
      **Operational guidance for effective counterfactual execution**:
      - Start from the execution layer (scripts, configs) rather than documentation — docs get covered in normal QC; execution code is the trust blind spot.
      - Verify implementation assumptions — seeing a comment or label (e.g., `<!-- T050 -->`) does not mean the system enforces it; read the enforcement code to confirm.

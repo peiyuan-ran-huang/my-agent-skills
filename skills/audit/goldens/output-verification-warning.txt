@@ -1,0 +1,7 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+AUDIT Output Verification Warning
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Report Path: reports/manuscript_audit.md
+Retained Temp Files: audit_R1_temp.md, audit_R2_temp.md
+Manual Check: Readback failed; verify written outputs manually before trusting completion
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

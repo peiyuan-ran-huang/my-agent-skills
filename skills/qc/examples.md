@@ -204,7 +204,7 @@ Demonstrating a well-formed proposal appended after the Summary section.
 ```
 ### Evolution Proposal
 
-> 🔄 **Proposed Evolution**
+> 🔄 **Proposed Evolution**  <!-- emoji is part of this template's format spec; overrides default no-emoji rule -->
 >
 > **Type**: pitfall
 > **Draft entry**:

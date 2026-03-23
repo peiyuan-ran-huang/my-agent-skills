@@ -1,6 +1,6 @@
 # my-agent-skills
 
-Private repository for personal AI agent skills, synced across devices.
+Reusable AI agent skills for Claude Code, synced across devices.
 
 ## Structure
 
@@ -28,4 +28,5 @@ bash ~/my-agent-skills/sync.sh
 
 | Skill | Trigger | Description |
 |-------|---------|-------------|
-| qc | `---qc [object] [criteria]` | Five-dimensional QC review (correctness / completeness / optimality / consistency / standards). EN + ZH bilingual. |
+| qc | `---qc [object] [criteria] [--loop [N]] [--sub]` | Five-dimensional QC review (correctness / completeness / optimality / consistency / standards). Supports loop mode and subagent counterfactual. EN + ZH bilingual. |
+| audit | `---audit [target] [--focus X] [--out path] [--lang zh/en] [--lite]` | Multi-round deep audit with parallel subagents across 3 phases: plan → dispatch → merge. Supports focus areas, output path, language override, and lite mode. EN + ZH bilingual. |

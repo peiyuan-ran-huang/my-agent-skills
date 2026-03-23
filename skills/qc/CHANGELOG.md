@@ -1,10 +1,10 @@
 # Changelog
 
 All notable changes to this project are documented here.
-Only version increments of 0.1 or above are recorded; patch-level (0.0.1) changes are omitted.
+Only version increments of 0.1 or above get their own entry heading; patch-level (0.0.1) fixes are recorded as ### Patched subsections within the parent version entry.
 Dates represent when the version was committed to the repo, not when development started.
 
-本文件记录所有重要变更。仅记录 0.1 及以上的版本增量；0.0.1 级别的修补不记录。
+本文件记录所有重要变更。0.1 及以上的版本增量有独立的标题条目；0.0.1 级别的修补记录为父版本条目内的 ### Patched 子节。
 日期为提交至 repo 的时间，非开发开始时间。
 
 ## [v0.9] — 2026-03-23
@@ -63,7 +63,7 @@ Dates represent when the version was committed to the repo, not when development
 
 ### Patched (2026-03-19)
 
-- **Distributable sanitization**: `set.seed(19705)` → `set.seed(7)` in examples (personal seed removed); "checked 11 entries" → "checked N entries" (hardcoded local count → generic placeholder); README date updated to 2026-03-19
+- **Distributable sanitization**: `set.seed(<personal-seed>)` → `set.seed(7)` in examples (personal seed removed); "checked 11 entries" → "checked N entries" (hardcoded local count → generic placeholder); README date updated to 2026-03-19
 - **pitfalls.md repo template**: restored to 2 English-only starter entries; personal entries removed from repo (no-clobber violation incident)
 
 ### Patched (2026-03-18)

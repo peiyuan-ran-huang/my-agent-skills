@@ -1,0 +1,78 @@
+# type\tpayload...
+# canonical_map_row\t<full literal row from README canonical source map>
+# coverage_item_literal\t<literal coverage checklist item>
+# coverage_item_regex\t<regex-backed coverage checklist item>
+# scenario_heading_regex\t<required scenario heading regex>
+# scenario-heading families are intentionally order-insensitive; scenario IDs are append-stable maintenance labels, not a globally sorted taxonomy
+# example_heading\t<expected example heading>
+# example_order\t<start heading>\t<end heading>\t<ordered literal 1>\t<ordered literal 2>...
+# ledger_header\t<full literal header row from verification-issue-ledger.md>
+# ledger_severity\t<allowed severity value>
+# ledger_status\t<allowed status value>
+
+canonical_map_row	| `SKILL.md` | English orchestrator entry protocol |
+canonical_map_row	| `SKILL_ZH.md` | Chinese entry protocol with the same runtime boundaries |
+canonical_map_row	| `references/phase-0-planning.md` | Detailed planning behavior |
+canonical_map_row	| `references/phase-1-dispatch.md` | Dispatch and batch-management behavior |
+canonical_map_row	| `references/phase-2-merge.md` | Merge, dedup, writeout, cleanup behavior |
+canonical_map_row	| `references/degradation-and-limitations.md` | Failure handling, degradation paths, context-pressure guidance, platform limitations |
+canonical_map_row	| `templates/subagent-template.md` | Canonical subagent execution protocol |
+canonical_map_row	| `templates/report-template.md` | Canonical final report structure |
+canonical_map_row	| `scripts/config-optimal-values.sh` | Single source of truth for optimal config values |
+canonical_map_row	| `scripts/config-check.sh` | Canonical source for raw config-check output shape only; Phase 0 detect-and-guide behavior belongs to `SKILL.md` plus `references/phase-0-planning.md` |
+canonical_map_row	| `scripts/config-optimize.sh` | Canonical source for backup-and-apply config optimization behavior and its output contract |
+canonical_map_row	| `scripts/config-restore.sh` | Canonical source for audit-field restore behavior, restore fallback branches, and restore output contract |
+canonical_map_row	| `scripts/parse-audit-args.py` | Canonical source for deterministic quote-aware argument parsing of the raw `---audit` argument string |
+
+coverage_item_literal	- trigger boundary
+coverage_item_literal	- config `OK`
+coverage_item_literal	- config script error / anomalous output
+coverage_item_literal	- incompatible Windows bash path
+coverage_item_literal	- no-target stop
+coverage_item_literal	- single-file code audit
+coverage_item_literal	- quoted target path with spaces
+coverage_item_literal	- paper audit
+coverage_item_literal	- research plan audit
+coverage_item_literal	- data analysis audit
+coverage_item_literal	- mixed audit
+coverage_item_literal	- MCP unavailable
+coverage_item_literal	- sequential fallback
+
+coverage_item_regex	^- config (`MISMATCH`|mismatch)$
+coverage_item_regex	^- no-argument( recent-deliverable)? auto-target$
+coverage_item_regex	^- partial-report salvage( / merge interruption| paths)$
+coverage_item_regex	^- final output readback( and split-output verification)?$
+
+scenario_heading_regex	^## T1\. Config OK$
+scenario_heading_regex	^## T1b\. Trigger Boundary$
+scenario_heading_regex	^## T2b\. No Target Stop$
+scenario_heading_regex	^## T2d\. .*No-Argument.*Auto-Target$
+scenario_heading_regex	^## T2c\. Config Check Script Error Or Anomalous Output$
+scenario_heading_regex	^## T3\. Single-File Code Audit$
+scenario_heading_regex	^## T3c\. Quoted Target Path With Spaces$
+scenario_heading_regex	^## T4\. Paper Audit$
+scenario_heading_regex	^## T5d\. Research Plan Audit$
+scenario_heading_regex	^## T5e\. Data Analysis Audit$
+scenario_heading_regex	^## T5\. Mixed Audit$
+scenario_heading_regex	^## T7\. MCP Unavailable$
+scenario_heading_regex	^## T8\. Sequential Fallback$
+scenario_heading_regex	^## T8e\. (Partial Report Salvage Paths|.*Merge Interruption.*)$
+scenario_heading_regex	^## T10\. Final Output Readback( And Split Output)?$
+
+example_heading	## Example 1: Good Report Excerpt
+example_heading	## Example 2: Over-Reporting Anti-Pattern
+example_heading	## Example 3: Cross-Round Dedup With Star
+example_heading	## Example 4: no-MCP Supplement
+example_heading	## Example 5: Zero-Issue Big Round
+example_heading	## Example 6: D/V Cycle — Discovery vs Verification
+
+example_order	## Example 1: Good Report Excerpt	## Example 2: Over-Reporting Anti-Pattern	**Model**: claude-opus-4-6 | Extended thinking: ON	---	## Issue List
+
+ledger_header	| ID | Severity | Status | Zone | Lane | First Seen | Last Checked | Summary | Primary Files | Resolution / Notes |
+ledger_severity	blocker
+ledger_severity	warning
+ledger_severity	info
+ledger_status	open
+ledger_status	recheck
+ledger_status	resolved
+ledger_status	stale
