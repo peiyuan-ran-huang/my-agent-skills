@@ -3,7 +3,7 @@ name: qc
 description: Use when the user's message starts with ---qc to request a structured five-dimensional review of code, plans, documents, data, advice, or skills/prompts.
 ---
 
-<!-- version: 0.8.0 | SYNC RULE: Changes to this file MUST be mirrored in SKILL_ZH.md.
+<!-- version: 0.9.1 | SYNC RULE: Changes to this file MUST be mirrored in SKILL_ZH.md.
 Allowed differences: (1) frontmatter `name` (qc vs qc-zh), (2) frontmatter `description` language,
 (3) loading behavior note in SKILL_ZH.md. Sync metric: semantic equivalence per section, NOT line-count equality. -->
 
@@ -20,7 +20,9 @@ You now assume the role of **strict reviewer**. Conduct a thorough, meticulous, 
 
 ## Parameter Parsing
 
-1. Read args after `---qc`: the first semantic unit is the review target (a single word, a quoted phrase, or a file path — **file paths containing spaces must be quoted with double quotes**, e.g., `---qc "OneDrive - University of Bristol/file.R"`; if unquoted path-like tokens containing spaces are detected, ask the user to re-invoke with quotes); the rest are additional criteria. After extracting target and criteria, scan remaining tokens for `--loop`/`--循环`; if followed by an integer use it as N, else default N=3. If found, activate **Loop Mode** (see below).
+1. Read args after `---qc`: the first semantic unit that is not a recognized flag is the review target (a single word, a quoted phrase, or a file path — **file paths containing spaces must be quoted with double quotes**, e.g., `---qc "OneDrive - University of Bristol/file.R"`; if unquoted path-like tokens containing spaces are detected, ask the user to re-invoke with quotes); the rest are additional criteria. Scan all tokens for recognized flags — flag tokens (identified by `--` prefix matching known flags below) are excluded from target/criteria identification regardless of position:
+   - `--loop`/`--循环` [N]: activate **Loop Mode** (N defaults to 3; if the token immediately following this flag is a positive integer, it is consumed as N and not treated as the review target)
+   - `--sub`/`--子代理`: activate **Subagent Counterfactual Mode** (see below)
 2. Target mapping: 代码/code → Code | 方案/plan → Plan | 文档/doc → Document | 数据/data → Data | 建议/advice → Advice | skill/prompt/技能/提示词 → Skill/Prompt | diff/changeset/directory/目录 → Code overlay (blast-radius scope = diff/directory); for mixed content → select the primary type based on the user's question focus or content proportion; overlay checks from secondary types
 3. No arguments → auto-detect using this priority:
    1. File path mentioned in the user's current message
@@ -43,6 +45,57 @@ When `--loop` is present, execute a review-fix-review cycle:
 In loop mode, the "review only — no auto-fixes" principle is suspended: Claude fixes findings between rounds. If a fix requires user input, pause and ask. For consecutive pass rounds, a brief confirmation suffices (state header + overall rating).
 
 **Adversarial re-framing**: In rounds 2+, before reviewing, adopt the stance: "This was written by someone else. My job is to find problems, not confirm correctness." This counteracts the natural tendency to validate your own fixes.
+
+## Subagent Counterfactual Mode (activated by `--sub` / `--子代理`)
+
+When `--sub` is present, the counterfactual test (see Meta-calibration in Key Principles) is delegated to a physically isolated subagent instead of running inline. This provides genuine context isolation — the subagent has never seen the generation or review process, eliminating self-review bias.
+
+### Dispatch Logic
+
+```
+# After five-dimension review, before writing Summary:
+if --sub active:
+    if --loop active:
+        if this_round_rating == "Pass" AND consecutive_passes == N - 1:
+            result = dispatch_subagent_counterfactual()
+        else:
+            result = inline_counterfactual()    # non-final rounds: save tokens
+    else:
+        result = dispatch_subagent_counterfactual()
+
+    # Post-dispatch (subagent only):
+    if result.source == "subagent" AND result.verdict == "reopened":
+        apply_new_findings(result.new_findings)
+        apply_severity_adjustments(result.severity_adjustments)
+        recalculate_overall_rating()
+        # loop naturally handles: new rating != Pass → consecutive_passes resets to 0
+```
+
+### Subagent Specification
+
+- **Agent type**: `general-purpose`, `model: "opus"`
+- **Input**: Write two temp files to `~/.claude/tmp/qc_sub/` (create the directory if it doesn't exist):
+  - `target_temp.md` — the review target content (for file targets, copy the file content; for in-context content, write it to temp)
+  - `findings_temp.md` — five-dimension findings in QC report format (each finding headed by `#### [Dimension] — [Severity]`)
+- **Prompt**: Must be fully self-contained (subagent has no access to main agent context). Include:
+  - Role: independent reviewer who has not participated in the creation or initial review
+  - Task: (1) find issues the initial review missed, (2) verify severity assignments of existing findings
+  - Target type and domain context (e.g., academic standards for Document, security checks for Code)
+  - Severity definitions (Critical/Major/Minor)
+  - Output format: JSON with fields `verdict` ("confirmed"/"reopened"), `area_examined`, `reasoning`, `severity_adjustments` (array; each item: `finding_ref` as "Dimension — Severity", `proposed`, `reason`), `new_findings` (array; each item: `dimension`, `severity`, `evidence`, `issue`, `suggested_fix`)
+- **Cleanup**: Delete `~/.claude/tmp/qc_sub/` contents after integration
+
+### Degradation
+
+If subagent dispatch fails (tool error, timeout, unavailable model, etc.) → fall back to inline counterfactual. Report line shows `[degraded: inline fallback]`.
+
+### Output Format Change
+
+The `**Counterfactual**:` line in Summary gains a source tag:
+
+- `[subagent] Confirmed — ...` or `[subagent] Reopened — ...`
+- `[degraded: inline fallback] Confirmed — ...`
+- (no tag) = inline counterfactual (default, when `--sub` is not active)
 
 ## Blast Radius Scan (file modifications only)
 
@@ -140,6 +193,11 @@ Use the following template:
   1. Would I rate this the same severity if it appeared in isolation?
   2. Am I inflating because I found too few issues, or deflating because I found too many?
   3. **Counterfactual test** (mandatory for all ratings): "If this exact target were submitted by a stranger for first-time review, would I still find no Critical or Major issues?" If uncertain, pick the weakest area and re-examine it with adversarial intent before confirming. In Loop Mode rounds 2+, the reasoning must specifically address whether the fixes applied in the previous round are correct and complete.
+     **Operational guidance for effective counterfactual execution**:
+     - Start from the execution layer (scripts, configs) rather than documentation — docs get covered in normal QC; execution code is the trust blind spot.
+     - Verify implementation assumptions — seeing a comment or label (e.g., `<!-- T050 -->`) does not mean the system enforces it; read the enforcement code to confirm.
+     - Scan for namespace collisions — ID/key/variable uniqueness is the most common collision point in self-testing code.
+     - Trace the root cause chain — after finding a bug, ask "why could this bug exist?" to identify missing guards, registries, or spec coverage.
   Adjust if needed.
 
 ## Evolution Protocol
@@ -176,7 +234,7 @@ Append this block to the report output:
 
 ### Write Mechanics (on user approval)
 
-- Append new entry after the last entry in the `## Entries / 条目` section of pitfalls.md (or the relevant section of examples.md)
+- Append new entry after the last entry in the `## Entries` section of pitfalls.md (or the relevant section of examples.md)
 - Auto-include provenance comment: `<!-- via: evolution-proposal, YYYY-MM-DD -->`
 - Before writing, scan existing entries for semantic overlap; if found, warn user and suggest merging instead of adding
 

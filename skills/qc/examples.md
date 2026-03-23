@@ -332,3 +332,45 @@ Demonstrating a `--loop` review-fix cycle on a hypothetical script.
 (2) 未验证修复是否引入新问题。Loop Mode 下 counterfactual 必须
 具体指向上一轮修复并说明其正确性和完整性。
 ```
+
+---
+
+## Subagent Counterfactual (`--sub`) — 好示例
+
+场景：审查一个 R 脚本，`---qc --sub`，五维审查评级 Minor。子代理独立审查后确认。
+
+```
+### Summary
+- **Overall Rating**: Minor
+- **Counterfactual**: [subagent] Confirmed — independent reviewer re-examined the data merge logic at lines 30-45 (most complex path with potential for silent row loss); left_join keys match on both sides, and the assertion at line 47 validates row count post-merge. Also checked whether the filtering at line 52 could silently drop valid records — the condition is correct per the codebook. No new findings. No severity adjustments.
+- One reproducibility gap (missing set.seed); core analysis logic is sound.
+- [ ] Add set.seed(7) before line 22
+- Evolution check: no new patterns discovered
+```
+
+### Anti-pattern: 子代理 prompt 不自包含
+
+```
+### Summary
+- **Overall Rating**: Pass
+- **Counterfactual**: [subagent] Confirmed — subagent agreed with the review
+
+错误：(1) 子代理结果缺少具体审查区域引用（area_examined 为空或泛化）。
+(2) 有效的子代理 counterfactual 必须引用子代理独立审查的具体位置和推理，
+而非仅仅"agreed"。子代理的价值在于独立视角——如果结果与内联无异，
+说明 prompt 不够自包含或子代理未真正独立审查。
+```
+
+### Subagent Reopened 示例
+
+场景：子代理发现了初审遗漏的问题。
+
+```
+### Summary
+- **Overall Rating**: Major (upgraded from Minor after subagent review)
+- **Counterfactual**: [subagent] Reopened — independent reviewer identified silent type coercion at line 55: character join key "001" matches numeric 1 in R's left_join, causing unexpected row duplication. New finding added to Correctness above. Severity of existing Completeness finding unchanged.
+- Subagent-discovered type coercion bug elevates rating to Major.
+- [ ] Convert join key to consistent type before merge (line 54)
+- [ ] Add set.seed(7) before line 22
+- Evolution check: no new patterns discovered
+```

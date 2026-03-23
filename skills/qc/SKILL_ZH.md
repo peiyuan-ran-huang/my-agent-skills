@@ -3,7 +3,7 @@ name: qc-zh
 description: 当用户消息以 ---qc 开头时触发，对代码、方案、文档、数据、建议或技能/提示词进行五维结构化审查。中文参考版（不会被自动加载）。
 ---
 
-<!-- version: 0.8.0 | 同步规则：此文件的任何改动必须同步到 SKILL.md，反之亦然。
+<!-- version: 0.9.1 | 同步规则：此文件的任何改动必须同步到 SKILL.md，反之亦然。
 允许差异：(1) frontmatter name 字段 (qc vs qc-zh)，(2) frontmatter description 语言，(3) SKILL_ZH.md 的加载说明。
 同步标准：逐节语义等价，非行数相等。 -->
 
@@ -20,7 +20,9 @@ description: 当用户消息以 ---qc 开头时触发，对代码、方案、文
 
 ## 参数解析
 
-1. 读取 `---qc` 后的参数：第一个语义单元为审查对象（可以是一个词、引号包裹的短语、或文件路径——**含空格的文件路径必须用双引号包裹**，例如 `---qc "OneDrive - University of Bristol/file.R"`；若检测到未加引号的含空格路径，请用户重新输入）；其余为额外标准。提取对象和标准后，扫描剩余 token 中的 `--loop`/`--循环`；若后跟整数则用作 N，否则默认 N=3。若发现该标志，激活**循环模式**（见下方）。
+1. 读取 `---qc` 后的参数：第一个非标志 token 为审查对象（可以是一个词、引号包裹的短语、或文件路径——**含空格的文件路径必须用双引号包裹**，例如 `---qc "OneDrive - University of Bristol/file.R"`；若检测到未加引号的含空格路径，请用户重新输入）；其余为额外标准。扫描所有 token 中的已知标志——标志 token（以 `--` 前缀匹配下列已知标志）无论位置如何均排除在对象/标准识别之外：
+   - `--loop`/`--循环` [N]：激活**循环模式**（N 默认为 3；若该标志后紧跟正整数 token，则该 token 被消费为 N，不视为审查对象）
+   - `--sub`/`--子代理`：激活**子代理反事实模式**（见下方）
 2. 对象映射：代码/code → 代码 | 方案/plan → 方案 | 文档/doc → 文档 | 数据/data → 数据 | 建议/advice → 建议 | skill/prompt/技能/提示词 → 技能/提示词 | diff/changeset/directory/目录 → 代码叠加（影响范围 = diff/目录）；若内容混合 → 按用户问题指向或内容主体比例选主体类型，次要类型叠加检查
 3. 无参数 → 按以下优先级自动识别：
    1. 用户当前消息中提及的文件路径
@@ -43,6 +45,52 @@ description: 当用户消息以 ---qc 开头时触发，对代码、方案、文
 循环模式下，"只审不改"原则暂停：Claude 在各轮之间修复发现的问题。若修复需要用户确认，暂停循环并询问。连续通过的轮次简要确认即可（状态头 + 整体评级）。
 
 **对抗性重构**：第 2 轮起，审查前先切换立场："假设这是别人写的，我的任务是找问题而非确认正确。"这抵消了对自己修复的天然认可倾向。
+
+## 子代理反事实模式（由 `--sub` / `--子代理` 激活）
+
+当 `--sub` 存在时，反事实测试（见重要原则中的元校准）由物理隔离的子代理执行，而非在同一上下文中内联运行。这提供了真正的上下文隔离——子代理从未参与过生成或审查过程，消除了自审偏差。
+
+### 派发逻辑
+
+```python
+# 五维审查完成后、写总结之前：
+if --sub 激活:
+    if --loop 激活:
+        if 本轮评级 == "Pass" AND 连续通过次数 == N - 1:
+            result = dispatch_subagent_counterfactual()
+        else:
+            result = inline_counterfactual()    # 非最终轮：节省 token
+    else:
+        result = dispatch_subagent_counterfactual()
+
+    # 派发后处理（仅子代理）：
+    if result.source == "subagent" AND result.verdict == "reopened":
+        apply_new_findings(result.new_findings)
+        apply_severity_adjustments(result.severity_adjustments)
+        recalculate_overall_rating()
+        # loop 自然处理：新评级非 Pass → 连续通过计数器归零
+```
+
+### 子代理规格
+
+- **Agent 类型**：`general-purpose`，`model: "opus"`
+- **输入**：写入两个临时文件到 `~/.claude/tmp/qc_sub/`（目录不存在时自动创建）：
+  - `target_temp.md` — 审查目标内容（文件目标则复制文件内容；上下文中的内容则写入临时文件）
+  - `findings_temp.md` — 五维审查发现，使用 QC 报告格式（每条发现以 `#### [维度] — [严重性]` 为标题）
+- **Prompt**：必须完全自包含（子代理无法访问主 agent 上下文）。包含：角色定义、任务说明、目标类型与领域上下文、严重性定义、JSON 输出格式（`verdict`, `area_examined`, `reasoning`, `severity_adjustments`, `new_findings`）
+- **清理**：整合完成后删除 `~/.claude/tmp/qc_sub/` 下所有临时文件
+
+### 降级
+
+子代理派发失败（工具错误、超时、模型不可用等）→ 回退到内联反事实测试。报告行显示 `[degraded: inline fallback]`。
+
+### 输出格式变化
+
+总结部分的 `**反事实**:` 行增加来源标记：
+
+- `[subagent] Confirmed — ...` 或 `[subagent] Reopened — ...`
+- `[degraded: inline fallback] Confirmed — ...`
+- （无标记）= 内联反事实测试（默认，`--sub` 未激活时）
 
 ## 影响范围扫描（仅限文件修改）
 
@@ -140,6 +188,11 @@ description: 当用户消息以 ---qc 开头时触发，对代码、方案、文
   1. 如果这条发现单独出现，我会给同样的严重性评级吗？
   2. 我是否因发现太少而虚高评级，或因发现太多而压低评级？
   3. **反事实测试**（对所有评级必做）："如果这份审查对象是由陌生人首次提交的，我还会认为没有 Critical 或 Major 问题吗？"如不确定，选最薄弱的区域以对抗性视角重新审视后再确认。循环模式第 2 轮起，reasoning 必须具体说明上一轮修复是否正确且完整。
+     **有效执行操作指南**：
+     - 从执行层（脚本、配置）切入，而非文档——文档在常规 QC 中已覆盖，执行代码才是信任盲区。
+     - 验证实现假设——看到注释或标签（如 `<!-- T050 -->`）不等于系统会强制执行，必须读执行代码确认。
+     - 扫描命名空间碰撞——ID/key/变量名唯一性是自测试代码最常见的碰撞点。
+     - 追溯根因链——发现 bug 后问"为什么这个 bug 能存在？"，找到缺失的 guard、registry 或 spec 覆盖。
   如有偏差，调整后再写总结。
 
 ## 进化协议
@@ -176,7 +229,7 @@ description: 当用户消息以 ---qc 开头时触发，对代码、方案、文
 
 ### 写入机制（用户批准后）
 
-- 在 pitfalls.md 的 `## Entries / 条目` 部分最后一条之后追加新条目（或 examples.md 的对应部分）
+- 在 pitfalls.md 的 `## Entries` 部分最后一条之后追加新条目（或 examples.md 的对应部分）
 - 自动附加来源注释：`<!-- via: evolution-proposal, YYYY-MM-DD -->`
 - 写入前扫描现有条目是否存在语义重叠；若有，提醒用户并建议合并而非新增
 

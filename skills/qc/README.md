@@ -1,7 +1,7 @@
 # QC: Five-Dimensional Deep Review / 五维深度审查
 
-**Version**: v0.8.0
-**Last Updated**: 2026-03-22
+**Version**: v0.9.0
+**Last Updated**: 2026-03-23
 **Author**: Peiyuan (Ran) Huang, with (*significant*) assistance from Claude Code
 
 ---
@@ -20,6 +20,7 @@ A stupidly simple prompt template (despite its name "Deep Review") that runs a s
 - **v0.6**: **Evolution Protocol** — post-review self-reflection that proposes new pitfalls/examples when QC encounters uncovered scenarios. Propose-and-confirm: skill suggests, user approves. / **进化协议**——审查后自我反思，遇到未覆盖场景时提议新的错题本/样例条目。提议确认制：skill 提议，用户批准。
 - **v0.7**: **Calibration refinements** — meta-calibration principle (check severity bias before finalizing), expanded Skill/Prompt overlay (8 items: +degradation path, self-review bias, runtime/dev boundary), tighter auto-detect step 2 filtering. / **校准细化**——元校准原则（定稿前检查严重性偏差）、Skill/Prompt 叠加检查扩展至 8 项（+降级路径、自审偏差、运行时/开发边界）、自动检测步骤 2 过滤收紧。
 - **v0.8**: **Loop Mode** (`--loop [N]` / `--循环 [N]`) — automated review-fix-review cycle until N consecutive passes (default 3) or 10 total rounds. / **循环模式**——自动化审查-修复-再审查循环，直到连续 N 轮 Pass（默认 3）或总计 10 轮。
+- **v0.9**: **Subagent Counterfactual Mode** (`--sub` / `--子代理`) — delegates counterfactual test to a physically isolated subagent (opus) for genuine context isolation, eliminating self-review bias. In loop mode, fires only on the final round. Degrades to inline on failure. / **子代理反事实模式**——将反事实测试委托给物理隔离的独立子代理（opus），实现真正的上下文隔离，消除自审偏差。循环模式中仅在最终轮触发。失败时降级为内联。
 
 For full version history, see `CHANGELOG.md`. / 完整版本历史见 `CHANGELOG.md`。
 
@@ -79,12 +80,12 @@ Changes to `SKILL.md` and `SKILL_ZH.md` **must** be mirrored in each other.
 ## Trigger / 触发方式
 
 ```
----qc [target] [extra criteria]
+---qc [target] [criteria] [--loop [N]] [--sub]
 ```
 
 **Rules / 规则**:
 - `---qc` must be the **first token** of your message / `---qc` 必须是消息的**首个 token**
-- File paths with spaces must be **double-quoted** / 含空格的文件路径必须用**双引号**包裹: `---qc "OneDrive - University of Bristol/file.R"`
+- File paths with spaces must be **double-quoted** / 含空格的文件路径必须用**双引号**包裹: `---qc "my project/analysis.R"`
 - Natural language (review / check / 审查 / 检查) does **not** trigger / 自然语言不会触发
 - Target can be a word, quoted phrase, or file path / 目标可以是一个词、引号短语或文件路径
 

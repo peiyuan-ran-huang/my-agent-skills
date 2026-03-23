@@ -7,6 +7,31 @@ Dates represent when the version was committed to the repo, not when development
 本文件记录所有重要变更。仅记录 0.1 及以上的版本增量；0.0.1 级别的修补不记录。
 日期为提交至 repo 的时间，非开发开始时间。
 
+## [v0.9] — 2026-03-23
+
+### Patched (2026-03-23) — v0.9.1
+
+- **Portability fix**: subagent temp path changed from `C:/tmp/qc_sub/` to `~/.claude/tmp/qc_sub/` — previous path failed silently on Linux/Mac
+- **Parameter Parsing rewritten**: eliminated self-contradiction between "remaining tokens" and "order-independent"; now explicitly states flag tokens (identified by `--` prefix) are excluded from target/criteria identification regardless of position
+- **`--loop [N]` N-consumption rule**: explicit note that a positive integer immediately following `--loop`/`--循环` is consumed as N and not treated as the review target
+- **Degradation path expanded**: "tool error, timeout, etc." → "tool error, timeout, unavailable model, etc." — covers the most common failure mode for distributed installs on restricted subscription tiers
+- **Write Mechanics header fixed**: `## Entries / 条目` → `## Entries` to match the actual header in the distributable `pitfalls.md`
+- **README trigger syntax completed**: added missing `--loop [N]` and `--sub` flags to the syntax example
+- **pitfalls.md**: added 4th starter entry — "Instruction-file section header mismatch" `[skill/prompt/file-modification]`
+
+### Added
+
+- **Subagent Counterfactual Mode** (`--sub` / `--子代理`): optional flag that delegates the counterfactual test to a physically isolated subagent (model: opus), providing genuine context isolation instead of inline role-playing. Subagent receives target content + findings via temp files, returns structured JSON (verdict, area_examined, reasoning, severity_adjustments, new_findings). In loop mode, subagent fires only on the final round to save tokens; non-final rounds use inline counterfactual.
+- **Dispatch logic with post-subagent recalculation**: if subagent reopens findings, new issues are appended, severity adjustments applied, and overall rating recalculated before the loop continues.
+- **Degradation path**: subagent failure falls back to inline counterfactual with `[degraded: inline fallback]` tag in report.
+- **Output format source tags**: Counterfactual line now shows `[subagent]`, `[degraded: inline fallback]`, or no tag (inline default).
+- Subagent counterfactual examples (confirmed, reopened, anti-pattern) added to `examples.md`.
+- New pitfall: "subagent prompt must be fully self-contained" (`[skill/prompt]`).
+
+### Changed
+
+- Parameter Parsing step 1 refactored from single `--loop` scan to order-independent flag list (`--loop`/`--循环`, `--sub`/`--子代理`).
+
 ## [v0.8] — 2026-03-22
 
 ### Added
