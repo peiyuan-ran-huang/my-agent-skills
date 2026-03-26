@@ -78,6 +78,12 @@
 - **Hard gate**: skill 类必须经过 `/skill-vetter`；MCP server 必须经过 security.md § MCP Server Security 审查；npm/pip 包需警告供应链风险。如 `/skill-vetter` 不可用（加载失败、文件缺失），则 tool-acquisition 流程必须 abort——fail-closed, not fail-open。
 - **Three-check**: 安装后需在 MEMORY.md Plugin Ecosystem 中新增条目
 
+### `patterns`
+- **Target**: 取决于 pattern 类型——可能 inform 任何现有类别或未来设计决策
+- **典型 insights**: 设计原则、工作流范式、架构习惯用法、跨领域技术
+- **审查要点**: 必须说出至少一个具体应用场景——"could inform" 不够。仅 pattern 名称无具体场景 → 不分类为 patterns。patterns 与 `other` 的区别：`other` = "不确定归哪类"，`patterns` = "我知道这是可迁移原则，具体应用于 [X]"
+- **Three-check**: pattern 导致具体改动 → 遵循目标类别的 three-check。仅作 reference → 遵循 ref_*.md 的 three-check
+
 ### `other`
 - **Target**: 用户确认
 - **行为**: 暂停并请用户指定具体的优化目标

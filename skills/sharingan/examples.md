@@ -121,7 +121,7 @@ Dimensions:
         Not blocking; no fix needed. [Minor]
   - [x] Write-deny compliance: checked 1 file, 0 violations
 Calibration: read pitfalls.md (N entries), examples.md (this file)
-Counterfactual: Without the external source I would not propose HOOK_TIMEOUT — this is a source-specific insight. Change is source-justified.
+Counterfactual: Two-sided test — (a) Would I propose HOOK_TIMEOUT without the source? No — not a pre-existing concern. (b) Does source reveal a genuine gap? Yes — hooks lack timeout (L1: Coverage gap). Resolution: (a)=no, (b)=yes → legitimate source value.
 Rating: Minor
 
 Inline QC Round 2
@@ -134,7 +134,7 @@ Dimensions:
   - [x] Standards: clean
   - [x] Write-deny compliance: checked 1 file, 0 violations
 Calibration: (re-calibration not required; < 3 rounds since last read)
-Counterfactual: Source-based timeout change remains justified; no sunk-cost reasoning here.
+Counterfactual: Two-sided test — (a) Would I propose without source? No. (b) Source reveals genuine gap? Yes — L1 confirmed. Resolution: (a)=no, (b)=yes → legitimate.
 Rating: Pass
 ```
 
@@ -153,7 +153,7 @@ Dimensions:
   - [x] Standards: clean
   - [x] Write-deny compliance: checked 2 files, 0 violations
 Calibration: read pitfalls.md (N entries), examples.md (this file)
-Counterfactual: Source-derived CLAUDE.md rules; the MEMORY.md omission is an internal consistency gap independent of the source — would catch this regardless.
+Counterfactual: Two-sided test — (a) Would I propose these CLAUDE.md rules without the source? No. (b) Does source reveal genuine gaps? Yes — L1 depth gaps in CLAUDE.md coverage. Resolution: (a)=no, (b)=yes → legitimate. Note: MEMORY.md omission is an internal consistency gap, would catch regardless.
 Rating: Major
 ```
 
@@ -229,7 +229,7 @@ Dimensions:
   - [x] Standards: clean — shebang, 注释, 变量命名符合约定
   - [x] Write-deny compliance: checked 1 file, 0 violations
 Calibration: read pitfalls.md (N entries), examples.md (this file)
-Counterfactual: Timeout change correct for modified file; no sunk-cost reasoning — change stands independently on technical merit.
+Counterfactual: Two-sided test — (a) Would I propose timeout without the source? No — not a pre-existing concern. (b) Does source reveal a genuine gap? Yes — hooks lack timeout, confirmed L1 in depth assessment. Resolution: (a)=no, (b)=yes → legitimate source value.
 Rating: Pass
 
 Inline QC Round 2 (Changes)
@@ -242,7 +242,7 @@ Dimensions:
   - [x] Standards: clean
   - [x] Write-deny compliance: checked 1 file, 0 violations
 Calibration: (re-calibration not required; < 3 rounds since last read)
-Counterfactual: Confirmed — same change, same assessment.
+Counterfactual: Two-sided test — (a) Would I propose this without the source? No — timeout idea is source-specific. (b) Does source reveal a genuine gap? Yes — confirmed L1 gap in Phase 3. Resolution: (a)=no, (b)=yes → legitimate source value. Confirmed.
 Rating: Pass
 
 Blast Radius: scanned 3 references to [block-dangerous.sh]; 0 stale references found
@@ -355,4 +355,99 @@ Save as reference memory? (Y / N / custom title)
 三个 "patterns" 都是硬凑的抽象（食谱格式 → 数据模式？）。
 这是 action bias 的典型表现——无 value 时应一行终止：
 "No reference value identified."
+```
+
+---
+
+## Phase 3: Implementation Depth Assessment — 好示例 (L1 correctly identified)
+
+外部资料推荐结构化错误处理（severity levels + recovery strategies）。
+
+```
+### Implementation Depth Assessment
+
+Insight: "Structured error handling with severity-based recovery"
+
+| Dimension | Current state (cite file:line) | Source offering | Gap? |
+|-----------|-------------------------------|-----------------|------|
+| Coverage  | security.md:15 — binary stop condition (abort or continue) | 3-tier severity (warn/error/fatal) with per-tier recovery | Y |
+| Depth     | Single-level: all errors treated equally | Graduated response: warn→log, error→pause+ask, fatal→abort | Y |
+| Quality   | Adequate for current use cases | Adds graceful degradation for non-fatal errors | Y |
+
+Gap anchoring:
+- Coverage gap: source handles warn-level events that current impl silently ignores
+- Depth gap: source provides 3 severity levels vs current binary
+- Quality gap: source adds recovery paths, current only aborts or ignores
+
+Aggregation: lowest dimension = Y (all three have gaps) → **L1**
+
+L1 Verification Gate: current state security.md:15 shows `if dangerous; then abort`
+(binary). Source §3.2 describes 3-tier model with per-tier handler. Gap is substantive:
+user would notice the difference when non-fatal issues arise.
+
+→ Pass to Phase 4 with upgrade note.
+
+正确：v0.7.1 会将此过滤为"已实现"（因为 security.md 确实有错误处理），
+但 v0.8.0 的二列对比揭示了深度差距（binary vs 3-tier），正确分类为 L1。
+```
+
+---
+
+## L1 Full Journey — 好示例 (Phase 3 → accepted proposal)
+
+外部资料推荐 hook timeout 配置（可调阈值 + 优雅降级）。
+
+```
+Phase 3: Depth Assessment
+  Current: hooks 无 timeout（Coverage gap）；基础 retry 存在但为 flat retry（Depth gap）
+  Source: §4.1 推荐可配置阈值 + exponential backoff
+  Assessment: L1 (2/3 dimensions have gaps)
+  L1 Verification Gate: hooks/*.sh 无 timeout 变量（Coverage gap confirmed）；
+    source §4.1 describes exponential backoff（Depth gap confirmed）
+
+Phase 4: Gap Analysis
+  L1 upgrade gap: hooks/block-dangerous.sh — no timeout mechanism
+  Before snapshot: lines 1-15 of block-dangerous.sh
+
+Phase 5: Proposal
+  Target: hooks/block-dangerous.sh
+  Add HOOK_TIMEOUT=5 variable + timeout wrapper + exponential backoff on retry
+
+Phase 6: QC
+  Counterfactual: Two-sided test —
+    (a) Would I propose without source? No — timeout was not a pre-existing concern.
+    (b) Does source reveal genuine gap? Yes — L1 confirmed in Phase 3 depth assessment.
+    Resolution: (a)=no, (b)=yes → legitimate source value.
+
+L1 attrition: 2 L1 insights entered Phase 4, 1 proposal generated (50% attrition — healthy)
+
+正确：这是 v0.8.0 系统应实现的完整路径——v0.7.1 会在 Phase 3 将此过滤为
+"已实现"（因 hooks 目录存在），但 v0.8.0 的二列对比发现深度差距，
+让 insight 走完全流程并产出合理提案。50% 的 L1 attrition 说明
+不是所有 L1 都变成提案——有选择性。
+```
+
+---
+
+## Phase 2: Patterns Category — Anti-pattern
+
+外部资料讨论"fractal organization"设计原则。
+
+```
+Classification: patterns
+
+Extracted insight:
+1. **Fractal Self-Similarity** — 组织系统应在不同层级呈现自相似结构
+   - Source: "Chapter 5: Fractal Patterns in System Design"
+   - Direct applicability: None
+   - Transferable pattern: "fractal self-similarity could inform skill design"
+   - User growth: None
+   - Depth: N/A (non-config)
+   - Priority: Low
+
+错误：Transferable pattern 字段没有命名具体 target——"could inform skill design" 太模糊。
+正确写法应是："QC Sub-Procedure 的 Phase 6/9 重复结构可抽取为可复用 inline-QC 模块，
+fractal 原则建议将此模式在 sharingan Phase 10 中也应用"（命名了具体 target：
+QC Sub-Procedure、Phase 6/9、Phase 10）。
+无具体应用场景 → 不应分类为 patterns。
 ```

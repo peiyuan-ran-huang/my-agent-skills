@@ -6,6 +6,33 @@ Dates represent when the version was committed, not when development started.
 
 本文件记录所有重要变更。0.1 及以上的版本增量有独立标题。日期为提交时间，非开发开始时间。
 
+## [v0.8.0] — 2026-03-26
+
+### Added
+
+- **Implementation Depth Assessment** (L0/L1/L2): Replaces binary "already implemented" filter with three-level system using two-column comparison across Coverage/Depth/Quality dimensions. "Lowest dimension wins" aggregation. L1 Verification Gate requires file:line + source section evidence.
+- **14th taxonomy category: `patterns`**: Transferable design principles and cross-domain techniques. Must name specific application scenario.
+- **Non-config Insight Routing**: Pattern-only and user-growth-only insights follow dedicated path through Phase 4-5 with reclassification possibility. Reference-value candidates listed separately.
+- **User model consultation** (Phase 2): Reads MEMORY.md User Profile to inform classification scope.
+- **Expanded extraction format**: 6 fields (Source, Direct applicability, Transferable pattern, User growth, Depth, Priority) replacing old 3-field format. Anti-laziness rule for "None" fields.
+- **Two-sided Counterfactual**: (a) action bias test + (b) source value test with explicit resolution rules. L1 insights not penalized for source-dependency.
+- **L1 attrition metric**: Structural check in Phase 5 output against completion bias. Zero attrition = red flag.
+- **Enhanced Reference Value Distillation**: 4-step gated process (Essence Extraction → Application Mapping → Conflict & Overlap Scan → Compression Draft) with ≤50-line budget, structured template, and Self-Critique Gate. Trigger expanded to include Phase 10 Final Report.
+- Test scenario S-10 (L1 insight passes Phase 3 filter).
+- 4 new pitfalls (#19-#22): L2 overconfidence, patterns dumping, L1 inflation, reference compression.
+- 3 new examples: L1 depth assessment, L1 full-journey, patterns category anti-pattern.
+- 3 new edge cases (pattern-only source, user-growth-only, mixed batch).
+
+### Changed
+
+- **Calibrated Acceptance Principle** replaces "Critical Acceptance": L2 filters confidently, L0/L1 passes forward for deeper evaluation, hard filters remain absolute.
+- **Completion bias awareness** note added to QC Sub-Procedure.
+- EXIT POINT 1 and 2 templates updated with L-level vocabulary and pattern/growth awareness.
+- Phase 4 output restructured into L0/L1/reference-value sections.
+- Phase 5 gains Reference-Value Candidates subsection.
+- Final Report template gains "Reference Value" line.
+- All counterfactual examples in examples.md updated to two-sided format.
+
 ## [v0.7.0] — 2026-03-23
 
 ### Added

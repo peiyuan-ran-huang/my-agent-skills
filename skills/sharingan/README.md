@@ -6,8 +6,8 @@
 
 # Sharingan: Self-Optimisation via External Resources / 写轮眼：外部资源自优化
 
-**Version**: v0.7.1
-**Last Updated**: 2026-03-23
+**Version**: v0.8.0
+**Last Updated**: 2026-03-26
 **Author**: Peiyuan (Ran) Huang, with (*significant*) assistance from Claude Code
 **Status**: Personal demo / 个人 demo
 
@@ -24,17 +24,21 @@ In *Naruto*, the Sharingan can instantly copy and absorb others' techniques. Thi
 A prompt-only skill (no code, no dependencies) that provides a structured 10-phase workflow for extracting insights from external resources and applying them to your Claude Code configuration. It includes:
 
 - **Dual EXIT POINTs** — normalises "no changes needed" as a legitimate outcome (Phase 3 and Phase 5), fighting the action bias that plagues AI agents
-- **13-category taxonomy** — classifies insights across skills, hooks, MCP, security, memory, and more
-- **Built-in QC** — inline quality checks requiring 2 consecutive passes (max 6 rounds) before changes are applied
-- **Reference Value Assessment** — even when no config changes are warranted, optionally captures long-term reference value from the source
+- **14-category taxonomy** — classifies insights across skills, hooks, MCP, security, memory, patterns, and more
+- **L0/L1/L2 Implementation Depth Assessment** — three-level depth evaluation replacing binary "already implemented" filter, with two-column comparison across Coverage/Depth/Quality dimensions
+- **Built-in QC** — inline quality checks with two-sided counterfactual, requiring 2 consecutive passes (max 6 rounds) before changes are applied
+- **Reference Value Assessment** — even when no config changes are warranted, optionally captures long-term reference value via 4-step gated distillation
+- **Non-config Insight Routing** — pattern-only and user-growth-only insights follow dedicated evaluation paths
 - **Security preflight** — refuses to read credentials, flags prompt injection attempts
 
 一个纯 prompt 的 skill（无代码、无依赖），提供结构化的 10 阶段工作流，从外部资源中提取洞察并应用到你的 Claude Code 配置中。包含：
 
 - **双 EXIT POINT** — 将"无需修改"正常化为合理结果（Phase 3 和 Phase 5），对抗 AI agent 的行动偏差
-- **13 类分类体系** — 涵盖技能、hooks、MCP、安全、记忆等
-- **内置 QC** — 行内质量检查，需连续 2 轮通过（最多 6 轮）才能执行修改
-- **参考价值评估** — 即使不需要修改配置，也可选择性地从资源中提取长期参考价值
+- **14 类分类体系** — 涵盖技能、hooks、MCP、安全、记忆、模式等
+- **L0/L1/L2 实现深度评估** — 三级深度评估替代二值"已实现"过滤，通过覆盖度/深度/质量三维二列对比
+- **内置 QC** — 含两侧反事实测试的行内质量检查，需连续 2 轮通过（最多 6 轮）才能执行修改
+- **参考价值评估** — 即使不需要修改配置，也通过 4 步门控蒸馏从资源中提取长期参考价值
+- **非配置洞察路由** — 模式和用户成长类洞察走专用评估路径
 - **安全预检** — 拒绝读取凭据，标记 prompt 注入尝试
 
 ## Disclaimers / 免责声明
@@ -80,7 +84,7 @@ Source can be: GitHub URL, any URL, local file/directory, or an image.
 
 ```
 Phase 1  Deep Reading       — fetch and thoroughly read the source
-Phase 2  Classification     — map to 13-category taxonomy
+Phase 2  Classification     — map to 14-category taxonomy
 Phase 3  Extract Insights   — structured extraction + filtering
          ╰─ EXIT POINT 1: all insights filtered → "No applicable targets"
 Phase 4  Self-Review        — challenge own extractions
@@ -98,7 +102,7 @@ Phase 10 Safety Verification — final safety check (max 4 rounds)
 | File | Language | Role |
 |------|----------|------|
 | `SKILL.md` | English | Core workflow (loaded by Claude Code) |
-| `taxonomy.md` | English | 13-category classification taxonomy |
+| `taxonomy.md` | English | 14-category classification taxonomy |
 | `examples.md` | EN/ZH | Output calibration: good patterns + anti-patterns |
 | `pitfalls.md` | EN/ZH | Pitfall checklist (starter entries; extend with your own) |
 | `references/` | English | Parameter parsing, source handling, edge cases, test scenarios |

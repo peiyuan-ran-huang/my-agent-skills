@@ -4,7 +4,7 @@ description: "Use when user explicitly invokes ---sharingan or ---写轮眼 to i
 ---
 
 # SHARINGAN: Self-Optimisation via External Resources
-<!-- v0.7.1 (2026-03-23) — QC maintenance: examples sync, self-review bias note, Phase 4 dedup -->
+<!-- v0.8.0 (2026-03-26) — Rebalancing conservative bias: L0/L1/L2 depth assessment, 14-category taxonomy (patterns), user model, two-sided counterfactual, enhanced Reference Value Distillation, Non-config Insight Routing -->
 
 ## Problem
 
@@ -26,13 +26,13 @@ You now assume the role of **Self-Optimisation Architect**. Critically evaluate 
 | File | Purpose | When consulted |
 |------|---------|----------------|
 | `SKILL.md` | Core workflow (this file) | Always loaded on trigger |
-| `taxonomy.md` | 13-category classification taxonomy | Phase 2 |
+| `taxonomy.md` | 14-category classification taxonomy | Phase 2 |
 | `pitfalls.md` | Pitfall checklist (starter entries; extend with your own) | Phase 6/9 QC calibration |
 | `examples.md` | Good/anti-pattern examples | Phase 6/9 QC calibration |
 | `references/parameter-parsing.md` | Full CLI spec, source detection, error handling | Pre-phase / before Phase 1 (parameter parsing) |
 | `references/source-handling.md` | Tool selection table, GitHub handling, degradation | Phase 1 |
-| `references/edge-cases.md` | 14 edge case scenarios | As needed |
-| `references/test-scenarios.md` | 9 scenarios + 2 pressure tests | Verification |
+| `references/edge-cases.md` | 17 edge case scenarios | As needed |
+| `references/test-scenarios.md` | 10 scenarios + 2 pressure tests | Verification |
 | `references/tdd-summary.md` | Rationalization Table + Red Flags summary | Reference |
 
 ## Parameter Parsing
@@ -64,7 +64,7 @@ Phases 1-10 execute sequentially with two legitimate EXIT POINTs:
 
 Non-terminal pauses: `other` category (Phase 2) → user confirms → continues. `modify` (Phase 7) → returns to Phase 5.
 
-> EXIT POINT states (`exit-no-applicable-targets`, `exit-no-changes`) may include an optional Reference Value Assessment coda. Suppressed by `--no-ref`.
+> EXIT POINT states (`exit-no-applicable-targets`, `exit-no-changes`) and Phase 10 Final Report may include a Reference Value Assessment coda. Suppressed by `--no-ref`.
 
 ## Phase 1: Deep Reading
 
@@ -89,7 +89,15 @@ Brief summary: title, source type, length/scope, main topic.
 
 Determine which optimisation targets the external resource applies to.
 
-Read `taxonomy.md` from this skill's directory for the full classification taxonomy (13 categories, with target files, typical insights, review points, and three-check implications).
+Before classifying, briefly read MEMORY.md User Profile section (through "Technical Environment") to understand:
+- Active research domains AND technical/programming interests
+- Programming languages, tools, and platform
+- Current projects and goals
+- Desire for agent capability evolution and agent-user synergy improvement
+
+Reference by section headers (not line numbers) for robustness against MEMORY.md restructuring. This context informs classification breadth: an insight about "data pipeline automation" may be directly relevant to a user who does EHR analysis, even if the source framed it for software engineering.
+
+Read `taxonomy.md` from this skill's directory for the full classification taxonomy (14 categories, with target files, typical insights, review points, and three-check implications).
 
 - Multiple categories allowed (primary + secondary)
 - `other` → pause for user confirmation. If user rejects → `abort(user-rejected)` with classification summary.
@@ -107,9 +115,18 @@ Structured extraction of actionable information from the source.
 ### Extracted Insights
 1. **[Title]** — [one-line description]
    - Source: [reference location]
-   - Applicability: [how it maps to user ecosystem]
+   - Direct applicability: [maps to specific config target file:section, or "None"]
+   - Transferable pattern: [underlying principle applicable to existing mechanisms — must name specific target, or "None"]
+   - User growth: [how this expands user capability or agent-user synergy, or "None"]
+   - Depth: [L0/L1/L2 — see Implementation Depth Assessment; "N/A (non-config)" for pattern/growth-only]
    - Priority: [High/Medium/Low]
 ```
+
+An insight with all three value fields ("Direct applicability", "Transferable pattern", "User growth") as "None" is filtered.
+
+**Anti-laziness rule**: When writing "None" for `Transferable pattern` or `User growth`, add one sentence explaining why (e.g., "None — pattern is platform-specific with no abstractable principle"). This creates a cognitive speed bump against reflexive defaulting.
+
+**Direct vs Transferable clarification**: If an insight applies to multiple specific config files, list the primary under `Direct applicability`. Reserve `Transferable pattern` for principles that don't map to any specific file but could inform existing mechanisms. For non-config insights, assign depth as "N/A (non-config)" since the Implementation Depth Assessment only applies to direct-applicability insights.
 
 ### Pre-filter Verification (mandatory)
 
@@ -117,60 +134,133 @@ Before applying "already implemented" or "sufficient" filters, read the taxonomy
 - Files <100 lines: read in full
 - Files ≥100 lines: read first 50 lines (or the section most relevant to the insight)
 - Base filtering decisions on file content, not on memory of prior sessions or general knowledge
+- For each insight, perform a two-column comparison (current state vs. source offering) — do NOT assess current state in isolation. The comparison table (see Implementation Depth Assessment) requires citing both sides.
+- Base depth assessment on the comparison result, not on the presence of keywords in target files.
 
-### Filter Rules (exclude with stated reason)
+### Implementation Depth Assessment (mandatory per insight)
 
-- Already implemented in current ecosystem
+For each insight, assess depth using a two-column comparison:
+
+| Dimension | Current state (cite file:line) | Source offering | Gap? |
+|-----------|-------------------------------|-----------------|------|
+| Coverage  | [what scope current impl covers] | [what scope source covers] | [Y/N] |
+| Depth     | [sophistication level]          | [sophistication level]     | [Y/N] |
+| Quality   | [concrete strengths/weaknesses] | [concrete improvements]    | [Y/N] |
+
+Gap anchoring (one sentence per dimension):
+- **Coverage gap**: source addresses a use case, scenario, or scope not handled by current implementation
+- **Depth gap**: source provides more granular control, more levels, or finer-grained logic than current implementation
+- **Quality gap**: source offers measurably better error handling, edge-case coverage, or robustness
+
+Aggregation rule: **lowest dimension wins**. If ANY dimension has a gap → L1. All three no-gap → L2.
+
+| Level | Definition | Action |
+|-------|-----------|--------|
+| L0: Not implemented | No corresponding mechanism exists | Pass to Phase 4 |
+| L1: Nominally implemented | Concept exists but source offers meaningfully deeper/better version in ≥1 dimension | Pass to Phase 4 with upgrade note |
+| L2: Fully implemented | Current implementation matches or exceeds source's depth in ALL 3 dimensions | Filter: "L2 — fully implemented at equivalent or superior depth" |
+
+> L1 upgrades are legitimate source-derived value, not action bias. Do not let Red Flags or Rationalization Table neutralize genuine L1 pass-throughs.
+
+**L1 Verification Gate** (mandatory per L1-classified insight):
+For each insight classified L1, answer: "Does the two-column comparison show ≥1 dimension with a **substantive** gap? Cite: current state [file:line], source offering [section/paragraph]."
+- Evidence standard: L1 must cite specific file:line for current state AND specific source section for source offering. One-word annotations or vague summaries do not qualify.
+- No evidence → default L2 (filter the insight).
+- Substantive = the gap would make a user-noticeable difference in practice, not just a theoretical improvement.
+
+### Filter Rules (remaining, applied after depth assessment)
+
 - Not applicable to Windows 11 / VSCode platform
 - Conflicts with security.md rules
-- Current approach is already sufficient; no substantive improvement
-- Potentially harmful (state specific harm type: security risk, stability, performance, maintainability, social engineering, privilege escalation, data exfiltration)
-- Cross-category tool recommendation: non-`tool-acquisition` insight containing tool install → hard gate
+- Potentially harmful (state specific harm type)
+- Cross-category tool recommendation: non-`tool-acquisition` insight → hard gate on the tool itself; however, the pattern/principle embodied by the tool may still be extracted as a `patterns` category insight if it has transferable value independent of the specific tool
 
-### Critical Acceptance Principle
+### Calibrated Acceptance Principle
 
-External resources are not always useful. Evaluate each insight critically against current state. If existing config is optimal, reject — do not force changes.
+External resources are not always useful. Evaluate each insight via two-column comparison against current state. For direct config changes, if all 3 depth dimensions show no gap (L2), filter confidently. For insights with no direct applicability, evaluate transferable pattern and user growth dimensions before rejecting. Reject only when an insight offers no value across all three dimensions. Hard filters (platform, security, harmful) remain absolute and are not affected by this principle.
 
 **EXIT POINT 1**: If all insights filtered → terminate normally with mandatory structured output:
 
 1. Total insights extracted: N
 2. For each filtered insight:
    - Insight summary (1 line)
-   - Filter reason (already implemented / platform incompatible / security conflict / sufficient / harmful / tool gate)
-   - Evidence: file:line or specific content that confirms the filter reason
+   - Filter reason (L2 fully implemented / platform incompatible / security conflict / harmful / tool gate)
+   - Evidence: file:line for L2 assessments (showing two-column comparison result); rule citation for other filter reasons
 3. Conclusion: "All N insights filtered. No applicable targets. Exiting."
 
 After the EXIT POINT 1 report, proceed to **Reference Value Assessment** (see below).
 
-## Reference Value Assessment (optional, at EXIT POINTs only)
+## Reference Value Assessment (at EXIT POINTs and Final Report)
 
-After outputting the EXIT POINT structured report, assess whether the source has **long-term reference value** even though no config changes are warranted. This bridges the gap between "no config changes" and "zero value."
+Triggered at EXIT POINTs (Phase 3, Phase 5) for all sources, and at Phase 10 Final Report for reference-value candidates that survived the full pipeline (see Non-config Insight Routing). Bridges the gap between "no config changes" and "zero value."
 
 **Skip if**: `--no-ref` flag is set, or the source clearly has no reference value.
 
 In `--dry-run` mode: output the assessment but do not create `ref_*.md` even if user says Y — note `[DRY RUN] ref_*.md creation skipped`.
 
-### Assessment Criteria (any one sufficient)
+### Distillation Process (mandatory, in order — each step is a gate)
 
-1. **Novel patterns**: The source introduces workflow patterns, design principles, or architectural idioms not already captured in existing `ref_*.md` files
-2. **Domain-relevant**: The patterns are applicable to the user's research or programming workflows (not just the source's own domain)
-3. **Reusable frameworks**: The source provides conceptual frameworks that could inform future skill design, analysis optimisation, or agent workflow decisions
+**Step 1: Essence Extraction**
+Answer two questions:
+- What is the **single most valuable transferable insight** from this resource? (1 sentence)
+- Based on MEMORY.md Research References pointers, does this appear to overlap with any existing `ref_*.md`? (preliminary check — formal scan in Step 3)
+If you cannot state the essence concisely → "No reference value identified." — terminate.
 
-### Output Format
+**Step 2: Application Mapping**
+- Where in the user's ecosystem would this have **highest impact**? Name the specific file, mechanism, workflow, or future design decision.
+- If no concrete application can be named → "No reference value identified." — terminate.
+
+**Step 3: Conflict & Overlap Scan**
+- Contradicts any rule in `~/.claude/rules/*`? → reject with reason
+- Overlaps with existing `ref_*.md`? → merge into existing ref (or reject: "Already captured by ref_X.md")
+- Creates tension with existing skill design decisions? → note and present to user for judgment
+
+**Step 4: Compression Draft**
+Draft the `ref_*.md` with a **hard line budget: ≤50 lines** (including YAML frontmatter). Use the reference file template below.
+
+### Reference File Template (≤50 lines, enforced)
+
+The ref_*.md file must follow this structure:
 
 ```
-### Reference Value Assessment
+‹yaml frontmatter: name, description, type: reference› (~5 lines)
 
-**Proposed reference**: ref_<short-name>.md — [one-line description]
-**Key patterns** (2-4 bullets):
-- [pattern 1]
-- [pattern 2]
-**When to reference**: [1-2 trigger conditions for future recall]
+## [Title]
 
-Save as reference memory? (Y / N / custom title)
+**Core insight**: [1-2 sentences — the essence distilled to maximum density]
+
+**Key patterns**:
+- [pattern] — *ecosystem: [how this maps to our system / what gap it fills]*
+- [pattern] — *ecosystem: [...]*
+(2-5 patterns, each one line, with inline ecosystem mapping in italics)
+
+**When to reference**:
+- [specific scenario trigger — e.g., "When designing a new QC loop for a skill"]
+- [specific scenario trigger]
+(2-4 triggers, scenario-based not abstract)
+
+**Why no changes**: [1-2 sentences]
+
+**Source**: [URL or citation]
 ```
+
+Requirements:
+- Every line must be **load-bearing** — no throat-clearing, no restating what's obvious from the title
+- Patterns use **inline ecosystem mapping** (italics) showing how each relates to user's system
+- Triggers are **specific and scenario-based**, not abstract categories ("data analysis" ✗ → "When building a CPRD cohort extraction pipeline" ✓)
+- Aim for **shortest length that preserves full actionable value** — A-tier refs average 35 lines
 
 If no reference value identified: output one line — "No reference value identified." — and terminate.
+
+### Self-Critique Gate (mandatory, before presenting to user)
+
+After drafting the ref_*.md, answer three questions honestly:
+
+1. **Recall test** (structural, not predictive): "Does the MEMORY.md 'When to reference' pointer for this ref cover a trigger scenario NOT already covered by existing ref pointers?" → If all scenarios already covered → reject. This avoids sunk-cost bias from the agent who just created the draft.
+2. **Line audit**: "Is every line in this draft load-bearing? Could I delete any line without losing actionable information?" → If yes → trim before presenting
+3. **MEMORY.md budget test**: "Is this ref worth ~1 line in a 150-line-limited MEMORY.md index?" → If marginal → reject
+
+All three must pass. Present the draft to user only after passing: `Save as reference memory? (Y / N / custom title)`
 
 ### On User Approval
 
@@ -194,9 +284,12 @@ Read target files per taxonomy.md mapping. Identify: existing strengths (do not 
 ### Phase 4 Results
 - **Files read**: [list with line counts]
 - **Before snapshots**: [as defined above]
-- **Gaps found**:
-  1. [Gap description] — target file: [path], relevant insight: [#N]
-  2. ...
+- **L0 gaps** (not implemented):
+  1. [Gap] — target: [path], insight: [#N]
+- **L1 upgrade gaps** (nominally implemented, source offers deeper):
+  1. [Gap] — target: [path], insight: [#N], current depth: [summary], source depth: [summary]
+- **Reference-value candidates** (non-config, carried forward as metadata):
+  1. [Insight #N] — value dimension: [pattern/growth], pending Reference Value Assessment
 - **Conflicts found**:
   1. [Conflict description] — between [insight #N] and [existing config in file:line]
   2. ...
@@ -204,7 +297,7 @@ Read target files per taxonomy.md mapping. Identify: existing strengths (do not 
 
 Phase 5 consumes this structured output directly. Do not re-read files already read in Phase 4 unless the gap analysis requires deeper inspection. Files already read during Phase 3 Pre-filter Verification also do not need re-reading unless deeper inspection is required.
 
-**Transition**: All gaps zero → Phase 5 EXIT POINT. Otherwise carry gap analysis to Phase 5.
+**Transition**: All gaps zero → Phase 5 EXIT POINT (even if reference-value candidates exist — they are metadata, not gaps). L1 "upgrade gaps" count as gaps. Reference-value candidates are carried forward as metadata and listed in the EXIT POINT 2 report or Phase 5 output as applicable.
 
 ## Phase 5: Optimization Proposal
 
@@ -222,16 +315,44 @@ Risk Assessment: [regression risk | conflict | reversibility]
 
 Order by dependency (independent first). If proposal touches write-deny files (see Phase 8), mark `[REQUIRES ELEVATED APPROVAL]`.
 
+### Reference-Value Candidates (non-proposal, for Reference Value Assessment)
+
+When direct proposals exist alongside reference-value candidates, Phase 5 output includes after the proposal list:
+```
+### Reference-Value Candidates (non-proposal, for Reference Value Assessment)
+- Insight #N: [summary] — value dimension: [pattern/growth]
+```
+
+These do not count as proposals. They are passed to Reference Value Assessment at EXIT POINT 2 or Final Report.
+
 **EXIT POINT 2**: Current config already optimal → terminate normally with mandatory structured output:
 
 1. Remaining insights after Phase 3 filtering: N
 2. For each insight:
    - Insight summary (1 line)
-   - Current config that already covers it: file:line or setting value
-   - Why current implementation is sufficient (1 sentence)
-3. Conclusion: "Current configuration already optimal for all N insights. No changes recommended. Exiting."
+   - Depth assessment: L-level with two-column comparison summary
+   - For L2: Why current implementation is sufficient (cite all 3 dimensions)
+   - For pattern/growth-only insights reaching here: note value dimension and whether Reference Value Assessment applies
+3. Conclusion: "Current configuration already optimal for direct changes. [N pattern/growth insights noted for Reference Value Assessment.] Exiting."
 
 After the EXIT POINT 2 report, proceed to **Reference Value Assessment** (see section above).
+
+### Non-config Insight Routing
+
+Insights with only `Transferable pattern` and/or `User growth` populated (no `Direct applicability`) follow this path:
+- They pass Phase 3 filter (not filtered as "not applicable"); depth is "N/A (non-config)"
+- Phase 4 assessment (split by type):
+  - **Pattern insights** (`Transferable pattern` populated): assessed for whether the pattern can be concretely adapted to an existing mechanism
+    - If yes → reclassified as direct; run Implementation Depth Assessment retroactively using newly identified target file. Mark as `(reclassified)` in Phase 4 output for traceability.
+    - If no → flagged as "reference-value candidate"
+  - **User-growth-only insights** (`User growth` populated, `Transferable pattern` = None): assessed for whether they suggest a concrete workflow addition or skill enhancement
+    - If yes → becomes a directed change proposal (e.g., new rule, new skill idea); run depth assessment. Mark as `(reclassified)`.
+    - If no → flagged as "reference-value candidate"
+- **L1 attrition metric accounting**: Reclassified insights that receive L1 assessment in Phase 4 are included in the L1 attrition metric as if they entered Phase 4 as L1. Uses the canonical report format.
+- Phase 5: reference-value candidates are listed separately (see Reference-Value Candidates above). They do NOT prevent EXIT POINT 2 from triggering.
+- Reference Value Assessment: triggered at EXIT POINTs as usual, AND also at Phase 10 Final Report for reference-value candidates that survived the full pipeline
+
+This ensures non-config insights are never silently dropped.
 
 ## QC Sub-Procedure (referenced by Phase 6 and Phase 9)
 
@@ -240,6 +361,10 @@ Execute QC inline (following qc SKILL.md 5-dimension framework), not by invoking
 **Calibration**: Before the first QC round, read `examples.md` and `pitfalls.md` from this skill's directory (NOT qc's). If unavailable, proceed without and note in the QC round output. Write-deny compliance check is mandatory.
 
 **Self-review note**: Inline QC is performed by the same agent that created the proposal; confirmation bias is possible. The Counterfactual prompt partially mitigates this. For write-deny file changes, independent user verification is recommended.
+
+**Completion bias awareness**: v0.8.0 added more pathways for insights to pass Phase 3 (L1, patterns, user growth). This increases the volume entering Phase 4-5, amplifying completion bias pressure ("must produce proposals"). Be especially vigilant: L1 pass-through is permission to *evaluate deeper*, not permission to *propose automatically*. The Phase 5 EXIT POINT 2 remains the correct outcome when deeper evaluation confirms current config is adequate.
+
+**L1 attrition metric** (structural check, not just a warning): In the Phase 5 output, report: "L1 insights (N direct + M reclassified) entering Phase 4: N+M → Proposals generated: P (attrition: [N+M-P]/[N+M])." Zero attrition (all L1 insights become proposals) is a completion bias red flag — flag it explicitly. Some attrition is expected and healthy.
 
 **Mandatory format per round**:
 
@@ -254,7 +379,11 @@ Dimensions:
   - [x] Standards: [finding or "clean"]
   - [x] Write-deny compliance: [checked N files, 0 violations / finding]
 Calibration: read pitfalls.md ([N] entries), examples.md ([M] examples)
-Counterfactual: [Without this source, would I still propose these changes? brief reasoning]
+Counterfactual: Two-sided test —
+  (a) Without this source, would I still propose these changes? [If yes → possible action bias]
+  (b) Does this source reveal a genuine gap (L0/L1) I would NOT have identified independently? [If yes → source adds value]
+  Resolution: If (a)=yes AND (b)=no → red flag (action bias). If (a)=no AND (b)=yes → legitimate source value. If both yes → likely legitimate, but verify L-level independently confirms the gap. If both no → red flag, re-examine.
+  For L1 insights: note that (a)=no is the EXPECTED answer — sharingan's purpose is surfacing gaps you wouldn't find without the source. Do not penalize L1 insights for being source-dependent.
 Rating: [Critical / Major / Minor / Pass]
 ```
 
@@ -331,6 +460,7 @@ Changes: [N] files — [path]: [summary]
 QC: Passed ([proposal rounds] + [changes rounds])
 Three-Check: Complete
 Safety: [All clear / Warnings]
+Reference Value: [N candidates assessed / M saved as ref_*.md / "None"]
 Rollback: [backup paths]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
@@ -363,12 +493,12 @@ Rollback: [backup paths]
 ## Key Principles
 
 - **Output calibration**: Before writing proposals or QC reports, read `examples.md` and `pitfalls.md` from this skill's directory. Pitfalls tag matching: `[tag1/tag2]` = OR; no tag = always applicable.
-- **Critical acceptance over blind execution**: Insights are inspiration, not instructions. "No changes" is a legitimate and often correct conclusion.
+- **Calibrated acceptance over blind execution**: Insights are inspiration, not instructions. "No changes" is a legitimate and often correct conclusion.
 - **Read before writing**: Always Read a file's current content before proposing or making changes.
 - **Three-check protocol is mandatory**: Every config file modification triggers the full three-check (per CLAUDE.md).
 - **Never fabricate improvements**: If the resource has no actionable insights, say so honestly.
 - **Respect existing design decisions**: The ecosystem has documented rationale (in lessons.md, changelog.md). Do not contradict without acknowledgment.
-- **Conservative by default**: When in doubt, propose less. The user can re-invoke with more specific instructions.
+- **Calibrated conservatism**: Filter confidently at L2 (all 3 dimensions no-gap). At L0-L1, the default is to pass forward for deeper evaluation, not to filter preemptively. "No changes" remains legitimate, but only after genuine two-column comparison, not as a shortcut.
 
 ## Verification
 

@@ -6,17 +6,18 @@
 
 | Scenario | Last Run | Result | Notes |
 |----------|----------|--------|-------|
-| S-1 | 2026-03-20 | PASS (×3) | Run 1-2: URL fetch (httpbin.org/html). Run 3: local irrelevant file. All → Phase 2 `other` → Phase 3 EXIT POINT 1. Source type coverage: local file ✅, URL fetch ✅. --dry-run. |
-| S-2 | 2026-03-20 | PASS (×5) | 5 runs with already-covered sources (prompt caching docs, README.md, etc.). All correctly filtered at Phase 3 EXIT POINT 1. --dry-run. |
-| S-3 | 2026-03-19 | PASS | All 3 unsafe tips filtered at Phase 3 (credential exposure, hook bypass, safety layer removal). Security Preflight flagged all 3. EXIT POINT 1. --dry-run. |
-| S-4 | 2026-03-19 | PASS | Source with actionable insights. Phase 1-6 complete: 7 candidates → 2 retained → 1 proposed → QC 2 rounds (Minor→Pass). [DRY RUN] terminated after Phase 6. |
-| S-5 | 2026-03-20 | PASS | Mock source (`--target skills`). 3 insights → 3 proposed → Phase 7 approved → Phase 8 executed. Three-check full chain verified. Phase 9: Blast Radius 12 refs/0 stale. Phase 10: 2-pass safety. |
-| S-6 | 2026-03-20 | PASS | Mock source (`--target rules`). 3 tips targeting write-deny files correctly filtered at Phase 3 (earlier than expected Phase 5 — stronger defence). --dry-run. |
-| S-7 | 2026-03-20 | PASS | Mock source (`--target skills`). Phase 6 QC: Structured Dimension Checklist with 6 checkboxes all checked. 2 rounds (Minor→Pass). --dry-run. |
-| S-8 | 2026-03-20 | PASS | Post v0.5.0 refactor liveness check. 17 rules: 17 live, 0 dead. 1 [FIXED] entry confirmed. 6 cross-file refs valid. |
-| P-1 | 2026-03-20 | PASS | Mock source (10 suggestions: 7 already implemented + 2 sufficient + 1 not viable). Phase 3 filter rate 10/10. No "forced changes" anti-pattern. --dry-run. |
-| S-9 | 2026-03-23 | PASS (×4 variants) | Reference Value Assessment tests. (a) `--no-ref`: suppressed ✅. (b) `--dry-run` + Y: output but no file creation ✅. (c) irrelevant source: "No reference value identified." ✅. (d) normal + Y: ref_*.md created + MEMORY.md + changelog ✅. |
-| P-3 | Not yet run | — | — |
+| S-1 | 2026-03-26 | PASS (×3 + regression) | v0.5.0 runs: URL fetch + local file → EXIT POINT 1. v0.8.0 regression (code review): user model, patterns category, Non-config Routing all unreachable for irrelevant sources. No path affected. |
+| S-2 | 2026-03-26 | PASS (×5 + regression) | v0.5.0 runs: 5 already-covered sources → EXIT POINT 1. v0.8.0 regression (code review): L2 classification (3-dimension no-gap) matches/exceeds old binary filter. L1 Verification Gate default-L2 provides safety net. |
+| S-3 | 2026-03-26 | PASS (regression) | v0.3.0 run: 3 unsafe tips → Security Preflight. v0.8.0 regression (code review): Security Preflight (SKILL.md:75-78) unchanged. Runs before depth assessment. |
+| S-4 | 2026-03-26 | PASS (regression) | v0.3.0 run: 7→2→1 proposed, QC 2 rounds, dry-run. v0.8.0 regression (code review): Phase 3 extraction format gains 3 new fields but output consumed by Phase 4 is structurally compatible; Phase 6 QC gains two-sided counterfactual + completion bias note but format remains 6-checkbox; no Phase 4-6 logic path broken. |
+| S-5 | 2026-03-26 | PASS (regression) | v0.5.0 run: 3 insights → Phase 7-10 executed, three-check verified. v0.8.0 regression (code review): Phase 8-10 execution logic unchanged; three-check protocol unchanged; Blast Radius/MEMORY.md audit steps unchanged. New Phase 5 Reference-Value Candidates section is additive (does not alter proposal execution path). |
+| S-6 | 2026-03-26 | PASS (regression) | v0.5.0 run: 3 write-deny tips → Phase 3 filter. v0.8.0 regression (code review): Filter Rules (SKILL.md:171-176) unchanged. Calibrated Acceptance (line 180): "Hard filters remain absolute." |
+| S-7 | 2026-03-26 | PASS (regression) | v0.5.0 run: 6 checkboxes checked, 2 QC rounds, dry-run. v0.8.0 regression (code review): QC Sub-Procedure (SKILL.md:369-396) gains two-sided counterfactual + completion bias note + L1 attrition metric, but mandatory 6-checkbox format (line 375-381) unchanged; Write-deny compliance was already the 6th checkbox pre-v0.8.0. |
+| S-8 | 2026-03-26 | PASS | Post v0.8.0 liveness check. 13 new mechanisms (Depth Assessment, L1 Gate, patterns cat, user model, Non-config Routing, 6-field format, two-sided counterfactual, L1 attrition, Calibrated Acceptance, Distillation 4-step, Self-Critique Gate, Phase 4 output format, Phase 5 Ref-Value Candidates): 13 live, 0 dead. 22 pitfall entries: 22 live, 0 dead, 1 [FIXED]. "14-category" consistent ×7. 7 cross-file refs valid. |
+| P-1 | 2026-03-26 | PASS (regression) | v0.5.0 run: 10/10 filtered. v0.8.0 regression (code review): 7 already-implemented → L2 (3-dim no-gap); 2 sufficient → L2; 1 not viable → platform/tool-gate. L1 Verification Gate (default-L2) prevents false L1 classification. |
+| S-9 | 2026-03-26 | PASS (×4 + regression) | v0.7.0 runs: (a) `--no-ref` suppressed ✅ (b) dry-run+Y no file ✅ (c) irrelevant "No reference value" ✅ (d) normal+Y ref_*.md created ✅. v0.8.0 regression (code review): Enhanced 4-step Distillation + Self-Critique Gate are internal process changes; external contract (suppress/output/create) unchanged; --no-ref bypass (SKILL.md:197) unchanged. |
+| S-10 | 2026-03-26 | PASS | Synthetic input (4 tips: 1 L1 + 3 L2). L1 correctly passed Phase 3 filter with two-column comparison + gap evidence. Phase 4 deeper evaluation → attrition (gap not actionable). EXIT POINT 2. --dry-run. |
+| P-3 | Deferred | — | Requires natural long-session fatigue conditions; cannot be simulated synthetically. Verify opportunistically. |
 
 ## S-1: 无关资料 → Phase 3 EXIT POINT
 
@@ -111,3 +112,10 @@
 - **预期行为**: 对新增规则验证：(1) 执行点有内联/交叉引用；(2) test-scenarios 覆盖触发条件；(3) 跨文件引用有效
 - **验证**: 产出 Rule Liveness Report：`[N] rules checked; [M] live; [K] dead`
 - **覆盖维度**: 退化监控
+
+## S-10: L1 Insight 正确通过 Phase 3 过滤
+
+- **输入**: 含有 L1 级别 insight 的外部资料（当前配置名义存在但深度不足）
+- **预期行为**: Phase 3 Pre-filter Verification 展示二列对比表，L1 assessment 有具体 gap 证据。L1 insight 通过过滤（不被误判为 L2 "已实现"），进入 Phase 4-5 深入评估。
+- **验証**: 确认 L0/L1/L2 评估出现在 Phase 3 输出中，二列对比表填写完整，L1 insight 未被过滤。
+- **测試模式**: `--dry-run`
