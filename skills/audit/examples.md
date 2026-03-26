@@ -5,8 +5,8 @@ This file is for output calibration and maintenance training.
 It is **not** a canonical rule file.
 
 - Final report structure is defined by `templates/report-template.md`.
-- Merge behavior is defined by `references/phase-2-merge.md`.
-- Failure and degradation behavior is defined by `references/degradation-and-limitations.md`.
+- Merge behaviour is defined by `references/phase-2-merge.md`.
+- Failure and degradation behaviour is defined by `references/degradation-and-limitations.md`.
 
 Use this file selectively when calibrating output quality or reviewing whether a change has made the audit style too loose or too aggressive.
 

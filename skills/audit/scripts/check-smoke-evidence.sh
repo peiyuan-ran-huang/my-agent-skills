@@ -21,7 +21,7 @@ Usage:
   check-smoke-evidence.sh <SMOKE_ROOT> [<SMOKE_ROOT> ...]
 
 Each SMOKE_ROOT should point to an archived smoke-evidence directory whose markdown
-report artifacts can be revalidated with scripts/validate-report.sh. Discovery prefers
+report artefacts can be revalidated with scripts/validate-report.sh. Discovery prefers
 markdown files under any `reports/` subtree; if none exist, it falls back to root-level
 `*.md` files.
 EOF

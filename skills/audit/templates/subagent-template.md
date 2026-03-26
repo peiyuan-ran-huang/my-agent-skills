@@ -2,7 +2,7 @@
 
 # Subagent Template
 
-Normative source for subagent-side execution behavior in this `audit` skill.
+Normative source for subagent-side execution behaviour in this `audit` skill.
 
 The orchestrator populates this template for each big round and passes the populated text as the subagent `prompt`.
 
@@ -70,7 +70,7 @@ If new issues are unexpectedly discovered during a V round, do not record them i
 - Escalate severity by one level as a precaution:
   - Minor -> Major
   - Major -> Critical
-  - Critical -> Critical with note `Highest severity, prioritize`
+  - Critical -> Critical with note `Highest severity, prioritise`
 
 ### Stop Conditions
 

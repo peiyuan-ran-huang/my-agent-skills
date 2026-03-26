@@ -84,7 +84,7 @@ Read arguments after `---audit`.
 - Run `scripts/config-check.sh` in a bash environment where `jq` is available and `$HOME/.claude/settings.json` resolves to the active Claude profile
 - On Windows, prefer Git Bash; treat `C:/Windows/system32/bash.exe` or a WSL bash that cannot see the active `~/.claude` profile as incompatible and route that branch to the documented script-error fallback
 - detect and guide on configuration without modifying settings mid-session
-- analyze target, select themes, batch rounds, verify MCP availability, announce plan
+- analyse target, select themes, batch rounds, verify MCP availability, announce plan
 - do not wait for user confirmation after the planning announcement; proceed directly to Phase 1
 
 ### Phase 1
@@ -97,7 +97,7 @@ Read arguments after `---audit`.
 
 - Load `references/phase-2-merge.md`
 - Load `templates/report-template.md`
-- collect results, deduplicate, renumber, write final output, clean up, and summarize
+- collect results, deduplicate, renumber, write final output, clean up, and summarise
 
 ### Degradation
 

@@ -7,7 +7,7 @@ This file is the canonical source for final report structure in this `audit` ski
 This file defines report structure only.
 
 - It does not define report-language selection logic.
-- It does not define write policy or split-write behavior.
+- It does not define write policy or split-write behaviour.
 - It does not define failure or degradation handling.
 
 All sections, tables, and field labels below must appear in the final report unless a documented simplified all-zero path explicitly overrides the full structure.

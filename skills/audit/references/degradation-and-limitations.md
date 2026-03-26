@@ -100,7 +100,7 @@ If stdout exists but no `STATUS:` line is present:
 - display the raw script output
 - flag the anomaly
 
-The step-by-step planning behavior remains in `references/phase-0-planning.md`.
+The step-by-step planning behaviour remains in `references/phase-0-planning.md`.
 
 ## Context Pressure Guidance
 
@@ -119,12 +119,12 @@ Recommendation:
 
 ### Subagent Context Pressure
 
-Subagent-side D3-plus segmented reading behavior belongs to `templates/subagent-template.md`, not this file.
+Subagent-side D3-plus segmented reading behaviour belongs to `templates/subagent-template.md`, not this file.
 
 ## Known Platform Limitations
 
-- **Subagent model**: Explicitly specify `model: "opus"` in every Agent call. Default model inheritance behavior is inconsistently documented across sources: some tool definitions imply parent inheritance, while external documentation suggests a default Sonnet behavior. Explicit specification eliminates this ambiguity.
-- **Reasoning effort**: Phase 0.0 operates in detect-and-guide mode and does not apply configuration optimization at audit start. Users who want maximum reasoning depth should configure `settings.json` before launching the session. Whether subagents inherit effort settings has no official documentation guarantee. This is a platform limitation, not something the skill can fully control. Audit quality is primarily ensured through multi-round D/V cycles and tool-assisted verification, not solely through single-pass reasoning depth.
+- **Subagent model**: Explicitly specify `model: "opus"` in every Agent call. Default model inheritance behaviour is inconsistently documented across sources: some tool definitions imply parent inheritance, while external documentation suggests a default Sonnet behaviour. Explicit specification eliminates this ambiguity.
+- **Reasoning effort**: Phase 0.0 operates in detect-and-guide mode and does not apply configuration optimisation at audit start. Users who want maximum reasoning depth should configure `settings.json` before launching the session. Whether subagents inherit effort settings has no official documentation guarantee. This is a platform limitation, not something the skill can fully control. Audit quality is primarily ensured through multi-round D/V cycles and tool-assisted verification, not solely through single-pass reasoning depth.
 - **Environment variable fallback**: Not currently used. The Agent tool's `model: "opus"` parameter is the sole mechanism for specifying the subagent model. If future platform versions introduce environment-variable overrides, this section should be updated.
 - **settings.json hot-reload limitation**: `effortLevel`, `fastMode`, `alwaysThinkingEnabled`, and `model` are cached at session start. Modifications to `~/.claude/settings.json` after a session has started have no effect on the running session. The `ConfigChange` hook fires on file-system notification only, not runtime reload. Relevant issue trail: `#30726`, `#13532`, `#10623`, `#22679`. This is why Phase 0.0 uses detect-and-guide mode rather than auto-modification; to run the audit at optimal settings, modify the config file and restart the session before triggering `---audit`.
-- **Fresh-session quoted OneDrive paper-path limitation**: Some fresh sessions may still rewrite a quoted OneDrive-style paper target path to an existing prefix directory even after the mandatory helper-parser plus parse-preflight flow. Treat that as a live entry/adherence limitation, not as permission to weaken the quote-aware parsing contract. If this occurs, disclose it explicitly and mitigate by staging the paper at a no-space temp path or by materializing the content into `audit_object_temp.md`; do not claim the direct quoted-path branch succeeded.
+- **Fresh-session quoted OneDrive paper-path limitation**: Some fresh sessions may still rewrite a quoted OneDrive-style paper target path to an existing prefix directory even after the mandatory helper-parser plus parse-preflight flow. Treat that as a live entry/adherence limitation, not as permission to weaken the quote-aware parsing contract. If this occurs, disclose it explicitly and mitigate by staging the paper at a no-space temp path or by materialising the content into `audit_object_temp.md`; do not claim the direct quoted-path branch succeeded.

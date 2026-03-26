@@ -73,7 +73,7 @@ Severity: `Blocker`
 - [ ] [SKILL.md](SKILL.md) frontmatter still uses only `name` and `description`.
 - [ ] [SKILL.md](SKILL.md) description still describes when to use the skill, not how the workflow works.
 - [ ] [SKILL_ZH.md](SKILL_ZH.md) frontmatter still remains a valid entry-file frontmatter block rather than drifting into ad hoc metadata.
-- [ ] [SKILL_ZH.md](SKILL_ZH.md) still describes when to use the Chinese entry reference rather than summarizing workflow.
+- [ ] [SKILL_ZH.md](SKILL_ZH.md) still describes when to use the Chinese entry reference rather than summarising workflow.
 - [ ] [SKILL_ZH.md](SKILL_ZH.md) remains semantically aligned with [SKILL.md](SKILL.md) at the entry-protocol level.
 - [ ] The entry layer still clearly covers the supported target families:
   - `paper`
@@ -88,8 +88,8 @@ Severity: `Blocker`
   - `--out`
   - `--lang`
   - `--lite`
-  - no-target stop behavior
-  - no-argument recent-deliverable auto-target behavior
+  - no-target stop behaviour
+  - no-argument recent-deliverable auto-target behaviour
 - [ ] The entry layer still preserves ordered support-file loading as a section-scoped contract:
   - `Phase 0 -> references/phase-0-planning.md`
   - `Phase 1 -> references/phase-1-dispatch.md`, then `templates/subagent-template.md`
@@ -125,7 +125,7 @@ Severity: `Blocker`
   - verification is not quietly turned into a second discovery round
   - stop conditions remain intact
 - [ ] Cross-round deduplication and unified numbering remain intact.
-- [ ] No-MCP supplement behavior remains intact.
+- [ ] No-MCP supplement behaviour remains intact.
 - [ ] Sequential fallback remains explicit and is not presented as equivalent to normal isolated execution.
 - [ ] Merge interruption and partial-report salvage paths remain intact.
 - [ ] Final report writeback, readback, and cleanup rules remain intact.
@@ -142,7 +142,7 @@ Primary files to inspect:
 
 Severity: `Blocker`
 
-- [ ] [subagent-template.md](templates/subagent-template.md) remains the canonical source for subagent execution behavior.
+- [ ] [subagent-template.md](templates/subagent-template.md) remains the canonical source for subagent execution behaviour.
 - [ ] [report-template.md](templates/report-template.md) remains the canonical source for final report structure.
 - [ ] Entry files and README do not re-copy template details in a way that can drift.
 - [ ] The subagent template still contains the critical anchors:
@@ -182,7 +182,7 @@ Severity: `Blocker`
 - [ ] [config-optimize.sh](scripts/config-optimize.sh) still preserves backup-before-replace semantics and still exposes:
   - `OPTIMIZED:`
   - `BACKUP:`
-- [ ] [config-restore.sh](scripts/config-restore.sh) still preserves audit-field restore behavior and still exposes:
+- [ ] [config-restore.sh](scripts/config-restore.sh) still preserves audit-field restore behaviour and still exposes:
   - `RESTORED:`
   - `SKIP:`
 - [ ] [config-restore.sh](scripts/config-restore.sh) still retains its documented fallback branches for:
@@ -204,11 +204,11 @@ Severity: `Blocker`
 - [ ] [audit-self-check.sh](scripts/audit-self-check.sh) still guards the degraded-output anchor sections in [degradation-and-limitations.md](references/degradation-and-limitations.md):
   - `Partial Report Output Contract`
   - `Output Verification Warning Contract`
-- [ ] [audit-self-check.sh](scripts/audit-self-check.sh) still proves those `0/1/2` semantics behaviorally against:
+- [ ] [audit-self-check.sh](scripts/audit-self-check.sh) still proves those `0/1/2` semantics behaviourally against:
   - the live package root
   - an intentionally broken temp copy
   - an invocation error on a bad root
-- [ ] Those `0/1/2` behavioral proofs still run even when [audit-self-check.sh](scripts/audit-self-check.sh) is invoked with an explicit live `PACKAGE_ROOT` that canonicalizes to the script's own package root, not only when the argument is omitted.
+- [ ] Those `0/1/2` behavioural proofs still run even when [audit-self-check.sh](scripts/audit-self-check.sh) is invoked with an explicit live `PACKAGE_ROOT` that canonicalizes to the script's own package root, not only when the argument is omitted.
 - [ ] README prerequisite notes about Bash-compatible shell and `jq` still match script reality.
 - [ ] On Windows, the script layer still supports both `jq` and WinGet-style `jq.exe` discovery without weakening the active-profile Bash boundary.
 - [ ] The maintenance guardrail still protects the stricter Windows config-check boundary:
@@ -227,7 +227,7 @@ Severity: `Blocker`
   - dedicated data-analysis verification remains explicit
   - mixed-target issue-bearing-component routing remains explicit
   - dominant-type fallback for ambiguous mixed issues remains explicit
-- [ ] No prose file promises script behavior that the scripts no longer implement.
+- [ ] No prose file promises script behaviour that the scripts no longer implement.
 
 ## 7. Regression Fixture Coverage
 
@@ -279,7 +279,7 @@ Severity: `Blocker`
   - `goldens/partial-report.md` still encodes the degraded partial-report shape
   - `goldens/output-verification-warning.txt` still encodes the degraded readback-warning summary shape
   - `goldens/` and the harness scripts do not replace `test-scenarios.md` as the semantic regression fixture
-- [ ] Any new behavior added in this release has either:
+- [ ] Any new behaviour added in this release has either:
   - a matching new scenario or append-stable scenario-family extension in [test-scenarios.md](test-scenarios.md), or
   - a documented reason why a scenario was not added
 - [ ] The config-mismatch maintenance fixture still encodes the conditional helper-script boundary:
@@ -331,7 +331,7 @@ For each smoke test, record:
 - [ ] resolved mode / type
 - [ ] visible planning announcement or equivalent runtime evidence
 - [ ] whether any degradation or fallback path was entered
-- [ ] output artifact path or final in-thread output branch
+- [ ] output artefact path or final in-thread output branch
 
 For each smoke test, confirm with observable evidence:
 
@@ -339,7 +339,7 @@ For each smoke test, confirm with observable evidence:
 - [ ] the announced plan is consistent with the target family and any flags such as `--lite`, `--focus`, or `--lang`
 - [ ] any degradation, fallback, or tool-unavailable branch is explicitly disclosed rather than silently absorbed
 - [ ] the final output shape matches either the normal report scaffold or the documented all-zero / partial-output exception path
-- [ ] at least one concrete artifact from the run can be compared against the relevant canonical source or scenario fixture
+- [ ] at least one concrete artefact from the run can be compared against the relevant canonical source or scenario fixture
 - [ ] any archived markdown smoke report being cited as report-shape evidence still passes the current `scripts/validate-report.sh` shape validator, or is explicitly marked stale and excluded from the acceptance decision
 - [ ] archived non-markdown or in-thread smoke evidence is reviewed against its own canonical source or fixture rather than being misclassified as something `validate-report.sh` can prove
 - [ ] archived markdown smoke reports generated against an older report shape are not silently counted as current release evidence
@@ -363,8 +363,8 @@ Release only if all three answers are `yes`.
 
 - [ ] This change does not weaken `audit`'s heavyweight review capability.
 - [ ] This change does not blur or silently reassign canonical source ownership.
-- [ ] This change does not introduce behavior that lacks fixture coverage or an explicit smoke-test decision.
+- [ ] This change does not introduce behaviour that lacks fixture coverage or an explicit smoke-test decision.
 
 ## Reviewer Note
 
-If a change technically passes the checklist but still feels like it makes the skill softer, more ambiguous, or easier to mis-maintain, treat that as a real release concern. This package is meant to stay heavyweight and product-like, not merely “organized.”
+If a change technically passes the checklist but still feels like it makes the skill softer, more ambiguous, or easier to mis-maintain, treat that as a real release concern. This package is meant to stay heavyweight and product-like, not merely “organised.”

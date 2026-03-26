@@ -2,13 +2,13 @@
 
 # Phase 0 Planning Reference
 
-Normative source for detailed Phase 0 planning behavior in this `audit` skill.
+Normative source for detailed Phase 0 planning behaviour in this `audit` skill.
 
 The parent `SKILL.md` must still retain the corresponding hard summaries for:
 - trigger and when-to-use boundaries
 - parameter parsing semantics
 - configuration-detection guardrails
-- dispatch continuation behavior
+- dispatch continuation behaviour
 
 This file expands the planning details that were previously embedded in the monolithic `SKILL.md`.
 
@@ -27,7 +27,7 @@ The parent `SKILL.md` remains the canonical summary for argument semantics. This
 - The exact raw substring inside the quotes is the authoritative target path; do not rewrite it to a shorter existing prefix directory during readability diagnosis.
 - For any quoted target or output path containing spaces, emit a short parse preflight line before readability diagnosis so the preserved `type / target / out` values are visible.
 - If the parse preflight loses the exact quoted target substring, stop and re-parse instead of attempting fragment-level path repair.
-- If a fresh-session runtime still rewrites that quoted OneDrive-style paper path to an existing prefix directory after the mandatory helper plus parse-preflight flow, classify the branch as a documented platform limitation rather than a successful parse; mitigate by staging the paper at a no-space temp path or by materializing the content into `audit_object_temp.md`.
+- If a fresh-session runtime still rewrites that quoted OneDrive-style paper path to an existing prefix directory after the mandatory helper plus parse-preflight flow, classify the branch as a documented platform limitation rather than a successful parse; mitigate by staging the paper at a no-space temp path or by materialising the content into `audit_object_temp.md`.
 - If the target content is not already in context, read it before planning begins.
 - If no audit target can be identified, stop and prompt the user to specify one.
 
@@ -78,7 +78,7 @@ If the script output contains `MODEL_MISMATCH: true`, additionally append:
 ⚠️ Current model is not Opus. Subagents are explicitly set to `model: "opus"` and will use Opus regardless. The orchestrator model cannot be changed mid-session; restart the session if you need the orchestrator on Opus too.
 ```
 
-Fallback behavior:
+Fallback behaviour:
 - If the script exits non-zero, explain: `Configuration check script encountered an error; skipping configuration check.`
 - Continue to `0.1`.
 - `STATUS: MISMATCH` is not treated as an error path here; it should already have been handled above because that case exits successfully.
@@ -97,12 +97,12 @@ Read the audit target thoroughly, with at least one complete pass over the targe
 - when the target is multi-file or `mixed`, surface that file inventory explicitly in the `0.5` planning announcement instead of keeping it as internal planning state only
 
 Large file handling:
-- For very large targets (`code >500 lines` or `document >8000 words`), prioritize core sections first.
+- For very large targets (`code >500 lines` or `document >8000 words`), prioritise core sections first.
 - For papers: methods, results, discussion.
 - For code: main logic and key functions.
 - For plans: core steps and risks.
 - For data analyses: results narrative, figures/tables, and methods or data-source sections.
-- For mixed targets: prioritize the dominant-type core sections first, then the highest-risk supporting material from the secondary type.
+- For mixed targets: prioritise the dominant-type core sections first, then the highest-risk supporting material from the secondary type.
 - Read remaining sections as needed in later D rounds.
 - For excessively large files, use segmented reading with `offset` and `limit`.
 

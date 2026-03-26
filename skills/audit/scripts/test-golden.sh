@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Thin executable harness for committed AUDIT golden artifacts.
+# Thin executable harness for committed AUDIT golden artefacts.
 # Usage:
 #   test-golden.sh [PACKAGE_ROOT]
 # Exit codes:

@@ -128,7 +128,7 @@ Manual reviewer question:
 Manual reviewer question:
 
 - Does this change blur or silently reassign canonical source ownership?
-- Does this change introduce behavior that lacks fixture coverage or an explicit smoke-test decision?
+- Does this change introduce behaviour that lacks fixture coverage or an explicit smoke-test decision?
 
 ## Failure Severity Policy
 

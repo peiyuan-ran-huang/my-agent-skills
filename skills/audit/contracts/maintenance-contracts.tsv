@@ -12,16 +12,16 @@
 
 canonical_map_row	| `SKILL.md` | English orchestrator entry protocol |
 canonical_map_row	| `SKILL_ZH.md` | Chinese entry protocol with the same runtime boundaries |
-canonical_map_row	| `references/phase-0-planning.md` | Detailed planning behavior |
-canonical_map_row	| `references/phase-1-dispatch.md` | Dispatch and batch-management behavior |
-canonical_map_row	| `references/phase-2-merge.md` | Merge, dedup, writeout, cleanup behavior |
+canonical_map_row	| `references/phase-0-planning.md` | Detailed planning behaviour |
+canonical_map_row	| `references/phase-1-dispatch.md` | Dispatch and batch-management behaviour |
+canonical_map_row	| `references/phase-2-merge.md` | Merge, dedup, writeout, cleanup behaviour |
 canonical_map_row	| `references/degradation-and-limitations.md` | Failure handling, degradation paths, context-pressure guidance, platform limitations |
 canonical_map_row	| `templates/subagent-template.md` | Canonical subagent execution protocol |
 canonical_map_row	| `templates/report-template.md` | Canonical final report structure |
 canonical_map_row	| `scripts/config-optimal-values.sh` | Single source of truth for optimal config values |
-canonical_map_row	| `scripts/config-check.sh` | Canonical source for raw config-check output shape only; Phase 0 detect-and-guide behavior belongs to `SKILL.md` plus `references/phase-0-planning.md` |
-canonical_map_row	| `scripts/config-optimize.sh` | Canonical source for backup-and-apply config optimization behavior and its output contract |
-canonical_map_row	| `scripts/config-restore.sh` | Canonical source for audit-field restore behavior, restore fallback branches, and restore output contract |
+canonical_map_row	| `scripts/config-check.sh` | Canonical source for raw config-check output shape only; Phase 0 detect-and-guide behaviour belongs to `SKILL.md` plus `references/phase-0-planning.md` |
+canonical_map_row	| `scripts/config-optimize.sh` | Canonical source for backup-and-apply config optimisation behaviour and its output contract |
+canonical_map_row	| `scripts/config-restore.sh` | Canonical source for audit-field restore behaviour, restore fallback branches, and restore output contract |
 canonical_map_row	| `scripts/parse-audit-args.py` | Canonical source for deterministic quote-aware argument parsing of the raw `---audit` argument string |
 
 coverage_item_literal	- trigger boundary

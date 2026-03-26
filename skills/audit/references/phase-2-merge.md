@@ -2,7 +2,7 @@
 
 # Phase 2 Merge Reference
 
-Normative source for detailed Phase 2 merge behavior in this `audit` skill.
+Normative source for detailed Phase 2 merge behaviour in this `audit` skill.
 
 The parent `SKILL.md` must still retain the corresponding hard summaries for:
 - merge-phase existence in the workflow skeleton

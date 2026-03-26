@@ -2,7 +2,7 @@
 
 # Phase 1 Dispatch Reference
 
-Normative source for detailed Phase 1 dispatch behavior in this `audit` skill.
+Normative source for detailed Phase 1 dispatch behaviour in this `audit` skill.
 
 The parent `SKILL.md` must still retain the corresponding hard summaries for:
 - parallel subagent architecture
@@ -93,8 +93,8 @@ Temp report expectations for dispatched subagents:
 - The per-round temp report path contract is `[report_dir]/audit_R[k]_temp.md`; Phase 1 must bind a concrete path matching this contract for each big round.
 - When multiple audit runs may execute in parallel (e.g., batch smoke via Agent tool), Phase 1 must include a run-unique token in the report directory path or filename (e.g., `[report_dir]/run_[timestamp]/audit_R[k]_temp.md` or `[report_dir]/audit_[pid]_R[k]_temp.md`) to prevent temp-file collisions across concurrent runs. Within a single audit run, each big round already uses a unique R[k] suffix, so no collision occurs. See also `templates/subagent-template.md` § Audit Task for the subagent-facing note on this topic.
 - A normally completed `0-issue` big round must still produce a temp report file.
-- Phase 1 binds and passes these temp-file expectations to subagents, but the actual write protocol, table format, incremental append behavior, and write-protection rules belong to `templates/subagent-template.md`.
-- Phase 2 owns temp-file collection, merge behavior, and cleanup.
+- Phase 1 binds and passes these temp-file expectations to subagents, but the actual write protocol, table format, incremental append behaviour, and write-protection rules belong to `templates/subagent-template.md`.
+- Phase 2 owns temp-file collection, merge behaviour, and cleanup.
 
 ## 1.5 Template Binding
 

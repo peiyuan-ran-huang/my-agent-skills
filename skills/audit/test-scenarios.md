@@ -4,15 +4,15 @@ This file is a maintenance regression fixture for the `audit` skill.
 
 It is **not** a runtime rule file.
 
-Use it to verify that structural edits did not silently weaken behavior.
+Use it to verify that structural edits did not silently weaken behaviour.
 
 Scenario IDs are stable maintenance labels, not a globally sorted taxonomy. Inserted scenarios may therefore appear out of numeric order when preserving existing references is safer than renumbering the whole fixture.
 
 Recommended use:
 
 - choose a scenario
-- identify the canonical files that should carry the behavior
-- verify that each required behavior still has an explicit home
+- identify the canonical files that should carry the behaviour
+- verify that each required behaviour still has an explicit home
 - treat any missing invariant as a regression until proven otherwise
 
 ---
@@ -36,7 +36,7 @@ The configuration check script returns `STATUS: OK`.
 - `scripts/config-check.sh` returns `STATUS: OK`
 - no script anomaly or stderr-triggering fallback path is active
 
-### Expected Behavior
+### Expected Behaviour
 
 - Phase 0 runs the config check before normal planning
 - no mismatch notice is shown
@@ -76,7 +76,7 @@ Tests script-error/anomalous-output/incompatible-Windows-bash fallback: non-zero
 
 ## T2d. No-Argument Recent Deliverable Auto-Target
 
-Tests `---audit` without arguments auto-targets most recent substantive deliverable (materializing to `audit_object_temp.md` if needed). **Owner**: `SKILL.md` Phase 0 target-identification. **Invariant**: no-argument positive path distinct from no-target stop path.
+Tests `---audit` without arguments auto-targets most recent substantive deliverable (materialising to `audit_object_temp.md` if needed). **Owner**: `SKILL.md` Phase 0 target-identification. **Invariant**: no-argument positive path distinct from no-target stop path.
 
 ## T2e. Phase 0 Output Path Planning
 
@@ -96,7 +96,7 @@ Tests `>=6` rounds or large target triggers Context Mode MCP recommendation befo
 
 ## T2i. Large-Target Planning Strategy
 
-Tests target-type-specific core-section prioritization for large files with deferred segmented reading. **Owner**: `SKILL.md` Phase 0 large-target planning. **Invariant**: large-target planning is explicit and target-type-specific.
+Tests target-type-specific core-section prioritisation for large files with deferred segmented reading. **Owner**: `SKILL.md` Phase 0 large-target planning. **Invariant**: large-target planning is explicit and target-type-specific.
 
 ## T2j. Phase 0 Target Loading Before Planning
 
@@ -152,7 +152,7 @@ Tests `--focus` topics retained first when total rounds exceed mode cap. **Owner
 
 ## T5c. In-Conversation Target Lifecycle
 
-Tests materialization to `{report_dir}/audit_object_temp.md`, subagent receives temp-file path, cleanup after merge, large-content warning. **Owner**: `SKILL.md` Phase 0 target-materialization. **Invariant**: in-conversation targets materialized before dispatch; cleanup removes temp file.
+Tests materialisation to `{report_dir}/audit_object_temp.md`, subagent receives temp-file path, cleanup after merge, large-content warning. **Owner**: `SKILL.md` Phase 0 target-materialisation. **Invariant**: in-conversation targets materialised before dispatch; cleanup removes temp file.
 
 ## T5d. Research Plan Audit
 
@@ -341,4 +341,4 @@ These scenarios are the minimum regression surface for this skill:
 - cross-round dedup and unified numbering
 - cross-round non-merge guard for same-location different-issue findings
 
-If one of these scenarios no longer has an explicit behavior home, the skill should be treated as incomplete.
+If one of these scenarios no longer has an explicit behaviour home, the skill should be treated as incomplete.
