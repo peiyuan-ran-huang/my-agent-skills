@@ -7,6 +7,49 @@ Dates represent when the version was committed to the repo, not when development
 本文件记录所有重要变更。0.1 及以上的版本增量有独立的标题条目；0.0.1 级别的修补记录为父版本条目内的 ### Patched 子节。
 日期为提交至 repo 的时间，非开发开始时间。
 
+## [v1.1] — 2026-03-26
+
+- **6-subagent parallel QC round**: identified and fixed 13 findings (5 Major + 8 Minor) from 6 independent opus subagent reviews
+- **Fix recurrence cap**: same finding recurring 3 times triggers user escalation instead of infinite fix loops
+- **Non-WNF fix queue**: "fix all findings" → "fix all non-WNF findings" (explicit WNF exclusion from fix queue)
+- **In-context content fix mechanism**: defined how loop mode handles fixes for non-file targets (Claude outputs corrected version; subsequent rounds review it)
+- **Auto-detect rejection path**: defined fallback when user rejects auto-detected target in loop mode
+- **Depth checkpoint + subagent interaction**: explicitly documented that both rules apply independently on checkpoint rounds
+- **Cross-validation fallback**: subagent handles original file unreadable gracefully
+- **Post-reopen History update**: pseudocode now updates round history when subagent reopens a Pass to non-Pass
+- **Sync rule expanded**: added (4) translation-process notes as allowed difference
+- **Evolution Protocol cross-reference**: section now notes loop-only timing restriction
+- **Version bump**: 1.0.0 → 1.1.0
+
+### Patched — 2026-03-26
+
+- **Parameter parsing clarification**: documented that only double quotes are supported for path quoting; single quotes, backslash-escaped spaces, and empty quoted strings are not supported
+- **Confirmed + severity_adjustments note**: added blockquote clarifying that confirmed verdicts may still include severity adjustments
+- **Write tool failure degradation**: added loop-mode degradation path for Write tool failures during fix application
+- **MEMORY.md version sync**: updated stale qc v0.9.2 → v1.1.0
+- **README.md changelog reorder**: fixed ascending chronological ordering for v1.0/v1.1 entries; added "(changed in v1.0)" to v0.9 subagent description
+- **Temp path reverted to `C:/tmp/qc_sub/`**: `~/.claude/tmp/qc_sub/` is inside the sensitive `~/.claude/` directory, causing Claude Code to prompt for Edit/Write permissions on every temp file write. Reverted to `C:/tmp/qc_sub/` which is outside the protected zone. Affected files: SKILL.md, SKILL_ZH.md, pitfalls.md
+
+## [v1.0] — 2026-03-25
+
+### Changed
+
+- **Subagent dispatch simplified**: removed `consecutive_passes == N - 1` condition in loop mode — subagent now fires on **every pass round**, not just the final round. Eliminates cross-round counter tracking that was error-prone in long contexts.
+- **No-shortcut rule for pass rounds**: replaced "brief confirmation suffices" with mandatory re-read from disk + five-dimension assessment + different counterfactual focus area each round. Pass rounds must show genuine re-examination, not copied verdicts.
+- **Depth checkpoint rounds**: every 5th round (5, 10, 15) requires a full expanded report regardless of pass streak, counteracting late-round shallow repetition.
+- **Round cap raised**: 10 → 15 total rounds, accommodating the increased rigor per round.
+- **Canonical subagent prompt template**: fixed verbatim ~55-line template with 4 fill-in fields (`{{TARGET_TYPE}}`, `{{DOMAIN_CONTEXT}}`, `{{TARGET_OVERLAYS}}`, `{{ORIGINAL_FILE_PATH}}`). Main agent must use template verbatim — cannot narrow scope or prioritise dimensions. Includes cross-validation step (subagent reads original file from disk to detect stale temp copies).
+- **Anti-downgrade self-check**: explicit self-verification step before writing the counterfactual line — catches silent subagent→inline downgrades.
+- **Evolution Protocol timing**: "final round only" → "loop exit round only" (covers both consecutive-pass exit and round-cap exit).
+
+### Token Cost Trade-off
+
+v1.0 deliberately trades token efficiency for review reliability. Every pass round now dispatches a subagent (previously only the final round did), and pass rounds require genuine five-dimension re-examination instead of one-line confirmations. This is a conscious design choice: a QC skill that doesn't reliably execute its own QC is not worth the tokens it saves.
+
+### Patched (2026-03-26) — v1.0.1 (superseded by v1.1.0)
+
+- ~~**Temp path reverted**: subagent temp path changed back from `~/.claude/tmp/qc_sub/` to `C:/tmp/qc_sub/`~~ — **Superseded then re-applied**: v1.1.0 initially kept `~/.claude/tmp/qc_sub/` for portability, but v1.1 Patched (see above) reverted back to `C:/tmp/qc_sub/` after permission prompt issues were confirmed in practice.
+
 ## [v0.9] — 2026-03-23
 
 ### Patched (2026-03-23) — v0.9.2

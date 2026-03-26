@@ -3,8 +3,8 @@ name: qc-zh
 description: 当用户消息以 ---qc 开头时触发，对代码、方案、文档、数据、建议或技能/提示词进行五维结构化审查。中文参考版（不会被自动加载）。
 ---
 
-<!-- version: 0.9.2 | 同步规则：此文件的任何改动必须同步到 SKILL.md，反之亦然。
-允许差异：(1) frontmatter name 字段 (qc vs qc-zh)，(2) frontmatter description 语言，(3) SKILL_ZH.md 的加载说明。
+<!-- version: 1.1.0 | 同步规则：此文件的任何改动必须同步到 SKILL.md，反之亦然。
+允许差异：(1) frontmatter name 字段 (qc vs qc-zh)，(2) frontmatter description 语言，(3) SKILL_ZH.md 的加载说明，(4) 翻译过程注释（如说明哪些部分保留英文原文的注释）。
 同步标准：逐节语义等价，非行数相等。 -->
 
 # QC：深度审查
@@ -20,29 +20,42 @@ description: 当用户消息以 ---qc 开头时触发，对代码、方案、文
 
 ## 参数解析
 
-1. 读取 `---qc` 后的参数：第一个非标志 token 为审查对象（可以是一个词、引号包裹的短语、或文件路径——**含空格的文件路径必须用双引号包裹**，例如 `---qc "my project/analysis.R"`；若检测到未加引号的含空格路径，请用户重新输入）；其余为额外标准。扫描所有 token 中的已知标志——标志 token（以 `--` 前缀匹配下列已知标志）无论位置如何均排除在对象/标准识别之外：
-   - `--loop`/`--循环` [N]：激活**循环模式**（N 默认为 3；若该标志后紧跟正整数 token，则该 token 被消费为 N，不视为审查对象；非正整数（如 `--loop 0`）及非数字 token 不被消费为 N）
+1. 读取 `---qc` 后的参数：第一个非标志 token 为审查对象（可以是一个词、引号包裹的短语、或文件路径——**含空格的文件路径必须用双引号包裹**，例如 `---qc "my project/analysis.R"`；若检测到未加引号的含空格路径，请用户重新输入；仅识别双引号路径包裹——单引号和反斜杠转义空格不受支持；空引号字符串作为审查对象时回退至自动检测步骤 3）；其余为额外标准。扫描所有 token 中的已知标志——标志 token（以 `--` 前缀匹配下列已知标志）无论位置如何均排除在对象/标准识别之外：
+   - `--loop`/`--循环` [N]：激活**循环模式**（N 默认为 3；若该标志后紧跟正整数 token，则该 token 被消费为 N，不视为审查对象；非正整数（如 `--loop 0`）及非数字 token 不被消费为 N——未被消费的 token 重新进入正常 token 流；若由此产生明显无意义的审查对象，提示用户澄清）
    - `--sub`/`--子代理`：激活**子代理反事实模式**（见下方）
+
+   `--loop` 和 `--sub` 可以同时使用，二者为独立开关，互不冲突（各自行为见对应章节）。
 2. 对象映射：代码/code → 代码 | 方案/plan → 方案 | 文档/doc → 文档 | 数据/data → 数据 | 建议/advice → 建议 | skill/prompt/技能/提示词 → 技能/提示词 | diff/changeset/directory/目录 → 代码叠加（影响范围 = diff/目录）；若内容混合 → 按用户问题指向或内容主体比例选主体类型，次要类型叠加检查
 3. 无参数 → 按以下优先级自动识别：
    1. 用户当前消息中提及的文件路径
-   2. 最近一次 assistant 的实质性输出——须满足：(a) ≥3 行代码块、≥5 项编号方案、或 ≥5 行连续散文（排除纯表格、纯数据输出或单行回答）；(b) 可归类为代码、方案、文档或建议（排除工具状态输出、报错信息、数据转储）；不确定时跳至步骤 3
+   2. 最近一次 assistant 的实质性输出——须满足：(a) ≥3 行代码块、≥5 项编号方案、或 ≥5 行连续散文（排除纯表格、纯数据输出或单行回答）；(b) 可归类为代码、方案、文档、数据、建议或技能/提示词（排除工具状态输出、报错信息、数据转储）；不确定时跳至步骤 3
    3. 本次会话中最近编辑或读取的文件
    4. （兜底）提示用户指定
-4. 若目标内容不在当前上下文中但有明确文件路径或最近编辑的文件 → 先用 Read 读取再审查；文件过大时 → 分段读取，优先读取核心逻辑部分
+4. 若目标内容不在当前上下文中但有明确文件路径或最近编辑的文件 → 先用 Read 读取再审查；文件过大时 → 分段读取，优先读取核心逻辑部分。若 Read 失败（文件不存在、权限错误），在 Coverage 中报告失败，回退至上下文中的内容（若有，标注 `[degraded: context fallback]`），或提示用户确认路径
 
 ## 循环模式（由 `--loop [N]` / `--循环 [N]` 激活）
 
 当 `--loop` 存在时，执行审查-修复-再审查循环：
 
 1. 对目标执行标准 QC 审查
-2. **Pass** → 连续通过计数器 +1；**非 Pass** → 计数器归零，修复所有发现（Critical → Major → Minor），然后重新审查
-3. 退出条件：连续通过次数 >= N（默认 3），或总轮次 >= 10
-4. 每轮报告以状态头开始：`🔄 Round X/10 | Passes: Y/N | History: [P, M, m, P, ...]`（P=Pass, C=Critical, M=Major, m=Minor）  <!-- emoji is part of this template's format spec; overrides default no-emoji rule -->
-5. 目标在调用时解析一次；后续轮次审查同一目标（文件：从磁盘重新读取；上下文中的内容：审查最新版本）
-6. 校准文件（examples.md、pitfalls.md）：启动时读取一次。进化协议：仅在最后一轮执行。
+2. **Pass** → 连续通过计数器 +1（若 `--sub` 激活，需经子代理反事实覆盖；见子代理反事实模式）；**非 Pass** → 计数器归零，修复所有非 WNF 发现（Critical → Major → Minor），然后重新审查。若同一发现（同一维度、同一位置）在此前某轮被修复后再次出现，在轮次状态头中记录复发（如 `History: [M, m, M(recur), ...]`）。若该发现复发 3 次（即修复后在 3 个独立轮次中再次出现），暂停并告知用户："此发现已在修复后复发 3 次——可能需要人工介入。标记为 WNF 或提供指导？"
+3. 退出条件：连续通过次数 >= N（默认 3），或总轮次 >= 15。若循环因达到轮次上限（总轮次 >= 15）而退出，且最近一轮评级为非 Pass（如子代理在最后一轮 reopen），则报告：`[Loop cap reached: X/15 rounds completed. Final rating: [rating]. Unresolved findings remain — see last round's report above.]`
+4. 每轮报告以状态头开始：`🔄 Round X/15 | Passes: Y/N | History: [P, M, m, P, ...]`（P=Pass, C=Critical, M=Major, m=Minor）  <!-- emoji is part of this template's format spec; overrides default no-emoji rule -->
+5. 目标在调用时解析一次；后续轮次审查同一目标（文件：从磁盘重新读取；上下文中的内容：审查 Claude 输出的最新修正版——Claude 在轮次报告中输出修正版以应用修复，后续轮次审查该最新输出）。若重新读取在循环过程中失败（文件被删除、重命名或权限变更），适用与参数解析步骤 4 相同的降级处理：在 Coverage 中报告，回退至上下文中的内容（若有，标注 `[degraded: context fallback]`）；若连续 2 轮重新读取失败，终止循环并报告 `[Loop terminated: target unreadable since round X]`。若目标为自动检测（非用户显式指定）且 `--loop` 激活，进入循环前须与用户确认自动检测的目标。若用户拒绝自动检测的目标，提示用户显式指定目标（参数解析步骤 3.4）后再进入循环
+6. 校准文件（examples.md、pitfalls.md）：启动时读取一次。进化协议：**仅在循环退出轮执行**（循环终止的那一轮，无论是通过达到 N 次连续通过还是达到轮次上限）。
 
-循环模式下，"只审不改"原则暂停：Claude 在各轮之间修复发现的问题。若修复需要用户确认，暂停循环并询问。若用户拒绝某项修复，将该发现标记为**不予修复（WNF）**。后续轮次的严重性评级中排除 WNF 项。在轮次状态头中追踪 WNF 项以供审计（如 `History: [M, P(1 WNF), P, P]`）。连续通过的轮次简要确认即可（状态头 + 整体评级）。
+循环模式下，"只审不改"原则暂停：Claude 在各轮之间修复发现的问题。若修复需要用户确认，暂停循环并询问。若用户拒绝某项修复，将该发现标记为**不予修复（WNF）**。后续轮次的严重性评级中排除 WNF 项（因此，一个所有剩余发现均为 WNF 的轮次在整体评级规则下视为 Pass）。在轮次状态头中追踪 WNF 项以供审计（如 `History: [M, P(1 WNF), P, P]`）。对 Critical 级别的 WNF：需提示用户显式确认（"此 Critical 发现涉及 [描述]——确认跳过？"），并在状态头中标记为 `P(1 C-WNF)`。若因工具故障（如文件目标的 Write 工具不可用）无法应用修复，视为需用户介入——暂停循环并报告故障。
+
+**不偷懒规则（通过轮次）**：即使在连续通过的轮次中，每轮也**必须**：
+1. **重新读取**磁盘上的目标文件（使用 Read 工具；不得依赖上下文记忆；对上下文中的内容目标，重新检视对话上下文中的最新版本）
+2. 执行真实的**五维评估**——紧凑格式可接受（每个维度一行判定），但每个判定必须反映对目标内容的实际重新审查，而非复制上一轮的结果
+3. 在**反事实测试**中引用一个与上一轮反事实聚焦区域**不同**的具体区域（文件:行号或逻辑点）——在各轮之间循环审查不同的风险区域，避免每轮都检查同一个点。对于审查区域有限的小型目标，可以从不同角度（如正确性 vs 性能 vs 边界情况）重新审视已检查过的区域。
+
+仅复制上一轮格式而无新审查证据的通过轮次视为协议违规。输出可以紧凑，但审查**必须**真实。
+
+**深度检查点轮次**：在轮次编号为 5 的倍数的轮次（第 5、10、15 轮），**必须**产出**完整五维报告**（展开推理，非紧凑格式），无论当前评级或连续通过情况如何。将深度检查点视为第 1 轮——以全新视角和最高严格度审查目标。此定期强制展开抵消后期轮次中自然出现的浅层重复趋势。深度检查点与子代理反事实相互独立——当各自条件满足时均适用。在 `--sub` 激活且评级为 Pass 的深度检查点轮次中，同时产出完整五维报告并派发子代理。
+
+**上下文压力管理**：在长循环中（第 6 轮起，非检查点轮次），若上下文占用较高，可将第 1 轮至第 (current_round - 4) 轮压缩为单行状态记录（轮次编号 + 评级 + 关键发现 ID）以释放上下文空间。若此操作影响审查深度，在 Coverage 中报告 `[degraded: context pressure]`。若循环过程中达到上下文限制，以 `[Loop terminated: context limit reached at round X]` 终止。
 
 **对抗性重构**：第 2 轮起，审查前先切换立场："假设这是别人写的，我的任务是找问题而非确认正确。"这抵消了对自己修复的天然认可倾向。
 
@@ -56,38 +69,107 @@ description: 当用户消息以 ---qc 开头时触发，对代码、方案、文
 # 五维审查完成后、写总结之前：
 if --sub 激活:
     if --loop 激活:
-        if 本轮评级 == "Pass" AND 连续通过次数 == N - 1:
+        if 本轮评级 == "Pass":
             result = dispatch_subagent_counterfactual()
         else:
-            result = inline_counterfactual()    # 非最终轮：节省 token
+            result = inline_counterfactual()    # 非 Pass：问题已浮出水面；inline 足够
     else:
         result = dispatch_subagent_counterfactual()
 
     # 派发后处理（仅子代理）：
-    if result.source == "subagent" AND result.verdict == "reopened":
-        apply_new_findings(result.new_findings)
-        apply_severity_adjustments(result.severity_adjustments)
-        recalculate_overall_rating()
-        # loop 自然处理：新评级非 Pass → 连续通过计数器归零
+    if result.source == "subagent":  # source 从派发上下文推断，而非从子代理输出中读取
+        apply_severity_adjustments(result.severity_adjustments)  # 对 confirmed 和 reopened 均适用
+        if result.verdict == "reopened":
+            apply_new_findings(result.new_findings)
+            recalculate_overall_rating()
+            update_round_history(round_number, new_overall_rating)  # 将初始 'P' 替换为重算后的评级
+            consecutive_passes = 0  # 显式重置——不依赖下一轮的隐式检测
 ```
+
+> **Confirmed + severity_adjustments**：`confirmed` 裁决仍可包含非空 `severity_adjustments`（例如子代理确认无遗漏问题但建议调整现有发现的严重性）。无论裁决如何均适用这些调整。
+
+> **反降级自检**：在写 `**反事实**:` 行之前，验证："是否 `--sub` 激活且本轮评级为 Pass（循环模式）或任意评级（非循环模式）？"若为是，**必须**派发子代理——如果发现自己即将写内联反事实而条件满足时，**停下来**改为派发子代理。绝不在未报告 `[degraded: inline fallback]` 和具体失败原因的情况下静默降级为内联。若为否（即循环模式 + 非 Pass 轮次），内联反事实为**设计行为**——无需降级标签。
 
 ### 子代理规格
 
-- **Agent 类型**：`general-purpose`，`model: "opus"`
-- **输入**：写入两个临时文件到 `~/.claude/tmp/qc_sub/`（目录不存在时自动创建）：
+- **Agent 类型**：`general-purpose`，`model: "opus"`（运行时约定下的最新 Opus 级模型；不可用时见下方降级处理）
+- **启动清理**：在写入临时文件前，若 `C:/tmp/qc_sub/` 已存在，先删除其全部内容（防止崩溃/中断的前一次会话的残留文件污染当前审查）。
+- **输入**：写入两个临时文件到 `C:/tmp/qc_sub/`（目录不存在时自动创建）：
   - `target_temp.md` — 审查目标内容（文件目标则复制文件内容；上下文中的内容则写入临时文件）
-  - `findings_temp.md` — 五维审查发现，使用 QC 报告格式（每条发现以 `#### [维度] — [严重性]` 为标题）
-- **Prompt**：必须完全自包含（子代理无法访问主 agent 上下文）。包含：
-  - 角色：未参与过生成或初审的独立审查者
-  - 任务：(1) 发现初审遗漏的问题，(2) 核验现有发现的严重性评级
-  - 目标类型与领域上下文（如：文档 → 学术规范，代码 → 安全检查）
-  - 严重性定义（Critical/Major/Minor）
-  - 输出格式：JSON，字段包括 `verdict`（"confirmed"/"reopened"）、`area_examined`、`reasoning`、`severity_adjustments`（数组；每项：`finding_ref` 为"维度 — 严重性"、`proposed`、`reason`）、`new_findings`（数组；每项：`dimension`、`severity`、`evidence`、`issue`、`suggested_fix`）
-- **清理**：整合完成后删除 `~/.claude/tmp/qc_sub/` 下所有临时文件
+  - `findings_temp.md` — 五维审查发现，使用 QC 报告格式（每条发现以 `#### [维度] — [严重性]` 为标题）；对 Pass 评级且无发现的轮次，写入：`✓ Correctness / Completeness / Optimality / Consistency / Standards: No issues\n\n**Overall Rating**: Pass`。在 findings_temp.md 末尾追加 `## Matched Pitfalls` 部分，列出与当前审查目标上下文匹配的错题本条目（使子代理也能访问用户自定义的检查项）
+- **Prompt**：必须使用以下规范模板逐字填写。仅允许填入四个 `{{...}}` 标记字段。不得添加指示聚焦特定维度、缩窄审查范围或跳过任何方面的指令。
+
+  <!-- 以下模板为子代理使用的英文原文，不翻译。仅翻译填入字段说明和约束条款。 -->
+
+````
+You are an independent reviewer who has NOT participated in the creation or initial review of the target below. Your task is to provide a thorough, unbiased second opinion.
+
+## Target Information
+- **Type**: {{TARGET_TYPE}}
+- **Domain context**: {{DOMAIN_CONTEXT}}
+- **Target-specific checks**: {{TARGET_OVERLAYS}}
+- **Content**: Read the file `C:/tmp/qc_sub/target_temp.md`
+- **Original file path** (if file-based target): {{ORIGINAL_FILE_PATH}}
+
+## Initial Review Findings
+Read the file `C:/tmp/qc_sub/findings_temp.md`
+
+## Cross-validation (mandatory for file-based targets)
+If an original file path is provided above, ALSO read it directly from disk and compare with the temp copy. If they differ, the disk version is authoritative — base your review on it and note the discrepancy. If the original file cannot be read (not found, permission error), proceed with the temp copy and note: [cross-validation skipped: original file unreadable].
+
+## Your Task
+
+Perform a COMPREHENSIVE independent review across ALL of the following five dimensions with EQUAL depth and rigor. Do NOT focus on any single dimension — every dimension deserves the same thoroughness.
+
+1. **Correctness**: Facts accurate? Logic sound? No hallucinations or fabrications?
+2. **Completeness**: All key points covered? Edge cases considered? Dependencies checked?
+3. **Optimality**: Best approach? Any simpler or more efficient alternatives?
+4. **Consistency**: Aligned with context / requirements / existing code? No self-contradictions?
+5. **Standards**: Compliant with relevant standards? (academic conventions / coding style / security rules)
+
+Also apply the target-specific checks listed above.
+
+You must:
+- (a) Find issues the initial review MISSED — actively look for blind spots, not confirmations
+- (b) Verify severity assignments of ALL existing findings — are any over- or under-rated?
+- Start from the execution layer (scripts, configs) rather than documentation
+- Verify implementation assumptions — comments/labels do not guarantee enforcement
+- Check for namespace collisions (ID/key/variable uniqueness)
+
+## Severity Definitions
+- **Critical**: factually wrong, dangerous, or fundamentally broken
+- **Major**: significant functional gap or risk
+- **Minor**: style, edge case, or non-blocking improvement
+
+## Output Format
+Respond with a JSON object ONLY (no markdown wrapping, no commentary outside JSON):
+```json
+{
+  "verdict": "confirmed | reopened",
+  "area_examined": "[MUST cite specific locations: file:line, code snippets, logic paths. Generic statements are INVALID.]",
+  "reasoning": "[MUST provide detailed reasoning with specific references. 'Looks good' or 'no issues' is INVALID.]",
+  "severity_adjustments": [
+    {"finding_ref": "Dimension — Severity", "proposed": "new severity", "reason": "..."}
+  ],
+  "new_findings": [
+    {"dimension": "...", "severity": "...", "evidence": "...", "issue": "...", "suggested_fix": "..."}
+  ]
+}
+```
+````
+
+  **填入字段定义**：
+  - `{{TARGET_TYPE}}`：参数解析中确定的目标类型（代码 / 方案 / 文档 / 数据 / 建议 / 技能/提示词）
+  - `{{DOMAIN_CONTEXT}}`：1-2 句领域描述（如："R tidyverse 数据处理脚本，用于流行病学分析" / "遵循 STROBE 指南的学术稿件"）
+  - `{{TARGET_OVERLAYS}}`：从 §对象专项叠加 复制该目标类型的完整叠加检查清单（如代码："+安全漏洞 +性能 +错误处理 +可读性 +依赖合理性 +测试覆盖"）
+  - `{{ORIGINAL_FILE_PATH}}`：文件类目标为磁盘上的原始文件路径（如 `~/project/analysis.R`）；上下文中的内容则写 "N/A — in-context content"
+
+  **约束**：若主 agent 需要提供额外上下文（如轮次编号、前几轮发现了什么），可在模板内容**之后**添加 `## Additional Context` 部分，但该部分**不得**覆盖、缩窄或优先任何维度。违例——如"聚焦完整性"或"特别检查影响范围"——被禁止。
+- **清理**：每次整合子代理结果后删除 `C:/tmp/qc_sub/` 下所有临时文件（循环模式下，每轮子代理结束后清理，而非仅在循环退出时清理）
 
 ### 降级
 
-子代理派发失败（工具错误、超时、模型不可用等）→ 回退到内联反事实测试。报告行显示 `[degraded: inline fallback]`。
+子代理派发失败（工具错误——包括创建临时文件时 Write 工具失败——、超时、模型不可用等）→ 回退到内联反事实测试。报告行显示 `[degraded: inline fallback]`。
 
 ### 输出格式变化
 
@@ -111,6 +193,8 @@ if --sub 激活:
 **边界规则**：若用户仅提供文件路径（如 `---qc file.R`）而无 diff/changeset，且当前会话中该文件未被修改，则视为**独立内容审查**——跳过影响范围扫描。仅在以下情况执行影响范围扫描：(a) 明确提供了 diff/changeset，(b) 该文件在当前会话中被修改过，或 (c) 用户明确要求审查修改影响。
 
 **仅当**审查对象为完全独立的内容且无文件依赖时跳过此步（包括上述边界规则中的"仅文件路径无修改上下文"场景，以及独立的建议、尚未保存到文件的文档草稿、或不涉及现有文件的方案）。
+
+若影响范围扫描期间 Grep 不可用，在影响范围输出行报告 `[degraded: no blast radius]`，并在 Coverage 中注明此限制。
 
 ## 审查框架（五维）
 
@@ -202,7 +286,7 @@ if --sub 激活:
 
 ## 进化协议
 
-完成 QC 报告后，反思本次审查是否发现了值得保留的知识。这是**后审步骤**——绝不干扰审查本身。
+完成 QC 报告后（循环模式下：仅在循环退出轮执行——见循环模式章节；异常终止如目标不可读或上下文限制退出时跳过），反思本次审查是否发现了值得保留的知识。这是**后审步骤**——绝不干扰审查本身。
 
 ### 何时提议
 
@@ -234,7 +318,7 @@ if --sub 激活:
 
 ### 写入机制（用户批准后）
 
-- 在 pitfalls.md 的 `## Entries` 部分最后一条之后追加新条目（或 examples.md 的对应部分）
+- 在 pitfalls.md 的 `## Entries` 部分最后一条之后追加新条目（匹配 `## Entries` 前缀，忽略任何双语后缀）（或 examples.md 的对应部分）
 - 自动附加来源注释：`<!-- via: evolution-proposal, YYYY-MM-DD -->`
 - 写入前扫描现有条目是否存在语义重叠；若有，提醒用户并建议合并而非新增
 

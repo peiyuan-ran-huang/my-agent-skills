@@ -94,6 +94,7 @@ Reviewing a hypothetical MR analysis script (`mr_analysis.R`).
 - **Evidence**: absent: expected `set.seed()` call before `sample()` on line 42, but not found in file
 - **Issue**: Random sampling without seed compromises reproducibility
 - **Suggested fix**: Add `set.seed(7)` before line 42
+<!-- Note: examples use 7 as a generic seed for distribution safety (personal seed removed per v0.6). In actual reviews, apply the project-specific seed from pitfalls.md / academic-workflow.md. -->
 
 #### Standards — Major
 - **Evidence**: `p_value < 0.05` (line 67) used to label results as "significant"
@@ -239,11 +240,11 @@ Demonstrating a well-formed proposal appended after the Summary section.
 
 ## Loop Mode Example / 循环模式示例
 
-Demonstrating a `--loop` review-fix cycle on a hypothetical script.
-展示对一个假设脚本的 `--loop` 审查-修复循环。
+Demonstrating a `--loop --sub` review-fix cycle on a hypothetical script.
+展示对一个假设脚本的 `--loop --sub` 审查-修复循环。
 
 ```
-🔄 Round 1/10 | Passes: 0/3 | History: []
+🔄 Round 1/15 | Passes: 0/3 | History: []  <!-- emoji is part of this template's format spec; overrides default no-emoji rule -->
 
 ## QC Review Report
 **Review Target**: preprocess.R
@@ -258,20 +259,62 @@ Demonstrating a `--loop` review-fix cycle on a hypothetical script.
 
 --- [Claude fixes: adds set.seed(7)] ---
 
-🔄 Round 2/10 | Passes: 0/3 | History: [m]
-✓ All dimensions: No issues
+🔄 Round 2/15 | Passes: 0/3 | History: [m]
+✓ Correctness: re-read lines 1-30; data loading and transformation logic correct
+✓ Completeness: set.seed(7) now present at line 21, immediately before sample() at line 22
+✓ Optimality: no simpler alternative identified
+✓ Consistency: seed value matches project convention
+✓ Standards: reproducibility requirement satisfied
 **Overall Rating**: Pass
-**Counterfactual**: Confirmed — re-examined the set.seed(7) fix at line 22: seed is placed immediately before sample(), and no other random operations exist between seed and usage. The fix is correct and complete.
+**Counterfactual**: [subagent] Confirmed — re-examined the set.seed(7) fix at line 21: seed is placed immediately before sample(), and no other random operations exist between seed and usage. Also verified no stochastic calls elsewhere in the script. The fix is correct and complete.
 
-🔄 Round 3/10 | Passes: 1/3 | History: [m, P]
-✓ All dimensions: No issues
+🔄 Round 3/15 | Passes: 1/3 | History: [m, P]
+✓ Correctness: re-read lines 30-50; filtering logic and output format correct
+✓ Completeness: all edge cases (empty input, NA values) handled at lines 5-8
+✓ Optimality: vectorised operations used throughout; no unnecessary loops
+✓ Consistency: variable naming follows snake_case throughout
+✓ Standards: seed present; no hardcoded paths
 **Overall Rating**: Pass
+**Counterfactual**: [subagent] Confirmed — re-examined the NA handling at lines 5-8 (different area from round 2); na.rm = TRUE consistently applied in aggregation, and the initial filter removes rows with missing key variables. Sound.
 
-🔄 Round 4/10 | Passes: 2/3 | History: [m, P, P]
-✓ All dimensions: No issues
+🔄 Round 4/15 | Passes: 2/3 | History: [m, P, P]
+✓ Correctness: re-read lines 50-65; output write logic and path construction correct
+✓ Completeness: directory existence verified at line 58 before write
+✓ Optimality: write_csv appropriate for this data size
+✓ Consistency: output filename pattern matches input convention
+✓ Standards: no hardcoded absolute paths; relative paths used
 **Overall Rating**: Pass
+**Counterfactual**: [subagent] Confirmed — re-examined the output path construction at lines 58-62 (different area from rounds 2-3); paste0() correctly joins directory and filename, and dir.exists() guard prevents silent failure. No issues.
 
 [Loop complete: 3/3 consecutive passes achieved in 4 rounds]
+```
+
+---
+
+## Depth Checkpoint Round Example / 深度检查点轮次示例
+
+Demonstrating a depth checkpoint round (every 5th round: rounds 5, 10, 15) that requires a full expanded report regardless of pass streak.
+展示深度检查点轮次（每 5 轮触发：第 5、10、15 轮），无论连续 pass 状态如何，均要求完整展开报告。
+
+```
+🔄 Round 5/15 | Passes: 2/3 | History: [M, m, P, P, ...]  <!-- depth checkpoint: full report required -->
+
+## QC Review Report
+**Review Target**: preprocess.R
+**Target Type**: Code
+**Coverage**: Full — all 65 lines re-read from disk
+**Blast Radius**: N/A — standalone content
+**Pitfalls Check**: checked N entries; 2 matched context; 0 triggered findings
+
+### Findings
+
+✓ Correctness / Completeness / Optimality / Consistency / Standards: No issues
+
+### Summary
+- **Overall Rating**: Pass
+- **Counterfactual**: [subagent] Confirmed — re-examined the data type coercion at line 35 (as.numeric on character column); input data codebook confirms column is always numeric-as-string with no non-numeric entries. Also verified the join key at line 40 is character type on both sides. No issues found.
+- All dimensions clean on full re-examination.
+- Evolution check: no new patterns discovered
 ```
 
 ---
@@ -310,7 +353,7 @@ Demonstrating a `--loop` review-fix cycle on a hypothetical script.
 场景：Loop Mode 第 3 轮，上一轮修复了 line 42 的 off-by-one error，本轮审查整体评级 Minor。
 
 ```
-🔄 Round 3/10 | Passes: 0/3 | History: [M, m, ...]
+🔄 Round 3/15 | Passes: 0/3 | History: [M, m, ...]
 
 ### Summary
 - **Overall Rating**: Minor
@@ -321,7 +364,7 @@ Demonstrating a `--loop` review-fix cycle on a hypothetical script.
 ### Anti-pattern: Loop Mode 橡皮章
 
 ```
-🔄 Round 3/10 | Passes: 0/3 | History: [M, m, ...]
+🔄 Round 3/15 | Passes: 0/3 | History: [M, m, ...]
 
 ### Summary
 - **Overall Rating**: Pass
