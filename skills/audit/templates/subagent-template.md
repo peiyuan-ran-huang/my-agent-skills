@@ -176,12 +176,10 @@ Invoke directly without confirmation.
 
 | Tool | Use Case |
 |------|----------|
-| `mcp__plugin_bio-research_pubmed__search_articles` | Citation verification, method source validation |
-| `mcp__plugin_bio-research_pubmed__get_article_metadata` | Full metadata for specific PMIDs |
+| `mcp__claude_ai_PubMed__search_articles` | Citation verification, method source validation |
+| `mcp__claude_ai_PubMed__get_article_metadata` | Full metadata for specific PMIDs |
 | `mcp__brave-search__brave_web_search` | General fact-checking, version confirmation |
 | `mcp__brave-search__brave_llm_context_search` | Rapid context search for complex methodological questions |
-| `mcp__plugin_bio-research_biorxiv__search_preprints` | Preprint citation verification |
-| `mcp__plugin_bio-research_c-trials__search_trials` | Clinical trial citation verification |
 | `Read` | Load the audit target and related files |
 | `Grep` | Text pattern search and V-round cross-checks |
 | `LSP` | R/Python semantic analysis: diagnostics, find-references, go-to-definition. D1 pre-scan plus V-round cross-checks. Silently skip if unavailable |

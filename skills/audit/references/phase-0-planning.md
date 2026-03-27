@@ -190,7 +190,7 @@ Before formal dispatch, send a lightweight MCP test subagent:
 ```text
 Agent tool:
   description: "MCP availability test"
-  prompt: "Call mcp__plugin_bio-research_pubmed__search_articles to search for 'test', and report whether the call succeeded (success/failure). If this specific tool is unavailable, try any MCP tool from the Available Tools list."
+  prompt: "Call mcp__claude_ai_PubMed__search_articles to search for 'test', and report whether the call succeeded (success/failure). If this specific tool is unavailable, try any MCP tool from the Available Tools list."
 ```
 
 Decision rules:
