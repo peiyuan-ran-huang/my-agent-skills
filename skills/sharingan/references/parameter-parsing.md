@@ -3,7 +3,7 @@
 ## Syntax
 
 ```
----sharingan <source> [--target <category>] [--auto] [--dry-run] [--no-ref] [context...]
+---sharingan <source> [--target <category>] [--auto] [--dry-run] [--no-ref] [--explore] [--no-explore] [context...]
 ```
 
 - `<source>` (required): the external resource to learn from
@@ -11,6 +11,8 @@
 - `--auto`: streamline Phase 7 — skip summary re-display, but still list target files and pause for user confirmation before execution (per security.md)
 - `--dry-run`: execute Phase 1-6 only; output proposal but do not modify files
 - `--no-ref`: skip Reference Value Assessment at EXIT POINTs
+- `--explore`: force Leverage Exploration after main pipeline completes (no prompt)
+- `--no-explore`: suppress Leverage Exploration prompt entirely
 - `context...`: additional instructions/context after the source
 
 ## Source Detection Heuristic (by priority)
@@ -36,9 +38,14 @@ Prompt: "Please provide a source (URL, file path, or screenshot path). Sharingan
 | Unknown flags | Abort, ask re-invoke with correct flags |
 | Duplicate flags | Abort, ask user to clarify |
 | `--target` without value | Prompt for category |
+| `--target` with unknown category | Validate against taxonomy.md category list; if no match → abort, suggest valid categories |
 | Multiple sources | Abort, ask for exactly one source |
 | `--no-ref` with non-EXIT outcome | Ignored silently (flag only applies at EXIT POINTs) |
+| `--explore` + `--no-explore` | Abort, ask user to clarify |
+| `--no-ref --no-explore` | Only main pipeline runs (skip both RVA and LE) |
+| `--dry-run --explore` | LE runs (LE-1 through LE-3) but LE-4 outputs proposed additions without executing writes |
+| `--no-ref` (without `--no-explore`) | RVA skipped, LE prompt still appears (LE activation is independent of RVA) |
 
 ## `--dry-run` Termination
 
-After Phase 6 QC passes, output proposal (Phase 5 format), then: `[DRY RUN] Proposal ready. Re-invoke without --dry-run to execute.`
+After Phase 6 QC passes, output proposal (Phase 5 format), then: `[DRY RUN] Proposal ready. Re-invoke without --dry-run to execute.` If `--explore` is set (or user responds Y to prompt), proceed to Leverage Exploration in read-only mode.

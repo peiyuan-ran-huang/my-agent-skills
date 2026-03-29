@@ -21,3 +21,9 @@
 | 源材料仅含 transferable patterns（无 direct applicability） | Non-config Insight Routing: Phase 4 尝试 reclassify 为 direct（须命名具体 target）；若失败标记为 reference-value candidate |
 | 源材料仅含 user growth insights（无 direct 也无 pattern） | Non-config Insight Routing: Phase 4 评估是否可转化为具体 workflow 提案；若否标记为 reference-value candidate |
 | 源材料混合 direct + pattern + growth insights | 各类 insight 分别走各自路径：direct → Implementation Depth Assessment，pattern/growth → Non-config Routing。Phase 5 output 分 proposals + reference-value candidates 两区 |
+| 短资料（<200 words）无广泛主题 | LE-1 大概率无 opportunities → `le-no-opportunities` |
+| 所有 LE opportunities 与 ai-dev-idea-todo.md 现有条目重复 | LE-4 仅更新状态，不新建条目 |
+| ai-dev-idea-todo.md 不存在（非项目上下文或文件已删除） | LE-4 仅展示 proposals，标注 `[LE-4: todo file not found — proposals displayed only]`，不自动创建文件 |
+| LE-4 写入 ai-dev-idea-todo.md 失败 | 报告失败，仅在输出中展示 proposals |
+| `--explore` + abort 终止的主流程 | LE 不运行（abort 跳过 LE） |
+| `--explore --no-ref` | LE 运行但 "Related ref" 字段始终省略（无 RVA ref）；回溯交叉引用步骤完全跳过 |

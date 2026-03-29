@@ -6,8 +6,8 @@
 
 # Sharingan: Self-Optimisation via External Resources / 写轮眼：外部资源自优化
 
-**Version**: v0.8.0
-**Last Updated**: 2026-03-26
+**Version**: v0.9.0
+**Last Updated**: 2026-03-28
 **Author**: Peiyuan (Ran) Huang, with (*significant*) assistance from Claude Code
 **Status**: Personal demo / 个人 demo
 
@@ -30,6 +30,7 @@ A prompt-only skill (no code, no dependencies) that provides a structured 10-pha
 - **Reference Value Assessment** — even when no config changes are warranted, optionally captures long-term reference value via 4-step gated distillation
 - **Non-config Insight Routing** — pattern-only and user-growth-only insights follow dedicated evaluation paths
 - **Security preflight** — refuses to read credentials, flags prompt injection attempts
+- **Leverage Exploration** — post-pipeline capability-building proposals with 5 opportunity types, feasibility matrix, and ai-dev-idea-todo.md integration
 
 一个纯 prompt 的 skill（无代码、无依赖），提供结构化的 10 阶段工作流，从外部资源中提取洞察并应用到你的 Claude Code 配置中。包含：
 
@@ -40,6 +41,7 @@ A prompt-only skill (no code, no dependencies) that provides a structured 10-pha
 - **参考价值评估** — 即使不需要修改配置，也通过 4 步门控蒸馏从资源中提取长期参考价值
 - **非配置洞察路由** — 模式和用户成长类洞察走专用评估路径
 - **安全预检** — 拒绝读取凭据，标记 prompt 注入尝试
+- **能力建设借鉴** — 流程后能力建设提案，含 5 种机会类型、可行性矩阵和 ai-dev-idea-todo.md 集成
 
 ## Disclaimers / 免责声明
 
@@ -72,8 +74,8 @@ Users are responsible for ensuring their use of this skill complies with applica
 ## Trigger / 触发方式
 
 ```
----sharingan <source> [--target <category>] [--auto] [--dry-run] [--no-ref]
----写轮眼 <source> [--target <category>] [--auto] [--dry-run] [--no-ref]
+---sharingan <source> [--target <category>] [--auto] [--dry-run] [--no-ref] [--explore] [--no-explore]
+---写轮眼 <source> [--target <category>] [--auto] [--dry-run] [--no-ref] [--explore] [--no-explore]
 ```
 
 Source can be: GitHub URL, any URL, local file/directory, or an image.
@@ -105,7 +107,7 @@ Phase 10 Safety Verification — final safety check (max 4 rounds)
 | `taxonomy.md` | English | 14-category classification taxonomy |
 | `examples.md` | EN/ZH | Output calibration: good patterns + anti-patterns |
 | `pitfalls.md` | EN/ZH | Pitfall checklist (starter entries; extend with your own) |
-| `references/` | English | Parameter parsing, source handling, edge cases, test scenarios |
+| `references/` | English | Parameter parsing, source handling, edge cases, test scenarios, TDD summary, leverage exploration |
 | `CHANGELOG.md` | English | Version history |
 
 ## Prerequisites / 前置条件

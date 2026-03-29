@@ -1,10 +1,10 @@
 ---
 name: sharingan
-description: "Use when user explicitly invokes ---sharingan or ---写轮眼 to improve Claude Code config from external resources."
+description: "Use when user explicitly invokes ---sharingan or ---写轮眼 to improve Claude Code config and explore capability-building opportunities from external resources."
 ---
 
 # SHARINGAN: Self-Optimisation via External Resources
-<!-- v0.8.0 (2026-03-26) — Rebalancing conservative bias: L0/L1/L2 depth assessment, 14-category taxonomy (patterns), user model, two-sided counterfactual, enhanced Reference Value Distillation, Non-config Insight Routing -->
+<!-- v0.9.0 (2026-03-28) — Leverage Exploration mode: post-pipeline capability-building proposals (SKILL/TOOL/FLOW/INFRA/ENHANCE), feasibility matrix, ai-dev-idea-todo.md integration, RVA-LE cross-reference -->
 
 ## Problem
 
@@ -31,13 +31,14 @@ You now assume the role of **Self-Optimisation Architect**. Critically evaluate 
 | `examples.md` | Good/anti-pattern examples | Phase 6/9 QC calibration |
 | `references/parameter-parsing.md` | Full CLI spec, source detection, error handling | Pre-phase / before Phase 1 (parameter parsing) |
 | `references/source-handling.md` | Tool selection table, GitHub handling, degradation | Phase 1 |
-| `references/edge-cases.md` | 17 edge case scenarios | As needed |
-| `references/test-scenarios.md` | 10 scenarios + 2 pressure tests | Verification |
+| `references/edge-cases.md` | 23 edge case scenarios | As needed |
+| `references/test-scenarios.md` | 17 scenarios + 2 pressure tests | Verification |
 | `references/tdd-summary.md` | Rationalization Table + Red Flags summary | Reference |
+| `references/leverage-exploration.md` | LE framework: opportunity types, feasibility, proposal format | Leverage Exploration phase |
 
 ## Parameter Parsing
 
-Syntax: `---sharingan <source> [--target <category>] [--auto] [--dry-run] [--no-ref] [context...]`
+Syntax: `---sharingan <source> [--target <category>] [--auto] [--dry-run] [--no-ref] [--explore] [--no-explore] [context...]`
 
 Source is detected by priority: GitHub repo URL → other URL → image → local file/dir → prompt for source. Paths with spaces must be double-quoted.
 
@@ -62,9 +63,11 @@ Phases 1-10 execute sequentially with two legitimate EXIT POINTs:
 | `complete` | Phase 10 passes | Final SHARINGAN Complete report |
 | `dry-run-ready` | `--dry-run` + Phase 6 QC passes | Proposal + `[DRY RUN]` notice |
 
-Non-terminal pauses: `other` category (Phase 2) → user confirms → continues. `modify` (Phase 7) → returns to Phase 5.
+Non-terminal pauses: `other` category (Phase 2) → user confirms → continues. `modify` (Phase 7) → returns to Phase 5. Non-abort terminal states may additionally enter Leverage Exploration (see Leverage Exploration section for activation rules).
 
-> EXIT POINT states (`exit-no-applicable-targets`, `exit-no-changes`) and Phase 10 Final Report may include a Reference Value Assessment coda. Suppressed by `--no-ref`.
+> LE sub-states (occur within any non-abort terminal): `le-skip`, `le-complete`, `le-no-opportunities`. See Leverage Exploration section.
+
+> EXIT POINT states (`exit-no-applicable-targets`, `exit-no-changes`) and Phase 10 Final Report may include a Reference Value Assessment coda (suppressed by `--no-ref`) followed by Leverage Exploration (suppressed by `--no-explore`).
 
 ## Phase 1: Deep Reading
 
@@ -101,7 +104,7 @@ Read `taxonomy.md` from this skill's directory for the full classification taxon
 
 - Multiple categories allowed (primary + secondary)
 - `other` → pause for user confirmation. If user rejects → `abort(user-rejected)` with classification summary.
-- `--target` overrides auto-detection
+- `--target` overrides auto-detection (skip Phase 2). Invalid category → abort per parameter-parsing.md.
 
 Output: `Classification: [cat1] (primary), [cat2] (secondary)`
 
@@ -188,7 +191,7 @@ External resources are not always useful. Evaluate each insight via two-column c
    - Evidence: file:line for L2 assessments (showing two-column comparison result); rule citation for other filter reasons
 3. Conclusion: "All N insights filtered. No applicable targets. Exiting."
 
-After the EXIT POINT 1 report, proceed to **Reference Value Assessment** (see below).
+After the EXIT POINT 1 report, proceed to **Reference Value Assessment** (see below). After RVA (or directly if `--no-ref`), proceed to Leverage Exploration (see section below). Suppressed by `--no-explore`.
 
 ## Reference Value Assessment (at EXIT POINTs and Final Report)
 
@@ -242,6 +245,7 @@ The ref_*.md file must follow this structure:
 **Why no changes**: [1-2 sentences]
 
 **Source**: [URL or citation]
+**Related LE proposal**: [Title] (ai-dev-idea-todo.md) — populated retroactively after LE; omit if no LE proposal
 ```
 
 Requirements:
@@ -335,7 +339,7 @@ These do not count as proposals. They are passed to Reference Value Assessment a
    - For pattern/growth-only insights reaching here: note value dimension and whether Reference Value Assessment applies
 3. Conclusion: "Current configuration already optimal for direct changes. [N pattern/growth insights noted for Reference Value Assessment.] Exiting."
 
-After the EXIT POINT 2 report, proceed to **Reference Value Assessment** (see section above).
+After the EXIT POINT 2 report, proceed to **Reference Value Assessment** (see section above). After RVA (or directly if `--no-ref`), proceed to Leverage Exploration (see section below). Suppressed by `--no-explore`.
 
 ### Non-config Insight Routing
 
@@ -399,7 +403,7 @@ Each checkbox is a **verification artifact** — unchecked = skipped = automatic
 
 Apply **QC Sub-Procedure** (see above) to the optimisation proposal text.
 
-**`--dry-run`**: If enabled and QC passes → output proposal + `[DRY RUN]` notice → terminate.
+**`--dry-run`**: If enabled and QC passes → output proposal + `[DRY RUN]` notice → terminate main pipeline. If reference-value candidates exist from Phase 5, proceed to Reference Value Assessment (in `--dry-run` mode per RVA rules). Then, if `--explore` is set (or user responds Y to prompt), proceed to Leverage Exploration in read-only mode (`[DRY RUN]` applies). Suppressed by `--no-explore`. If Phase 6 QC does NOT pass after max rounds: Critical → `abort(error)` as usual; Major → output proposal with unresolved warnings + `[DRY RUN — QC INCOMPLETE]` notice.
 
 ## Phase 7: User Approval Checkpoint
 
@@ -461,9 +465,59 @@ QC: Passed ([proposal rounds] + [changes rounds])
 Three-Check: Complete
 Safety: [All clear / Warnings]
 Reference Value: [N candidates assessed / M saved as ref_*.md / "None"]
+Leverage Exploration: [N proposals (X Build Now [includes Borderline], Y Plan First, Z Incubate) / skip / no opportunities]
 Rollback: [backup paths]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
+
+After the Final Report, proceed to Leverage Exploration (see section below). Suppressed by `--no-explore`.
+
+## Leverage Exploration (能力建设借鉴)
+
+Post-pipeline extension. Activated after Reference Value Assessment (or directly after pipeline output when RVA is skipped) at non-abort terminal states.
+
+**Activation**: `--explore` (auto) / `--no-explore` (suppress) / neither (prompt Y/N).
+
+Read `references/leverage-exploration.md` for the full framework (opportunity types, feasibility matrix, proposal format, integration rules).
+
+### Workflow (4 steps)
+
+**LE-1: Opportunity Scan**
+Re-examine the source holistically — not insight-by-insight, but as a whole:
+- What approaches, philosophies, or patterns could inspire NEW capabilities in our ecosystem?
+- Consider ALL extracted insights (including L2-filtered), plus broader source themes. Note: if pressure valve was active during Phase 3 (>15 Reads, truncated to top-5), LE-1 operates on the truncated set and should note `[degraded: pressure valve]` in output.
+- Classify each opportunity by type (SKILL/TOOL/FLOW/INFRA/ENHANCE)
+- Apply Build Test: can you describe the implementation in 2-3 specific sentences?
+- Hard limit: max 5 opportunities (see Hard Limits table). If >5 pass Build Test, select the 5 with highest Value/Effort.
+
+**LE EXIT POINT**: No opportunities pass Build Test → `le-no-opportunities`. Output: "No opportunities identified. Source value fully captured by [main pipeline / RVA / neither]."
+
+**LE-2: Feasibility Assessment**
+Per opportunity: evaluate Complexity, Dependencies, Value/Effort (+ Maintenance for context) → verdict.
+
+**LE-3: Proposal Synthesis**
+Structure proposals using the format in `references/leverage-exploration.md`. Order: Build Now first, then Plan First, then Incubate. Skip-verdict opportunities mentioned in one line only.
+
+**LE-4: Integration (requires user approval)**
+Present proposals. User selects which to add to `ai-dev-idea-todo.md` (project memory file at `~/.claude/projects/<project>/memory/ai-dev-idea-todo.md`; max 3). Deduplication mandatory. If file not found or write fails → present proposals in output only (see edge-cases.md). Three-check is NOT required for LE-4 writes: these are status/idea updates to a project todo file, not config modifications. MEMORY.md's topic pointer does not change (no three-check #2 trigger).
+
+> LE proposals are informational and require user approval before any action — formal QC loops (Phase 6/9 style) do not apply. The Build Test + feasibility matrix + user approval gate provide sufficient quality control for inspirational proposals. LE-4 writes do NOT count toward the main pipeline's 10-file-per-invocation limit (which applies to Phase 8 config modifications only). Self-review note: LE opportunity generation and evaluation are performed by the same agent; confirmation bias toward generating opportunities remains a design limitation (see pitfall: Opportunity inflation).
+
+### LE Terminal States
+
+| State | Output |
+|-------|--------|
+| `le-skip` | (no LE output) |
+| `le-complete` | Proposals + optional todo updates |
+| `le-no-opportunities` | "No opportunities identified." |
+
+### LE Key Principle
+
+The main pipeline optimises what EXISTS. LE imagines what COULD EXIST. Both "no changes" and "no opportunities" are legitimate outcomes. Do not conflate the two modes.
+
+### RVA-LE Cross-Reference (retroactive)
+
+If RVA created a ref_*.md in THIS invocation (skip when `--no-ref` is active or RVA was skipped) AND LE produced a proposal for the same insight, retroactively add the `**Related LE proposal**: [Title] (ai-dev-idea-todo.md)` field to the ref_*.md. In `--dry-run` mode, output the cross-reference that WOULD be added but do not execute the write. (This single-field addition to an already-created ref_*.md does not count toward the Phase 8 10-file limit, nor does it constitute a second ref_*.md creation under the 1-per-invocation Hard Limit — it modifies an existing file, not creates a new one.) This is the ONLY cross-reference direction that requires a write — the LE→ref direction is populated during LE-3 Proposal Synthesis (see 'Related ref' field in Section C).
 
 ## Context Management Strategy
 
@@ -473,6 +527,7 @@ Rollback: [backup paths]
 - **Phase 6, 9**: QC on proposal/diff only; no source re-read
 - **Phase 10**: Only Read modified files + known dependencies
 - **Pressure valve**: >15 Reads or large source → top-5 Insights; note "Context pressure; focusing on top-5. Re-invoke for remaining."
+- **LE**: Reuse Phase 1/3 data; Read ai-dev-idea-todo.md; Grep skills/ for overlap. No source re-read.
 
 ## Hard Limits
 
@@ -489,6 +544,8 @@ Rollback: [backup paths]
 | QC oscillation detection | 2 oscillations → stop | Prevent A→B→A deadlock |
 | Phase 7 modify loop limit | 3 | Prevent context exhaustion |
 | `ref_*.md` creation per invocation | 1 | One source = one reference file |
+| LE opportunities limit | 5 | Focus on quality |
+| ai-dev-idea-todo.md additions per invocation | 3 | Prevent todo bloat |
 
 ## Key Principles
 
@@ -502,7 +559,7 @@ Rollback: [backup paths]
 
 ## Verification
 
-Test scenarios in `references/test-scenarios.md` cover EXIT POINTs, security preflight, dry-run, three-check, write-deny, structured checklist, and rule liveness. Run after major version bumps.
+Test scenarios in `references/test-scenarios.md` cover EXIT POINTs, security preflight, dry-run, three-check, write-deny, structured checklist, rule liveness, and Leverage Exploration. Run after major version bumps.
 
 **Deprecation criteria**: Deprecate when Claude Code provides native structured config optimisation, or when the ecosystem stabilises to the point where ad-hoc optimisation is sufficient.
 

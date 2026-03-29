@@ -8,15 +8,22 @@
 |----------|----------|--------|-------|
 | S-1 | 2026-03-26 | PASS (×3 + regression) | v0.5.0 runs: URL fetch + local file → EXIT POINT 1. v0.8.0 regression (code review): user model, patterns category, Non-config Routing all unreachable for irrelevant sources. No path affected. |
 | S-2 | 2026-03-26 | PASS (×5 + regression) | v0.5.0 runs: 5 already-covered sources → EXIT POINT 1. v0.8.0 regression (code review): L2 classification (3-dimension no-gap) matches/exceeds old binary filter. L1 Verification Gate default-L2 provides safety net. |
-| S-3 | 2026-03-26 | PASS (regression) | v0.3.0 run: 3 unsafe tips → Security Preflight. v0.8.0 regression (code review): Security Preflight (SKILL.md:75-78) unchanged. Runs before depth assessment. |
+| S-3 | 2026-03-26 | PASS (regression) | v0.3.0 run: 3 unsafe tips → Security Preflight. v0.8.0 regression (code review): Security Preflight (SKILL.md § Security Preflight) unchanged. Runs before depth assessment. |
 | S-4 | 2026-03-26 | PASS (regression) | v0.3.0 run: 7→2→1 proposed, QC 2 rounds, dry-run. v0.8.0 regression (code review): Phase 3 extraction format gains 3 new fields but output consumed by Phase 4 is structurally compatible; Phase 6 QC gains two-sided counterfactual + completion bias note but format remains 6-checkbox; no Phase 4-6 logic path broken. |
 | S-5 | 2026-03-26 | PASS (regression) | v0.5.0 run: 3 insights → Phase 7-10 executed, three-check verified. v0.8.0 regression (code review): Phase 8-10 execution logic unchanged; three-check protocol unchanged; Blast Radius/MEMORY.md audit steps unchanged. New Phase 5 Reference-Value Candidates section is additive (does not alter proposal execution path). |
-| S-6 | 2026-03-26 | PASS (regression) | v0.5.0 run: 3 write-deny tips → Phase 3 filter. v0.8.0 regression (code review): Filter Rules (SKILL.md:171-176) unchanged. Calibrated Acceptance (line 180): "Hard filters remain absolute." |
-| S-7 | 2026-03-26 | PASS (regression) | v0.5.0 run: 6 checkboxes checked, 2 QC rounds, dry-run. v0.8.0 regression (code review): QC Sub-Procedure (SKILL.md:369-396) gains two-sided counterfactual + completion bias note + L1 attrition metric, but mandatory 6-checkbox format (line 375-381) unchanged; Write-deny compliance was already the 6th checkbox pre-v0.8.0. |
-| S-8 | 2026-03-26 | PASS | Post v0.8.0 liveness check. 13 new mechanisms (Depth Assessment, L1 Gate, patterns cat, user model, Non-config Routing, 6-field format, two-sided counterfactual, L1 attrition, Calibrated Acceptance, Distillation 4-step, Self-Critique Gate, Phase 4 output format, Phase 5 Ref-Value Candidates): 13 live, 0 dead. 22 pitfall entries: 22 live, 0 dead, 1 [FIXED]. "14-category" consistent ×7. 7 cross-file refs valid. |
+| S-6 | 2026-03-26 | PASS (regression) | v0.5.0 run: 3 write-deny tips → Phase 3 filter. v0.8.0 regression (code review): Filter Rules (SKILL.md § Filter Rules) unchanged. Calibrated Acceptance (SKILL.md § Calibrated Acceptance Principle): "Hard filters remain absolute." |
+| S-7 | 2026-03-26 | PASS (regression) | v0.5.0 run: 6 checkboxes checked, 2 QC rounds, dry-run. v0.8.0 regression (code review): QC Sub-Procedure (SKILL.md § QC Sub-Procedure) gains two-sided counterfactual + completion bias note + L1 attrition metric, but mandatory 6-checkbox format (SKILL.md § QC Sub-Procedure, Mandatory format) unchanged; Write-deny compliance was already the 6th checkbox pre-v0.8.0. |
+| S-8 | 2026-03-28 | PASS | Post v0.9.0 liveness check. 23 mechanisms (13 v0.8.0 + 10 LE: LE-1 Opportunity Scan, LE-2 Feasibility, LE-3 Proposal Synthesis, LE-4 Integration, Build Test gate, LE EXIT POINT, LE activation logic, RVA-LE Cross-Reference, LE sub-states, Anti-Bias Rules): 23 live, 0 dead. 26 pitfall entries (22+4 `[le]`). 23 edge cases (17+6 LE). 10 cross-file refs valid. Coverage gaps addressed: S-13 PASS, S-14 PASS (behavioral, 2026-03-29), S-15 PASS, S-16 PASS (behavioral, 2026-03-29). |
 | P-1 | 2026-03-26 | PASS (regression) | v0.5.0 run: 10/10 filtered. v0.8.0 regression (code review): 7 already-implemented → L2 (3-dim no-gap); 2 sufficient → L2; 1 not viable → platform/tool-gate. L1 Verification Gate (default-L2) prevents false L1 classification. |
-| S-9 | 2026-03-26 | PASS (×4 + regression) | v0.7.0 runs: (a) `--no-ref` suppressed ✅ (b) dry-run+Y no file ✅ (c) irrelevant "No reference value" ✅ (d) normal+Y ref_*.md created ✅. v0.8.0 regression (code review): Enhanced 4-step Distillation + Self-Critique Gate are internal process changes; external contract (suppress/output/create) unchanged; --no-ref bypass (SKILL.md:197) unchanged. |
+| S-9 | 2026-03-26 | PASS (×4 + regression) | v0.7.0 runs: (a) `--no-ref` suppressed ✅ (b) dry-run+Y no file ✅ (c) irrelevant "No reference value" ✅ (d) normal+Y ref_*.md created ✅. v0.8.0 regression (code review): Enhanced 4-step Distillation + Self-Critique Gate are internal process changes; external contract (suppress/output/create) unchanged; --no-ref bypass (SKILL.md § Reference Value Assessment, --no-ref skip) unchanged. |
 | S-10 | 2026-03-26 | PASS | Synthetic input (4 tips: 1 L1 + 3 L2). L1 correctly passed Phase 3 filter with two-column comparison + gap evidence. Phase 4 deeper evaluation → attrition (gap not actionable). EXIT POINT 2. --dry-run. |
+| S-11 | 2026-03-28 | PASS (regression) | v0.9.0 code-review regression. EXIT POINT 2 (SKILL.md § Phase 5, EXIT POINT 2) → RVA (SKILL.md § Phase 5, RVA cross-ref) → LE auto-enter via --explore (SKILL.md § Leverage Exploration, Activation) → LE-1→LE-2→LE-3→LE-4 (SKILL.md § LE-1 through LE-4). Transition chain textually complete with cross-refs at each junction. No contradictory terminal-state logic. Declaration-level wiring only. |
+| S-12 | 2026-03-28 | PASS (regression) | v0.9.0 code-review regression. LE-1 (SKILL.md § LE-1: Opportunity Scan) → Build Test (SKILL.md § LE-1, Build Test) → failure → le-no-opportunities (SKILL.md § LE EXIT POINT). Output "No opportunities identified." consistent across 3 sites (SKILL.md § Workflow Overview LE sub-states, § LE EXIT POINT, § LE Terminal States). Declaration-level wiring only. |
+| S-13 | 2026-03-29 | PASS (code-review) | --no-explore suppression verified: flag parsed (parameter-parsing.md § Syntax, --no-explore), --explore conflict caught (parameter-parsing.md § Error Handling, --explore + --no-explore), LE suppressed at all 4 activation points (SKILL.md § EXIT POINT 1, § EXIT POINT 2, § Phase 6 --dry-run, § Phase 10 Final Report), activation logic (SKILL.md § Leverage Exploration, Activation) lists suppress. Declaration-level wiring only. |
+| S-14 | 2026-03-29 | PASS (behavioral) | Anti-bias wiring verified (code-review, 2026-03-29) + behavioral test (2026-03-29): synthetic weak-input source (6 items: 4 vague, 1 config-backflow, 1 borderline). All 3 pitfalls triggered: #23 on items 1-4 (Build Test fail — no 2-3 specific implementation sentences), #24 on item 5 ("configuration recommendation" revealed config-change nature → redirected), #25 on item 3 (aspirational ML idea, no implementation path → can't be Build Now). Test source QC'd via `---qc --loop --sub` (7 rounds, 3 consecutive passes). |
+| S-15 | 2026-03-29 | PASS (opportunistic + code-review) | ECC run (2026-03-28): ref_progressive_knowledge_refinement.md (RVA) contains pointer-level "Related LE Proposals" (3 lines); LE proposals in ai-dev-idea-todo.md Part B have independent content with [来源: ECC] tags. No content duplication. Cross-ref mechanism (SKILL.md § RVA-LE Cross-Reference): ref→LE via "Related LE proposal" field, LE→ref via "Related ref" in Section C — bidirectional but content-isolated. |
+| S-16 | 2026-03-29 | PASS (behavioral) | Synthetic source: Session Cost Tracker with 3 uncertain dependencies (Stop hook collision, JSONL schema, ~/.claude/ write protection). (a) Feasibility shows Build Now (Borderline displayed as Build Now) ✅ (b) Dependencies field has Risk sub-field with 3 verification prerequisites ✅ (c) Final Report counts Borderline in Build Now total ("1 Build Now [Borderline]") ✅. LE-4 dedup correctly identified overlap with existing ai-dev-idea-todo.md entry → proposed enrichment. |
+| S-17 | — | — | LE-4 ai-dev-idea-todo.md not-found fallback. Added 2026-03-29. |
 | P-3 | Deferred | — | Requires natural long-session fatigue conditions; cannot be simulated synthetically. Verify opportunistically. |
 
 ## S-1: 无关资料 → Phase 3 EXIT POINT
@@ -117,5 +124,59 @@
 
 - **输入**: 含有 L1 级别 insight 的外部资料（当前配置名义存在但深度不足）
 - **预期行为**: Phase 3 Pre-filter Verification 展示二列对比表，L1 assessment 有具体 gap 证据。L1 insight 通过过滤（不被误判为 L2 "已实现"），进入 Phase 4-5 深入评估。
-- **验証**: 确认 L0/L1/L2 评估出现在 Phase 3 输出中，二列对比表填写完整，L1 insight 未被过滤。
-- **测試模式**: `--dry-run`
+- **验证**: 确认 L0/L1/L2 评估出现在 Phase 3 输出中，二列对比表填写完整，L1 insight 未被过滤。
+- **测试模式**: `--dry-run`
+
+## S-11: LE after EXIT POINT 2 (all L2) with `--explore`
+
+- **输入**: 所有 insights 为 L2 的外部资料 + `--explore` flag
+- **预期行为**: EXIT POINT 2 → RVA → LE 自动进入（无 prompt）→ LE-1 至 LE-4 执行完整流程
+- **验证**: 确认 RVA → LE 顺序正确；proposal 格式匹配 `references/leverage-exploration.md` Section C 模板；如有 RVA ref 和 LE proposal 重叠，cross-reference 正确填写
+- **测试模式**: `--dry-run --explore`
+
+## S-12: LE with no opportunities
+
+- **输入**: 与用户生态无关的短资料 + `--explore` flag
+- **预期行为**: LE-1 Opportunity Scan 发现所有候选均未通过 Build Test → `le-no-opportunities` → 输出 "No opportunities identified."
+- **验证**: 确认 LE 输出包含 "No opportunities identified." 且正确标注 source value 归属（main pipeline / RVA / neither）
+- **测试模式**: `--dry-run --explore`
+
+## S-13: `--no-explore` 抑制 LE
+
+- **输入**: 任意外部资料 + `--no-explore` flag
+- **预期行为**: 主流程正常执行至完成（或 EXIT POINT）；LE 完全不触发
+- **验证**: 确认输出不含 "Leverage Exploration" 或 LE-1~LE-4 任何步骤
+- **测试模式**: `--dry-run --no-explore`
+- **来源**: S-8 coverage gap (2026-03-28)
+
+## S-14: LE Anti-Bias 门控强制执行
+
+- **输入**: 包含低质量"能力建设"建议的外部资料 + `--explore` flag（如模糊的 "could build a tool someday"）
+- **预期行为**: LE-1 Opportunity Scan 中 Build Test 拒绝模糊提案；anti-bias rules (pitfalls #23/#24/#25) 被正确执行
+- **验证**: 确认 Opportunity inflation / Config backflow / Build Now threshold 至少一项被触发拦截
+- **测试模式**: `--dry-run --explore`
+- **来源**: S-8 coverage gap (2026-03-28)
+
+## S-15: RVA-LE Cross-Reference 隔离
+
+- **输入**: 高质量外部资料（触发 RVA ref 生成 + LE proposal）+ `--explore` flag
+- **预期行为**: RVA 生成 ref_*.md；LE 生成独立 proposal；两者有交叉引用但内容不重叠
+- **验证**: ref_*.md 不含 LE proposal 内容；LE proposal 的 RVA cross-ref 字段正确指向 ref_*.md
+- **测试模式**: 正常模式 + `--explore`
+- **来源**: S-8 coverage gap (2026-03-28)
+
+## S-16: Borderline Verdict → Build Now + Risk Note
+
+- **输入**: 含有依赖状态不确定的 LE opportunity 的外部资料 + `--explore` flag（如某工具依赖未验证的 Stop hook 兼容性）
+- **预期行为**: LE-2 Feasibility Assessment 识别 borderline 场景 → verdict 为 Build Now + 显式 risk note（列出验证前提）；proposal output 的 Dependencies 字段含 Risk 子字段；Final Report 中 Borderline 计入 Build Now 总数
+- **验证**: 确认 (a) Feasibility 字段显示 Build Now 而非 Plan First / Borderline，(b) Dependencies 字段含 Risk 子字段，(c) Final Report 的 Build Now 计数包含 borderline proposals
+- **测试模式**: `--dry-run --explore`
+- **来源**: Borderline verdict rule addition (2026-03-29)
+
+## S-17: LE-4 ai-dev-idea-todo.md Not Found → Display-Only Fallback
+
+- **输入**: 在不含 `ai-dev-idea-todo.md` 的目录下运行 `---sharingan <source> --explore`，且 LE-1 产出至少 1 个 Build Now opportunity
+- **预期行为**: LE-4 Integration 检测到 todo 文件不存在 → proposals 正常输出但仅展示（不写入）→ 输出含 `[LE-4: todo file not found — proposals displayed only]` 标记 → 不自动创建 `ai-dev-idea-todo.md`
+- **验证**: 确认 (a) proposals 内容完整呈现（Title / Type / Feasibility 等字段齐全），(b) 输出含 `[LE-4: todo file not found — proposals displayed only]` 标记，(c) 运行后目录中无新建 `ai-dev-idea-todo.md` 文件
+- **测试模式**: `--dry-run --explore`（在临时目录或非项目目录执行）
+- **来源**: leverage-exploration.md § Section D, not-found fallback rule (2026-03-29)
