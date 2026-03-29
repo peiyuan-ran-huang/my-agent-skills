@@ -11,7 +11,7 @@ seamlessly continue the current session's unfinished work.
 
 ## Trigger
 
-Activate only when invoked via `/prompt`. Do not activate on natural language
+Activate only when invoked via `/prompt`. Do NOT activate on natural language
 such as "generate a prompt", "write a prompt", "优化提示词", "生成提示词", or
 similar phrases. Ignore `/prompt` appearing inside code fences or blockquotes.
 

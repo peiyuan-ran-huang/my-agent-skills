@@ -451,3 +451,36 @@ fractal 原则建议将此模式在 sharingan Phase 10 中也应用"（命名了
 QC Sub-Procedure、Phase 6/9、Phase 10）。
 无具体应用场景 → 不应分类为 patterns。
 ```
+
+---
+
+## Leverage Exploration — 好示例
+
+外部资料：OpenAI Harness Engineering 博客，经 sharingan 主流程后所有 insights 均为 L2。进入 LE：
+
+### Opportunity 1: Capability-Gaps Logger
+- Type: INFRA
+- Source inspiration: "logging what the agent couldn't do"
+- What it does: 工作中遇到 Claude 做不到的事自动记录到 capability-gaps.md，定期回顾驱动能力建设
+- How it maps to our ecosystem: PostToolUse hook 检测 "I can't" / fallback 模式 → 写入 memory/capability-gaps.md
+- Feasibility: Plan First
+  - Complexity: Med — needs hook integration + structured log format
+  - Dependencies: hookify framework (existing)
+  - Value/Effort: Regular use — 每次能力差距都被记录
+- Existing overlap: None
+
+### Opportunity 2: Config-Doctor Health Check
+- Type: TOOL
+- Source inspiration: "automated config validation"
+- What it does: 自动扫描 ~/.claude/ 配置健康度（冗余、一致性、过期条目、最佳实践对标）
+- How it maps to our ecosystem: 扫描 settings.json + mcp.json + rules/ + MEMORY.md，对比 best practices checklist
+- Feasibility: Plan First
+  - Complexity: Med-High — cross-file scanning + health score logic
+  - Dependencies: existing Grep/Read tools
+  - Value/Effort: Regular use — 替代手动配置审查
+- Existing overlap: 与 ai-dev-idea-todo.md "全局配置+记忆自查优化工具" 条目重叠 → 更新而非新建
+
+### Anti-pattern: Opportunity inflation
+
+同一源材料中硬凑 8 个 "opportunity"，其中 5 个只有一句话描述，无具体实现路径。
+Build Test 失败的 opportunity 不应出现在 LE 输出中（即使 Skip verdict 也只一行带过）。

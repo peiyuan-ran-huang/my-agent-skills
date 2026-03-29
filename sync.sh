@@ -54,16 +54,20 @@ for skill_dir in "$REPO_DIR/skills/"/*/; do
   cp -r "$skill_dir/." "$dest/"
 
   # Restore user-maintained files (overrides repo templates just copied)
+  # Clear each backup var after restore so the trap handler won't re-attempt
   if [[ -n "$pitfalls_backup" ]]; then
     mv "$pitfalls_backup" "$dest/pitfalls.md"
+    pitfalls_backup=""
     echo "  ⏭ $skill_name/pitfalls.md (user file preserved)"
   fi
   if [[ -n "$examples_backup" ]]; then
     mv "$examples_backup" "$dest/examples.md"
+    examples_backup=""
     echo "  ⏭ $skill_name/examples.md (user file preserved)"
   fi
   if [[ -n "$ledger_backup" ]]; then
     mv "$ledger_backup" "$dest/verification-issue-ledger.md"
+    ledger_backup=""
     echo "  ⏭ $skill_name/verification-issue-ledger.md (user file preserved)"
   fi
 
@@ -92,7 +96,8 @@ for cmd_file in "$REPO_DIR/commands/"*.md; do
       echo "  ✓ $cmd_name (→ skills/$cmd_name/SKILL.md)"
     fi
   else
-    # Regular command: install to commands dir
+    # Regular command: install to commands dir (always overwritten — local
+    # customizations, if any, will be replaced by the repo version)
     mkdir -p "$HOME/.claude/commands"
     cp "$cmd_file" "$HOME/.claude/commands/$cmd_name.md"
     echo "  ✓ $cmd_name (→ commands/$cmd_name.md)"

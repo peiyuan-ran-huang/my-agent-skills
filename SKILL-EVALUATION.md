@@ -3,6 +3,8 @@
 **Date**: 2026-03-24 | **Framework**: Skill Evaluation Gold Standard v1.0 | **Evaluator**: Claude Code (Opus 4.6)
 
 > **Disclosure**: The evaluation framework used here was designed by Claude Code itself. All three skills evaluated below were also authored by Claude Code under the user's direction. This is therefore a **self-assessment** — the same system that wrote the skills also defined the rubric and performed the scoring. Readers should bear this inherent limitation in mind. This is a **summary report** presenting scores only; the Gold Standard's full reporting template (key findings, evidence, strengths/weaknesses, improvement recommendations) is omitted by design.
+>
+> **Note**: Version numbers below reflect the version at time of evaluation, not the current release. See each skill's SKILL.md for current versions.
 
 ---
 
@@ -145,4 +147,4 @@ Highest score per dimension shown in **bold**.
 
 ## Commands (Not Formally Scored)
 
-The `commands/` directory contains lightweight single-file tools (handoff v0.1.0, rus v1.2.0, work) that fall below the evaluation threshold (Simple tier). They are not formally scored under the D1-D7 framework.
+The `commands/` directory contains lightweight single-file tools (handoff v0.1.0, rus v1.2.0, work, prompt v0.1.0) that fall below the evaluation threshold (Simple tier). They are not formally scored under the D1-D7 framework.
