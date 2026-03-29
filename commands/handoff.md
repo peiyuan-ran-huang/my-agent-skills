@@ -2,6 +2,7 @@
 description: "Generate a session handoff document for seamless work continuity across sessions"
 allowed-tools: Read, Write, Bash, Grep, Glob, TaskList, Skill
 ---
+<!-- version: 0.1.0 (2026-03-29) — converted from skill to slash command -->
 
 # Session Handoff
 

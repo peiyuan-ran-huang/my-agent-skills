@@ -39,7 +39,7 @@ bash ~/my-agent-tools/sync.sh
 
 ## Commands
 
-Lightweight tools organized by complexity rather than type. Some are technically skills but are single-file and simple enough to live here.
+Lightweight single-file tools that complement the skills above.
 
 | Tool | Trigger | Description |
 |------|---------|-------------|

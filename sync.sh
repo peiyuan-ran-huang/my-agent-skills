@@ -73,9 +73,9 @@ for skill_dir in "$REPO_DIR/skills/"/*/; do
 done
 
 # ── Commands ──────────────────────────────────────────────
-# Commands can be either:
-#   - Regular commands (frontmatter has 'description:' only) → ~/.claude/commands/<name>.md
-#   - Skills-as-commands (frontmatter has 'name:' field) → ~/.claude/skills/<name>/SKILL.md
+# All commands use 'description:' frontmatter → installed to ~/.claude/commands/<name>.md
+# Hybrid routing (fallback): if a command file has 'name:' in frontmatter,
+# it is routed to ~/.claude/skills/<name>/SKILL.md instead (currently unused).
 echo "Syncing commands to $HOME/.claude/ ..."
 for cmd_file in "$REPO_DIR/commands/"*.md; do
   [[ -f "$cmd_file" ]] || continue
