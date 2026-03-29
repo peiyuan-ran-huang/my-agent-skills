@@ -1,6 +1,6 @@
 # my-agent-tools
 
-Reusable AI agent skills and commands for Claude Code, synced across devices.
+Reusable tools (e.g., skills and commands) for AI agents (e.g., Claude Code), synced across devices.
 
 ## Structure
 
@@ -13,7 +13,7 @@ skills/
 commands/
   work.md         ← slash command (/work)
   handoff.md      ← session handoff generator (/handoff)
-  rus.md          ← lightweight self-review (---rus)
+  rus.md          ← lightweight self-review "r u sure?" (/rus)
 ```
 
 ## First-time setup (new device)
@@ -45,4 +45,4 @@ Lightweight tools organized by complexity rather than type. Some are technically
 |------|---------|-------------|
 | work | `/work` | Read-only session summary: completed, pending, remaining items |
 | handoff | `/handoff [path]` | 4-phase session handoff document generator with QC review |
-| rus | `---rus` | Lightweight critical self-review of last response (v1.1.0) |
+| rus | `/rus` | Lightweight critical self-review ("r u sure?") of last response (v1.2.0) |
