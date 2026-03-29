@@ -1,17 +1,9 @@
 ---
-name: rus
-description: Use when the user explicitly invokes ---rus to trigger a quick critical self-review of Claude's own last response. Lightweight alternative to ---qc.
+description: "Quick critical self-review of Claude's last response — lightweight /qc alternative"
 ---
-<!-- version: 1.1.0 (2026-03-28) -->
+<!-- version: 1.2.0 (2026-03-29) — converted from skill to slash command -->
 
 # RUS — R U Sure?
-
-## Trigger
-
-Activate ONLY when `---rus` (case-insensitive) appears as the **first token** of the user message.
-Ignore `---rus` occurring inside code fences, blockquotes, quotes, or inline examples.
-Do NOT activate on natural language like "r u sure" / "are you sure" / "check again" / "你确定吗". If the user appears to want a re-check but uses no sentinel, do not self-activate.
-This skill takes no arguments. Any text after `---rus` is ignored; the review scope is always the last substantive response.
 
 ## What To Do
 
