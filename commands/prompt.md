@@ -109,7 +109,7 @@ primarily goal-oriented):
 
 2. **File output** (only when `--file` is present):
    a. Determine output path:
-      - No path argument → default: `~/Desktop/_temp_md/prompt_<timestamp>.md`
+      - No path argument → default: `C:/tmp/prompt_<timestamp>.md`
       - Directory path → generate `prompt_<timestamp>.md` inside it
       - `.md` file path → use directly
       - Other extension → prompt user to confirm

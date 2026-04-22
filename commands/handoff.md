@@ -20,9 +20,9 @@ similar phrases. Ignore `/handoff` appearing inside code fences or blockquotes.
 Syntax: `/handoff [output path]`
 
 1. **No arguments**: output to default path:
-   `~/Desktop/_temp_md/handoff_<timestamp>.md`
+   `C:/tmp/handoff_<timestamp>.md`
    Generate `<timestamp>` via Bash: `date +%Y-%m-%d_%H%M%S`
-   <!-- Note: ~/Desktop/ may not exist on headless Linux/WSL. Users can override via /handoff [path]. -->
+   <!-- Note: C:/tmp/ chosen to avoid OneDrive folder redirection (~/Desktop/ is cloud-synced on this machine). Users can override via /handoff [path]. -->
 
 2. **With arguments**: the argument is the output path.
    - Paths containing spaces **must be double-quoted**
