@@ -1,17 +1,16 @@
 ---
 name: qc
-description: Use when the user's message starts with ---qc to request a structured five-dimensional review of code, plans, documents, data, advice, or skills/prompts.
+description: Use when the user's message starts with ---qc to request a structured five-dimensional review of code, plans, documents, data, advice, or skills/prompts. Do not activate on natural-language check/review/audit, Unicode dash variants (—/–/——), or ---qc inside code fences or quotes.
 ---
 
-<!-- version: 1.4.0 | SYNC RULE: Changes to this file MUST be mirrored in SKILL_ZH.md, and vice versa.
-Allowed differences: (1) frontmatter `name` (qc vs qc-zh), (2) frontmatter `description` language,
-(3) loading behavior note in SKILL_ZH.md, (4) translation-process notes (e.g., comments explaining which sections are kept in English). Sync metric: semantic equivalence per section, NOT line-count equality. -->
+<!-- version: 1.7.3 -->
 
 # QC: Deep Review
 
 ## Trigger
 
 Activate ONLY when `---qc` (case-insensitive) appears as the **first token** of the user message.
+Tokenization ignores leading whitespace and blank lines before the sentinel. Unicode dash variants (em-dash `—`, en-dash `–`, Chinese full-width dashes `——` / `―`) do NOT match the ASCII `---` sentinel — they're literal text, not triggers.
 Ignore `---qc` occurring inside code fences, blockquotes, quotes, or inline examples.
 Do NOT activate on natural language: check / review / verify / inspect / audit / 检查 / 审阅 / 复核 / 审计 or similar.
 If the user clearly wants QC but uses no sentinel, do nothing — they may use `---qc` to invoke.
@@ -20,67 +19,67 @@ You now assume the role of **strict reviewer**. Conduct a thorough, meticulous, 
 
 ## Parameter Parsing
 
-1. Read args after `---qc`: the first semantic unit that is not a recognized flag is the review target (a single word, a quoted phrase, or a file path — **file paths containing spaces must be quoted with double quotes**, e.g., `---qc "my project/analysis.R"`; if unquoted path-like tokens containing spaces are detected, ask the user to re-invoke with quotes; only double quotes are recognized — single quotes and backslash-escaped spaces are not supported; an empty quoted string as the target falls through to auto-detect step 3); the rest are additional criteria. Scan all tokens for recognized flags — flag tokens (identified by `--` prefix matching known flags below) are excluded from target/criteria identification regardless of position:
-   - `--loop`/`--循环` [N]: activate **Loop Mode** (N defaults to 3; if the token immediately following this flag is a positive integer, it is consumed as N and not treated as the review target; non-positive integers, e.g., `--loop 0`, and non-numeric tokens are NOT consumed as N — un-consumed tokens re-enter the normal token stream; if this creates a clearly nonsensical target, prompt the user for clarification)
-   - `--sub`/`--子代理`: activate **Subagent Counterfactual Mode** (see below)
-
-   `--loop` and `--sub` can be used together; they are independent switches with no conflict (see respective sections for combined behavior).
+1. Read args after `---qc`: the first non-flag semantic unit is the review target (single word, quoted phrase, or file path); the rest are additional criteria. Flag tokens (`--` prefix matching known flags below) are excluded from target/criteria regardless of position.
+   - **Quoting**: paths with spaces MUST use double quotes (e.g., `---qc "my project/analysis.R"`). Single quotes and backslash-escaped spaces are not supported; unquoted path-like tokens with spaces → ask user to re-invoke with quotes. Empty quoted string → falls through to auto-detect step 3.
+   - `--loop`/`--循环` [N]: activate **Loop Mode**. N defaults to 3 (aligns with L2/L4 in `ref_verification_depth_ladder.md`; use `--loop 2` for L1/L3). The immediately-following token is consumed as N ONLY if it is a positive integer; otherwise (non-numeric) it re-enters the token stream. Explicit non-positive integer literals (`--loop 0`, `--loop -1`, etc.) → treat as user error, prompt for clarification rather than silent fallthrough. Ambiguous result → prompt user.
+   - `--sub`/`--子代理`: activate **Subagent Counterfactual Mode** (see below).
+   - `--loop` and `--sub` are independent switches and combine without conflict.
 2. Target mapping: 代码/code → Code | 方案/plan → Plan | 文档/doc → Document | 数据/data → Data | 建议/advice → Advice | skill/prompt/技能/提示词 → Skill/Prompt | diff/changeset/directory/目录 → Code overlay (blast-radius scope = diff/directory); for mixed content → select the primary type based on the user's question focus or content proportion; overlay checks from secondary types
-3. No arguments → auto-detect using this priority:
+3. No arguments → auto-detect in this priority order:
    1. File path mentioned in the user's current message
-   2. Most recent substantive assistant output — must be: (a) code block ≥3 lines, numbered plan ≥5 items, or continuous prose ≥5 lines (excludes pure tables, pure data output, or single-line answers); (b) classifiable as code, plan, document, data, advice, or skill/prompt (excludes tool-status output, error messages, data dumps); if uncertain, skip to step 3
+   2. Most recent substantive assistant output — must satisfy BOTH: (a) size: code block ≥3 lines, numbered plan ≥5 items, or prose ≥5 lines (excludes tables, data dumps, single-line answers); (b) type: classifiable as code/plan/document/data/advice/skill/prompt (excludes tool-status, errors). If uncertain, skip.
    3. Most recently edited or read file in the session
-   4. (Fallback) Prompt the user to specify
-4. If target content is not in current context but a clear file path or recently edited file exists → use Read to load the file before reviewing; for oversized files → read in segments, prioritising core logic sections. If Read fails (file not found, permission error), report the failure in Coverage, fall back to in-context content if available (noting `[degraded: context fallback]`), or prompt the user to verify the path
+   4. Fallback: prompt user
+4. If target content is not in context but a file path or recently edited file exists → Read it first (segment oversized files, prioritising core logic). Read failure → report in Coverage; fall back to in-context content if available (`[degraded: context fallback]`), else prompt user to verify path.
 
 ## Loop Mode (activated by `--loop [N]` / `--循环 [N]`)
 
 When `--loop` is present, execute a review-fix-review cycle:
 
-1. Run standard QC review on the target
-2. **Pass** → increment consecutive pass counter (subject to subagent counterfactual override if `--sub` is active; see Subagent Counterfactual Mode); **Not Pass** → reset counter to 0, fix all non-WNF findings (Critical → Major → Minor), then re-review. If the same finding (same dimension, same location) recurs after being fixed in a prior round, note the recurrence in the round status header (e.g., `History: [M, m, M(recur), ...]`). If it recurs 3 times (i.e., reappears in 3 separate rounds after being fixed), pause and present to the user: "This finding has recurred 3 times despite attempted fixes — manual intervention may be needed. Treat as WNF or provide guidance?" Response handling follows WNF Path 2.
-3. Exit when: consecutive passes >= N (default 3), or total rounds >= 15. If the loop exits due to reaching the round cap (total rounds >= 15) while the most recent rating is non-Pass (e.g., subagent reopened on the final round), report: `[Loop cap reached: X/15 rounds completed. Final rating: [rating]. Unresolved findings remain — see last round's report above.]`
-4. Each round starts with: `🔄 Round X/15 | Passes: Y/N | History: [P, M, m, P, ...]` (P=Pass, C=Critical, M=Major, m=Minor)  <!-- emoji is part of this template's format spec; overrides default no-emoji rule -->
-5. Target is resolved once at invocation; subsequent rounds re-review the same target (files: re-read from disk; in-context content: review the most recent corrected version output by Claude — Claude applies fixes by outputting the corrected version in the round report, and subsequent rounds review that latest output). If re-read fails mid-loop (file deleted, renamed, or permissions changed), apply the same degradation as Parameter Parsing step 4: report in Coverage, fall back to in-context content if available (`[degraded: context fallback]`); if re-read fails for 2 consecutive rounds, terminate the loop with `[Loop terminated: target unreadable since round X]`. If the target was auto-detected (not explicitly specified) and `--loop` is active, confirm the auto-detected target with the user before entering the loop. If the user rejects the auto-detected target, prompt for an explicit target specification (Parameter Parsing step 3.4) before entering the loop
-6. Calibration files (examples.md, pitfalls.md): read once at start. Evolution Protocol: **loop exit round only** (the round where the loop terminates, whether by achieving N consecutive passes or hitting the round cap).
+1. Run standard QC review on the target.
+2. **Pass** → increment consecutive pass counter (may be overridden by `--sub` subagent; see Subagent Counterfactual Mode). **Not Pass** → reset counter to 0, fix all non-WNF findings (Critical → Major → Minor), then re-review. Recurrence: if the same finding (same dimension + location) reappears after a prior-round fix, note in history as `M(recur)`; after 3 recurrences, pause and prompt user per WNF Path 2.
+3. Exit when consecutive passes ≥ N (default 3) or total rounds ≥ 15. If cap is hit while the latest rating is non-Pass (e.g., subagent reopened), report: `[Loop cap reached: X/15 rounds completed. Final rating: [rating]. Unresolved findings remain — see last round above.]`
+4. Each round header: `🔄 Round X/15 | Passes: Y/N | History: [P, M, m, P, ...]` (P=Pass, C=Critical, M=Major, m=Minor; decorators: `(recur)` = finding recurred after prior-round fix; `(N WNF)` = N won't-fix items; `(N C-WNF)` = N Critical won't-fix items; a round's rating may be retroactively replaced in history after subagent reopening per L107)  <!-- emoji is part of this template's format spec; overrides default no-emoji rule -->
+5. Target is resolved once at invocation; subsequent rounds re-review the same target — files: re-read from disk; in-context content: review the latest corrected version Claude output. Re-read failure → degrade per Parameter Parsing step 4 (`[degraded: context fallback]`); 2 consecutive failures → terminate with `[Loop terminated: target unreadable since round X]`. If target was auto-detected, confirm with user before entering the loop; if rejected, prompt for explicit target (step 3.4). Non-loop `---qc` with auto-detected target proceeds without confirmation by design — a single-round review is cheap to re-run, while loop mode's multi-round commitment on the wrong target is expensive.
+6. Calibration files (examples.md, pitfalls.md): read once at start. Evolution Protocol fires on **loop exit round only**.
 
-In loop mode, the "review only — no auto-fixes" principle is suspended: Claude fixes findings between rounds. If a fix requires user input, pause and ask. If a fix cannot be applied due to tool failure (e.g., Write tool unavailable for a file target), treat as requiring user intervention — pause the loop and report the failure. For any path that pauses the loop awaiting user response (including the WNF paths below), normal session timeout applies; the loop does not auto-resume.
+In loop mode, "review only" is suspended: Claude fixes findings between rounds. Pause the loop if a fix needs user input or if tool failure blocks application (e.g., Write unavailable). Pauses (including WNF paths) follow normal session timeout; the loop does not auto-resume.
 
-**WNF gating rule**: A finding may only be marked won't-fix (WNF) through one of these paths:
-1. **User rejects fix**: Claude proposes a fix → user explicitly rejects it (e.g., "no", "don't change that", "这个别改"). The rejection must be clearly directed at the specific fix, not a general conversational acknowledgment. If the user's response is ambiguous (neither clear acceptance nor clear rejection), do not mark as WNF — retry the fix in the next round. If the same finding receives ambiguous responses for 3 consecutive rounds, escalate to an explicit WNF prompt using Path 3's format. An escalated finding follows Path 3's full consent protocol and is recorded as path:3 in the WNF register.
-2. **Recurrence**: Finding recurs 3 times after attempted fixes → Claude prompts the user per the recurrence protocol in Loop Mode step 2. If user confirms WNF, the finding is marked WNF. If user provides guidance instead, the finding re-enters the fix cycle (not marked WNF).
-3. **Infeasible fix**: Claude determines auto-fix is infeasible (constraint conflict, capability limit, or disproportionate cost) → must issue a WNF proposal in this format:
+**Fix-report brevity (D2)**: Between rounds, summarize each fix in ONE line: `- [dim] loc: what changed` (no re-explanation of why). Verbose multi-paragraph fix rationales → prohibited unless the fix was non-obvious AND triggered a WNF path, in which case include a **Why:** line limited to one sentence.
+
+**WNF gating rule**: A finding may only be marked won't-fix (WNF) via one of these paths:
+1. **User rejects fix**: user explicitly rejects Claude's fix (e.g., "don't change that", "这个别改") — must be directed at the specific fix, not general acknowledgment. Ambiguous responses → retry next round; after 3 consecutive ambiguous responses, escalate to Path 3 format (recorded as path:3).
+2. **Recurrence**: finding recurs 3 times after fixes → prompt per Loop Mode step 2. User confirms WNF → mark WNF; user provides guidance → re-enter fix cycle.
+3. **Infeasible fix**: Claude determines auto-fix is infeasible (constraint conflict, capability limit, disproportionate cost) → issue WNF proposal:
    `⚠️ WNF proposal: [finding ref] — [reason infeasible]`  <!-- emoji is part of this template's format spec; overrides default no-emoji rule -->
-   and wait for user response. **Consent keywords**: "WNF" / "skip" / "跳过" / "不修". If the user's response does not contain a listed keyword but unambiguously expresses WNF intent (e.g., "不用管了", "leave it", "算了"), Claude may accept it as consent but MUST record the user's exact words in the round report body for auditability. **Ambiguous responses** (e.g., "继续", "好", "OK") do NOT constitute consent — re-prompt once; if still unclear, pause the loop and present: "WNF consent unclear for [finding ref] — please confirm with WNF/skip/跳过/不修, or provide fix guidance."
+   and wait. **Consent keywords**: `WNF` / `skip` / `跳过` / `不修`. Unambiguous non-keyword expressions (e.g., "不用管了", "leave it") accepted but MUST record the user's exact words in the round report for audit. Ambiguous responses ("继续", "好", "OK") → re-prompt once; still unclear → pause loop with: "WNF consent unclear for [ref] — confirm with WNF/skip/跳过/不修 or provide fix guidance."
 
-Note: Path 1's ambiguity counter (3 consecutive ambiguous responses) and Path 2's recurrence threshold (3 recurrences after fix application) measure different things and are mutually exclusive — ambiguous responses mean the fix was never applied, so it cannot recur.
+Path 1 counter (3 ambiguous) and Path 2 counter (3 recurrences) measure different things and are mutually exclusive (ambiguity means no fix was applied, so it cannot recur). Path 3 has the strictest consent because it originates from Claude's judgment, not user behavior. Claude MUST NOT silently mark findings as WNF based on inferred preferences — the "cannot auto-fix" judgment is Claude's; the "skip it" decision is the user's.
 
-Path 3 uses the strictest consent protocol because the WNF proposal originates from Claude's judgment, not from user behavior; Paths 1 and 2 involve direct user interaction that provides sufficient intent signal.
+WNF items are excluded from subsequent round severity (a round whose only remaining findings are WNF rates as Pass). Track in header for audit (e.g., `History: [M, P(1 WNF), P, P]`). **Critical-severity WNF**: require explicit confirmation prompt and tag as `P(1 C-WNF)`.
 
-Claude MUST NOT silently mark findings as WNF based on inferred user preferences or project context. The judgment "this cannot be auto-fixed" is Claude's; the decision "skip it" is the user's.
+**WNF retraction**: user explicit request ("还是修一下", "fix that after all") → remove from WNF register, re-enter fix cycle next round, reset consecutive pass counter to 0.
 
-Exclude WNF items from subsequent round severity ratings (a round where all remaining findings are WNF rates as Pass under the Overall Rating Rule). Track WNF items in the round status header for audit trail (e.g., `History: [M, P(1 WNF), P, P]`). For Critical-severity WNF: prompt for explicit confirmation ("This Critical finding involves [description] — confirm skip?") and tag as `P(1 C-WNF)` in the header.
+**No-shortcut rule (pass rounds)**: Every pass round (even consecutive) MUST:
+1. **Re-read** target from disk (use Read tool; do not rely on memory; in-context targets → re-examine latest version).
+2. Produce a genuine **five-dimension assessment**. Compact format (one line per verdict) is fine, but each verdict must reflect fresh examination — never copy prior round.
+3. In the **counterfactual**, cite an area **different** from the prior round — prefer rotating across angle dimensions (e.g., correctness focus → performance focus → edge cases → security → portability). For small targets, revisiting is OK only from a different angle (e.g., correctness vs performance vs edge cases).
 
-**WNF retraction**: If the user explicitly requests re-evaluation of a WNF item (e.g., "fix that after all", "还是修一下"), remove it from the WNF register and re-enter the finding into the fix cycle in the next round. A retraction resets the consecutive pass counter to 0 (the re-entered finding has not yet been re-reviewed). The WNF count in subsequent round status headers reflects the current register state after the retraction.
+A pass round that copies prior output without evidence of fresh examination is a protocol violation.
 
-**No-shortcut rule (pass rounds)**: Even in consecutive pass rounds, every round MUST:
-1. **Re-read** the target from disk (use the Read tool; do not rely on context memory; for in-context content targets, re-examine the latest version in conversation context)
-2. Perform a genuine **five-dimension assessment** — compact format is acceptable (one line per dimension verdict), but each verdict must reflect actual re-examination of the target content, not a copy of the previous round
-3. In the **counterfactual**, cite a specific area (file:line or logic point) that is **different** from the previous round's counterfactual focus — cycle through different risk areas across rounds to avoid always checking the same spot. For small targets with limited distinct areas, revisiting a previously examined area is acceptable if you approach it from a different angle (e.g., correctness vs performance vs edge cases).
+**Depth checkpoint rounds** (round_number is a multiple of 5: rounds 5/10/15): produce a **full five-dimension report** with expanded reasoning, regardless of rating or pass streak. Treat as round 1 — fresh eyes, maximum rigor. Checkpoints and subagent counterfactual are independent; when both apply, produce both the full report AND the subagent dispatch. **Interaction with Pass-round gating**: the full-report requirement always applies at a checkpoint, but subagent dispatch still respects the loop-mode Pass-round gate in Dispatch Logic — a non-Pass checkpoint round produces the full inline report AND runs inline counterfactual (no subagent), per the `if this_round_rating == "Pass"` branch in Dispatch Logic below.
 
-A pass round that merely copies the previous round's format without evidence of fresh examination is a protocol violation. The output may be compact, but the review MUST be genuine.
+**Context pressure management**: In long loops (round ≥ 6, non-checkpoint), if summarizing earlier rounds becomes cheaper than carrying them in full (Claude's operational judgment — no fixed % threshold), summarize rounds 1 through (current_round - 4) into single-line records (round + rating + finding IDs). WNF tracking state (Path 1 ambiguity counter, Path 2 recurrence counter, WNF register) MUST NOT be summarized — keep in a dedicated block. Report `[degraded: context pressure]` in Coverage. Context limit reached → terminate with `[Loop terminated: context limit reached at round X]`.
 
-**Depth checkpoint rounds**: In rounds where `round_number` is a multiple of 5 (rounds 5, 10, 15), you MUST produce a **full five-dimension report** with expanded reasoning (not compact format), regardless of the current rating or pass streak. Treat a depth checkpoint as if it were round 1 — approach the target with fresh eyes and maximum rigor. This periodic forced expansion counteracts the natural tendency toward shallow repetition in later rounds. Depth checkpoints and subagent counterfactual are independent — both apply when their respective conditions are met. A depth checkpoint round with `--sub` active and Pass rating produces both a full five-dimension report AND dispatches the subagent.
-
-**Context pressure management**: In long loops (round >= 6, non-checkpoint rounds), if context usage is high, you may summarize rounds 1 through (current_round - 4) into single-line status records (round number + rating + key finding IDs) to free context space. WNF tracking state (per-finding ambiguity count for Path 1, recurrence count for Path 2, and the WNF register itself) must not be summarized — maintain it in a dedicated block outside the round-by-round summaries. Report `[degraded: context pressure]` in Coverage if this affects review depth. If context limits are reached mid-loop, terminate with `[Loop terminated: context limit reached at round X]`.
-
-**Adversarial re-framing**: In rounds 2+, before reviewing, adopt the stance: "This was written by someone else. My job is to find problems, not confirm correctness." This counteracts the natural tendency to validate your own fixes.
+**Adversarial re-framing**: In rounds 2+, before reviewing, adopt: "This was written by someone else. My job is to find problems, not confirm correctness." Counteracts the tendency to validate own fixes.
 
 ## Subagent Counterfactual Mode (activated by `--sub` / `--子代理`)
 
-When `--sub` is present, the counterfactual test (see meta-calibration principle in Key Principles) is delegated to a physically isolated subagent instead of running inline. This provides genuine context isolation — the subagent has never seen the generation or review process, eliminating self-review bias.
+When `--sub` is present, the counterfactual test (see meta-calibration principle in Key Principles) is delegated to a physically isolated subagent instead of running inline. This provides genuine context isolation — the subagent has never seen the generation or review process, eliminating self-review bias. In loop mode, dispatch is gated to Pass rounds only — non-Pass rounds already have surfaced findings to fix, so inline counterfactual suffices there (see Dispatch Logic below).
 
 ### Dispatch Logic
+
+> *Loop interaction: see the **Loop Mode** section above for how Pass/Non-Pass gating, WNF register, and checkpoint rounds feed the `this_round_rating` branch below.*
 
 ```python
 # After five-dimension review, before writing Summary:
@@ -93,27 +92,8 @@ if --sub active:
     else:
         result = dispatch_subagent_counterfactual()
 
-    # Post-dispatch (subagent only):
-    if result.source == "subagent":  # source is inferred from dispatch context, not from subagent output
-        apply_severity_adjustments(result.severity_adjustments)  # applies for both confirmed and reopened
-        log_wnf_reidentifications(result.wnf_reidentified)  # audit trail only; does not affect verdict or rating
-
-        # Cross-check: reclassify any new_findings that match WNF register entries
-        for finding in result.new_findings[:]:  # iterate over copy
-            if matches_wnf_register(finding, wnf_register):  # match on dimension + area/description
-                result.wnf_reidentified.append(reclassify_as_wnf(finding))
-                result.new_findings.remove(finding)
-
-        if result.verdict == "reopened":
-            if result.new_findings:  # genuinely new findings remain after cross-check
-                apply_new_findings(result.new_findings)
-                recalculate_overall_rating()
-                update_round_history(round_number, new_overall_rating)  # replace initial 'P' with recalculated rating
-                consecutive_passes = 0  # explicit reset — do not rely on implicit next-round detection
-            else:
-                # Subagent said "reopened" but only WNF re-identifications remain — override to confirmed
-                result.verdict = "confirmed"
-                # consecutive_passes NOT reset — WNF-only reopen is a false alarm
+    # Post-dispatch cross-check + WNF protection + rating recalculation.
+    # See references/subagent-spec.md § Post-Dispatch Logic for full pseudocode.
 ```
 
 > **Confirmed + severity_adjustments**: A `confirmed` verdict may still include non-empty `severity_adjustments` (e.g., the subagent agrees no new issues were missed but recommends re-rating an existing finding). These adjustments are applied to the main report regardless of verdict.
@@ -127,11 +107,19 @@ if --sub active:
 ### Subagent Specification
 
 - **Agent type**: `general-purpose`, `model: "opus"` (latest Opus-class model per runtime conventions; see Degradation below if unavailable)
-- **Session directory**: At the first subagent dispatch in a session, generate a session-unique working directory: run `echo "$(date +%s)_${RANDOM}"` via Bash to obtain a unique ID, then use `C:/tmp/qc_sub_<id>/` as the working directory (e.g., `C:/tmp/qc_sub_1711700000_12345/`). Store this path as `QC_SUB_DIR` and reuse it for all subsequent subagent dispatches within the session. In loop mode, each round's cleanup and next round's write use the same `QC_SUB_DIR`.
+- **Session directory**: At the first subagent dispatch in a session, generate a session-unique working directory: run `echo "$(date +%s)_${BASHPID}_${RANDOM}"` via Bash to obtain a unique ID (includes PID to prevent same-second collisions across parallel Claude Code sessions), then use `C:/tmp/qc_sub_<id>/` as the working directory (e.g., `C:/tmp/qc_sub_1776000000_4321_12345/`). Runtime scope: Windows with Git Bash (this skill's personal-use environment — `C:/tmp/` is Windows-specific; if porting to a non-Windows runtime, replace path root with `/tmp/` and verify `${BASHPID}` support, substituting `$$` if unavailable). Store this path as `QC_SUB_DIR` and reuse it for all subsequent subagent dispatches within the session. In loop mode, each round's cleanup and next round's write use the same `QC_SUB_DIR`.
 - **Startup cleanup**: Before writing temp files, if `QC_SUB_DIR` already exists, delete all its contents first (prevents stale files from crashed/interrupted previous sessions from contaminating the current review).
 - **Input**: Write two temp files to `QC_SUB_DIR` (create the directory if it doesn't exist):
   - `target_temp.md` — the review target content (for file targets, copy the file content; for in-context content, write it to temp)
-  - `findings_temp.md` — five-dimension findings in QC report format (each finding headed by `#### [Dimension] — [Severity]`); for Pass-rated rounds with no findings, write: `✓ Correctness / Completeness / Optimality / Consistency / Standards: No issues\n\n**Overall Rating**: Pass`. In loop mode, if any WNF items have accumulated, append a `## WNF Register` section after the findings (before Matched Pitfalls) listing all won't-fix items so the subagent can distinguish re-identifications from genuinely new findings. Format:
+  - `findings_temp.md` — five-dimension findings in QC report format (each finding headed by `#### [Dimension] — [Severity]`); for Pass-rated rounds with no findings, write the following two lines **verbatim as two actual lines separated by a blank line** (NOT as a single-line string containing the literal characters `\n\n`):
+
+    ```
+    ✓ Correctness / Completeness / Optimality / Consistency / Standards: No issues
+
+    **Overall Rating**: Pass
+    ```
+
+    In loop mode, if any WNF items have accumulated, append a `## WNF Register` section after the findings (before Matched Pitfalls) listing all won't-fix items so the subagent can distinguish re-identifications from genuinely new findings. Format:
     ```
     ## WNF Register
     Items below were marked won't-fix by the reviewer/user. If your independent review
@@ -141,88 +129,24 @@ if --sub active:
     - [WNF-2] Dimension: one-line description (Reason: reason) (Path: 1|2|3)
     ```
     If the WNF register exceeds 20 items, write a summary header (`N WNF items total; top 5 by severity:`) followed by the 5 highest-severity entries (Critical > Major > Minor). At the end of findings_temp.md, append a `## Matched Pitfalls` section listing the pitfall entries that matched the current target context (so the subagent has access to user-specific check items)
-- **Prompt**: Must use the following canonical template verbatim. Only the five `{{...}}` fields may be filled in. Do NOT add instructions to focus on specific dimensions, narrow the review scope, or skip any aspect.
-
-````
-You are an independent reviewer who has NOT participated in the creation or initial review of the target below. Your task is to provide a thorough, unbiased second opinion.
-
-## Target Information
-- **Type**: {{TARGET_TYPE}}
-- **Domain context**: {{DOMAIN_CONTEXT}}
-- **Target-specific checks**: {{TARGET_OVERLAYS}}
-- **Content**: Read the file `{{QC_SUB_DIR}}/target_temp.md`
-- **Original file path** (if file-based target): {{ORIGINAL_FILE_PATH}}
-
-## Initial Review Findings
-Read the file `{{QC_SUB_DIR}}/findings_temp.md`
-
-## Cross-validation (mandatory for file-based targets)
-If an original file path is provided above, ALSO read it directly from disk and compare with the temp copy. If they differ, the disk version is authoritative — base your review on it and note the discrepancy. If the original file cannot be read (not found, permission error), proceed with the temp copy and note: [cross-validation skipped: original file unreadable].
-
-## Your Task
-
-Perform a COMPREHENSIVE independent review across ALL of the following five dimensions with EQUAL depth and rigor. Do NOT focus on any single dimension — every dimension deserves the same thoroughness.
-
-1. **Correctness**: Facts accurate? Logic sound? No hallucinations or fabrications?
-2. **Completeness**: All key points covered? Edge cases considered? Dependencies checked?
-3. **Optimality**: Best approach? Any simpler or more efficient alternatives?
-4. **Consistency**: Aligned with context / requirements / existing code? No self-contradictions?
-5. **Standards**: Compliant with relevant standards? (academic conventions / coding style / security rules)
-
-Also apply the target-specific checks listed above.
-
-You must:
-- (a) Find issues the initial review MISSED — actively look for blind spots, not confirmations
-- (b) Verify severity assignments of ALL existing findings — are any over- or under-rated?
-- Start from the execution layer (scripts, configs) rather than documentation
-- Verify implementation assumptions — comments/labels do not guarantee enforcement
-- Check for namespace collisions (ID/key/variable uniqueness)
-
-## Severity Definitions
-- **Critical**: factually wrong, dangerous, or fundamentally broken
-- **Major**: significant functional gap or risk
-- **Minor**: style, edge case, or non-blocking improvement
-
-## Output Format
-Respond with a JSON object ONLY (no markdown wrapping, no commentary outside JSON):
-```json
-{
-  "verdict": "confirmed | reopened",
-  "area_examined": "[MUST cite specific locations: file:line, code snippets, logic paths. Generic statements are INVALID.]",
-  "reasoning": "[MUST provide detailed reasoning with specific references. 'Looks good' or 'no issues' is INVALID.]",
-  "severity_adjustments": [
-    {"finding_ref": "Dimension — Severity", "proposed": "new severity", "reason": "..."}
-  ],
-  "new_findings": [
-    {"dimension": "...", "severity": "...", "evidence": "...", "issue": "...", "suggested_fix": "..."}
-  ],
-  "wnf_reidentified": [
-    {"wnf_ref": "WNF-N", "dimension": "...", "evidence": "...", "note": "still present but acknowledged as won't-fix"}
-  ]
-}
-```
-````
-
-  **Fill-in field definitions**:
-  - `{{TARGET_TYPE}}`: the target type from Parameter Parsing (Code / Plan / Document / Data / Advice / Skill/Prompt)
-  - `{{DOMAIN_CONTEXT}}`: 1-2 sentence description of the domain (e.g., "R tidyverse data processing script for epidemiological analysis" / "academic manuscript following STROBE guidelines")
-  - `{{TARGET_OVERLAYS}}`: copy the full overlay checklist for the target type from §Target-Specific Overlays (e.g., for Code: "+Security vulnerabilities +Performance +Error handling +Readability +Dependency reasonableness +Test coverage")
-  - `{{ORIGINAL_FILE_PATH}}`: for file-based targets, the original file path on disk (e.g., `~/project/analysis.R`); for in-context content, write "N/A — in-context content"
-  - `{{QC_SUB_DIR}}`: the session-unique working directory path generated in the Session directory step (e.g., `C:/tmp/qc_sub_1711700000_12345`)
-
-  **Constraint**: If the main agent needs to provide additional context (e.g., round number, what previous rounds found), it may add a `## Additional Context` section AFTER the template content, but this section MUST NOT override, narrow, or prioritize any dimension over others. Violations — such as "focus on Completeness" or "particularly check blast radius" — are prohibited. When WNF items exist, Additional Context SHOULD include: "The WNF Register in findings_temp.md lists items the user has marked as won't-fix. Review these areas independently, but classify re-identifications under `wnf_reidentified`, not `new_findings`."
+- **Prompt**: Must use the canonical template from `references/subagent-spec.md` § Canonical Subagent Prompt Template **verbatim**. Only the 5 `{{...}}` fields may be filled in (see references § Fill-in Field Definitions). Do NOT add dimension-focusing instructions, narrow the review scope, or skip any aspect. Main-agent `## Additional Context` may be appended per references § Additional Context Constraint.
 - **Cleanup**: Delete `QC_SUB_DIR` contents after integrating each subagent result (in loop mode, clean up after each subagent round, not just at loop exit)
 
 ### Degradation
 
 If subagent dispatch fails (tool error — including Write tool failure when creating temp files —, timeout, unavailable model, etc.) → fall back to inline counterfactual. Report line shows `[degraded: inline fallback]`.
 
+Invalid subagent response (unparseable JSON, missing required fields such as `verdict`, or markdown wrapping despite the JSON-only instruction) → treat as dispatch failure: fall back to inline counterfactual with `[degraded: subagent JSON invalid]` tag and include a one-line excerpt of the malformed response in the round report for user audit.
+
+If `references/subagent-spec.md` is unreadable (file missing, permission denied, encoding error) → the canonical subagent prompt template is unavailable; `--sub` cannot dispatch correctly. Fall back to inline counterfactual and tag `[degraded: subagent-spec unavailable]` with the specific file-read failure reason. Do NOT attempt to reconstruct the template from memory — it is intentionally versioned separately to avoid drift.
+
 ### Output Format Change
 
 The `**Counterfactual**:` line in Summary gains a source tag:
 
 - `[subagent] Confirmed — ...` or `[subagent] Reopened — ...`
-- `[degraded: inline fallback] Confirmed — ...`
+- `[degraded: inline fallback] Confirmed — ...` (subagent dispatch failed — tool error, timeout, unavailable model)
+- `[degraded: subagent JSON invalid] Confirmed — ...` (subagent response unparseable — missing fields, invalid syntax, or markdown-wrapped)
 - (no tag) = inline counterfactual (default, when `--sub` is not active)
 
 ## Blast Radius Scan (file modifications only)
@@ -235,6 +159,7 @@ When the review target includes file modifications (including `directory`/`目�
 4. For each reference found, assess whether it is a substantive dependency (not just a passing mention) and whether it needs updating
 5. Feed findings into the Completeness dimension below
 6. For config files (`.bashrc`, `settings.json`, `mcp.json`, `MEMORY.md`, `rules/*`, `scripts/*`), also verify against any workspace instruction file that defines linked-update rules (e.g., `CLAUDE.md`, `AGENTS.md`, repo-local policy files) if present
+7. **Version-bump consistency scan** (fires when target file contains a version marker — `<!-- version: X.Y.Z -->`, `**Version**: vX.Y.Z`, `"version": "X.Y.Z"`, or similar conventional patterns): Grep the old version string across the repo-level anchor files (README.md, CHANGELOG.md, MEMORY.md, AGENTS.md, package manifests, plugin-details.md) and `~/.claude/` if this is a skill/plugin config. Report all stale matches as Completeness findings. Scope note: this is **value-consistency dependency** (different axis from step 3's reference dependency); run both.
 
 **Boundary rule**: If the user provides only a file path (e.g., `---qc file.R`) without a diff/changeset and no session modifications exist for that file, treat it as a **standalone content review** — skip blast radius. Only perform blast radius when (a) a diff/changeset is explicitly provided, (b) the file was modified in the current session, or (c) the user explicitly asks to review modification impact.
 
@@ -263,13 +188,15 @@ Examine each dimension and render a verdict:
 - **Document**: +Citation authenticity +Fact-checking +Academic standards (STROBE / CONSORT, etc.) +Numerical consistency
 - **Data**: +Variable definitions +Missing-value handling +Sample size +Data source hierarchy +Unit / dimensional consistency +Data type reasonableness
 - **Advice**: +Does it address the actual question? +Any better alternatives? +Potential side effects or negative consequences +Applicable boundaries and prerequisites
-- **Skill/Prompt**: +Trigger/activation boundary clarity +Parameter parsing edge cases (spaces, quotes, empty input) +Consistency between instruction text and examples +Token cost awareness (mandatory pre-reads, growing reference files) +Portability assumptions (which runtime features are required?) +Degradation path coverage (does the skill define behavior when tools are unavailable or context is insufficient? — missing → Major) +Self-review bias risk (does the same agent both generate and review output without isolation? — Minor, design limitation) +Runtime vs development material boundary (are files clearly marked as runtime-loaded vs development-only reference? — Minor, cognitive burden)
+- **Skill/Prompt**: +Trigger/activation boundary clarity +Parameter parsing edge cases (spaces, quotes, empty input) +Consistency between instruction text and examples +Token cost awareness (mandatory pre-reads, growing reference files) +Portability assumptions (which runtime features are required?) +Degradation path coverage (does the skill define behavior when tools are unavailable or context is insufficient? — missing → Major) +Self-review bias risk (does the same agent both generate and review output without isolation? — Minor, design limitation) +Runtime vs development material boundary (are files clearly marked as runtime-loaded vs development-only reference? — Minor, cognitive burden) +LLM audit anti-patterns (when the Skill/Prompt target is itself an LLM-facing prompt or audit harness, scan for common LLM-output failure modes — e.g., self-contradiction within the same response, fabricated calibration bonuses, output-schema degradation, stuck-in-one-angle counterfactuals; not a mandatory checklist)
 
 ## Output Format
 
 > **Severity definitions**: Critical = factually wrong, dangerous, or fundamentally broken; Major = significant functional gap or risk; Minor = style, edge case, or non-blocking improvement.
 >
 > **Overall Rating Rule**: any Critical finding → Critical; no Critical but any Major → Major; all Minor only → Minor; no findings → Pass
+
+**Report brevity (D1)**: Default reports to **compact form** — single-line Pass summary, expand only when Critical/Major findings need evidence. Evidence field: `file:line` OR one-line quote (not both). Counterfactual: 1-2 sentences with one concrete area reference (no multi-paragraph rationale). Verbose expansion is reserved for (a) Critical/Major findings, (b) depth checkpoint rounds, (c) explicit user request for detail.
 
 Use the following template:
 
@@ -310,9 +237,21 @@ Use the following template:
 - Evolution check: [no new patterns discovered | see Evolution Proposal below]
 ```
 
+## Tool Priority
+
+When multiple tool options exist for a QC operation, use the preferred tool first and degrade per the table below. Degradation triggers are **consecutive failures** (not first-time errors). Transient failures do not trigger fallback.
+
+| Operation | Preferred tool | Degradation trigger | Fallback path |
+|-----------|----------------|---------------------|---------------|
+| Read target | Read | Read returns error 2 consecutive times | `ctx_execute cat` or `Bash cat` |
+| Subagent dispatch | Agent (`general-purpose`, opus) | First dispatch returns invalid JSON (Meta-3) → no retry | inline counterfactual + `[degraded: subagent JSON invalid]` tag |
+| Blast radius Grep | Grep | Grep 2 consecutive failures | `Bash grep` via `ctx_execute` sandbox |
+| Anchor re-verify (pre-edit) | Grep (content mode, exact keyword) | Grep 2 consecutive failures | `Bash grep` via `ctx_execute` sandbox |
+| Checkpoint report | Inline generation | Exceeds token budget | Compact wrap + `[degraded: context pressure]` tag |
+
 ## Key Principles
 
-- **Output calibration**: Before writing the report, read `examples.md` (format/severity calibration) and `pitfalls.md` (user-specified check items) from this skill's directory (`~/.claude/skills/qc/`). For each pitfall entry, first assess whether its trigger tag (if present) matches the current review target type and context; only apply matching entries. In the Pitfalls Check output line, report: checked X entries; Y matched context; Z triggered findings. If `pitfalls.md` grows beyond ~30 entries, scan tags/headings first and read only matching sections in full. If either file is unavailable or empty, proceed without it.
+- **Output calibration**: Before writing the report, read `examples.md` (format/severity calibration) and `pitfalls.md` (user-specified check items) from this skill's directory (`~/.claude/skills/qc/`). For each pitfall entry, first assess whether its trigger tag (if present) matches the current review target type and context; only apply matching entries. In the Pitfalls Check output line, report: checked X entries; Y matched context; Z triggered findings. Scan tags/headings first and read only matching sections in full. If either file is unavailable or empty, proceed without it.
 - **Pitfalls tag matching rules**: `[tag1/tag2]` — `/` means OR; an entry applies if ANY listed tag matches the current context. No tag = always applicable (same as `[all]`). Matching is contextual (AI judges applicability), not a literal string comparison against the target type name. Suggested tags: `[all]`, `[code]`, `[academic]`, `[academic/statistics]`, `[file-modification]`, `[file-path]`, `[code/R/Python]`, `[skill/prompt]`. Keep tags within a single dimension (object type OR action context OR language); avoid mixing dimensions in one OR group.
 - **Review only — no auto-fixes**: Output the review report only. Do not modify any content automatically. Fixes are the user's decision. (This principle is suspended when `--loop` is active — see **Loop Mode** above.)
 - **Evidence-led, not suspicion-led**: Every finding in the Findings section must have concrete evidence (direct quote, file:line, code snippet, or explicit absence citation). Uncertain items without sufficient evidence → place in the **Open Questions** section instead. Goal: zero missed real issues — but suspicions without evidence are questions, not findings.
@@ -330,19 +269,36 @@ Use the following template:
      - Trace the root cause chain — after finding a bug, ask "why could this bug exist?" to identify missing guards, registries, or spec coverage.
   Adjust if needed.
 
+## Failure Modes
+
+- **Self-review confirmation bias**: counterfactual test degenerates to mechanical "Confirmed" without re-examination, especially under context pressure or many findings. *Mitigation*: counterfactual MUST articulate a specific alternative interpretation before confirming; flag all-confirmed rounds without substantive reasoning.
+- **Loop convergence dependency on WNF protocol**: ambiguous user responses or disengagement from WNF prompts can stall the loop. *Mitigation*: 3-path WNF with explicit consent keywords; ambiguity counter escalates to Path 3 after 3 unclear responses; round cap (15) as hard stop.
+- **Subagent context isolation loss**: template drift (rewording, missing sections, stale refs) silently degrades subagent review. *Mitigation*: copy the canonical template literally; verify template version matches SKILL.md.
+- **WNF state loss under compaction**: WNF tracking state in conversation context can be lost during summarization, re-raising dismissed findings. *Mitigation*: anchor WNF state in findings file, not conversation alone; verify WNF register survives compaction. (Historical: v1.3.0 added `## WNF Register` to findings_temp.md + `wnf_reidentified` JSON field + dispatch-logic cross-check to fix **Subagent WNF blindness**.)
+- **Subagent temp file race**: target can change between temp write and subagent read; external processes can overwrite `findings_temp.md`. *Mitigation*: subagent cross-validates temp copy vs disk original (authoritative); session-unique `QC_SUB_DIR`; verify temp file timestamp before dispatch. (Historical: v1.2.0 fixed **concurrent `--sub` temp collision** on the shared `C:/tmp/qc_sub/`.)
+- **MCP tool name environment drift**: hardcoded MCP tool names silently fail after env changes. *Mitigation*: "tool not found" → degrade gracefully; log missing tool for user.
+- **Pass-round no-shortcut degradation**: pass rounds silently degrade to copy-previous without fresh re-read. Distinct from confirmation bias — affects the core five-dimension assessment, not the counterfactual. *Mitigation*: no-shortcut rule (re-read from disk, fresh verdicts, rotating counterfactual focus); copy-previous without evidence is a protocol violation.
+- **Depth checkpoint skipping under context pressure**: checkpoint rounds may produce compact format under context pressure, negating the anti-degradation purpose. *Mitigation*: checkpoints are mandatory regardless of context; cannot produce full report → flag `[degraded: checkpoint abbreviated]` in Coverage.
+- **Adversarial re-framing fatigue**: "written by someone else" stance decays over many rounds as agent identifies with own fixes. Distinct from confirmation bias — affects the full review posture, not just the counterfactual. *Mitigation*: depth checkpoints at rounds 5/10/15 force fresh-eyes pass; round cap (15) limits cumulative fatigue.
+- **Category dispatch coverage gap**: dispatch logic (pitfalls tag matching, overlay selection) may handle one category but silently skip others. *Mitigation*: assert dispatch coverage matches reference file categories before review; flag unrouted categories.
+
 ## Evolution Protocol
 
-After completing the QC report (in Loop Mode: loop exit round only — see Loop Mode section; skipped on abnormal terminations such as target-unreadable or context-limit exits), self-reflect on whether the review surfaced knowledge worth preserving. This is a **post-review** step — never let it interfere with the review itself.
+After completing the QC report (in Loop Mode: loop exit round only — see Loop Mode section; skipped on abnormal terminations such as target-unreadable, context-limit, or loop-cap-without-convergence exits where unresolved findings remain), self-reflect on whether the review surfaced knowledge worth preserving. This is a **post-review** step — never let it interfere with the review itself.
 
 ### When to Propose
 
-Ask yourself:
-- Did I encounter a target type with no matching overlay?
-- Did I discover a pattern worth capturing for future reviews that is not in pitfalls.md?
-- Did I find a calibration gap not in examples.md (e.g., a new anti-pattern or severity edge case)?
-- Did I apply domain knowledge that should be formalized?
+**Selectivity (D3) — default to silence**. Proposal bar requires BOTH:
+(a) pattern is **not even loosely covered** by any existing pitfall/example/overlay — merely adjacent coverage disqualifies, AND
+(b) pattern is likely to **recur** in future reviews (one-off quirks do not qualify).
 
-If YES to any → append an Evolution Proposal section **after the Summary section** (as the final section of the QC report). If NO to all → end normally; do not force a proposal.
+(a) is satisfied by at least one of these concrete signals:
+- Target type encountered with no matching overlay
+- Pattern worth capturing not in pitfalls.md (and not a near-duplicate)
+- Calibration gap not in examples.md (new anti-pattern / severity edge case)
+- Domain knowledge applied that should be formalized
+
+If BOTH (a)+(b) hold → append **Evolution Proposal** after Summary. Otherwise end with `Evolution check: no new patterns` — this is the **expected case**, not a failure.
 
 ### Proposal Format
 
@@ -373,7 +329,7 @@ Append this block to the report output:
 
 ### Constraints
 
-- Max 1 proposal per QC review (avoid proposal fatigue; if 2+ genuinely novel patterns surface, pick the highest-value one)
-- Never auto-write to any file; always wait for user confirmation
-- Never propose changes to the 5 core dimensions or severity definitions
-- Proposals for SKILL.md structural changes (new overlays, new dimensions) → flag only, defer to a dedicated review session
+- **Max 1 proposal per QC review** — for `--loop` all rounds share one proposal budget (if 2+ novel patterns surface, pick the highest-value one).
+- Never auto-write to any file; always wait for user confirmation.
+- Never propose changes to the 5 core dimensions or severity definitions.
+- SKILL.md structural changes (new overlays, new dimensions) → flag only, defer to dedicated review session.
