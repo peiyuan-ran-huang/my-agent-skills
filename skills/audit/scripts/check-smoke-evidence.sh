@@ -92,7 +92,7 @@ for root in "${ROOTS[@]}"; do
         if [[ -z "$first_reason" ]]; then
           first_reason="archived markdown smoke report failed the current validator"
         fi
-        record_finding FAIL E002 "$report" "archived markdown smoke report is stale under the current validator: $first_reason"
+        record_finding FAIL SE002 "$report" "archived markdown smoke report is stale under the current validator: $first_reason"
       else
         cat "$tmp_out" >&2 || true
         rm -f "$tmp_out"
@@ -104,7 +104,7 @@ for root in "${ROOTS[@]}"; do
 
   if [[ $root_reports -eq 0 ]]; then
     EMPTY_ROOT_COUNT=$((EMPTY_ROOT_COUNT + 1))
-    record_finding FAIL E001 "$root" "no archived markdown smoke reports were found under this root"
+    record_finding FAIL SE001 "$root" "no archived markdown smoke reports were found under this root"
   fi
 done
 

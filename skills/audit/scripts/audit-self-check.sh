@@ -50,7 +50,6 @@ PACKAGE_ROOT="$(cd "$PACKAGE_ROOT_INPUT" 2>/dev/null && pwd -P)" || die "package
 
 README_FILE="$PACKAGE_ROOT/README.md"
 SKILL_EN="$PACKAGE_ROOT/SKILL.md"
-SKILL_ZH="$PACKAGE_ROOT/SKILL_ZH.md"
 TEST_SCENARIOS="$PACKAGE_ROOT/test-scenarios.md"
 EXAMPLES_FILE="$PACKAGE_ROOT/examples.md"
 CONTRACTS_FILE="$PACKAGE_ROOT/contracts/maintenance-contracts.tsv"
@@ -59,7 +58,6 @@ GOLDEN_DIR="$PACKAGE_ROOT/goldens"
 
 declare -a FINDINGS=()
 declare -a MANUALS=(
-  "M001 Review semantic parity between SKILL.md and SKILL_ZH.md."
   "M002 Review whether the skill still feels heavyweight, explicit, isolated, and exhaustive."
   "M003 Review whether examples still calibrate maintainers toward the correct report shape."
   "M004 Run fresh-session smoke tests for paper/code/plan/data/mixed plus at least one degraded-path drill from the documented release-gate set ('MCP unavailable', 'sequential fallback', 'merge interruption / partial-output salvage', 'config-check anomaly or failure path', or the incompatible Windows bash case). If Claude Code CLI is used for those smoke attempts, first require 'claude auth status' to show 'loggedIn: true', and if the non-interactive prompt begins with '---audit', deliver it through stdin or another non-argv input path instead of a bare prompt argument. If archived markdown smoke reports are cited as report-shape evidence, first revalidate them against the current 'scripts/validate-report.sh' shape validator; otherwise mark them stale and do not count them toward release acceptance. Non-markdown or in-thread smoke evidence must be reviewed against its own canonical source or fixture instead of being treated as something 'scripts/validate-report.sh' can prove. If a CLI smoke attempt fails before the session starts because Claude Code was unauthenticated or a leading '---audit' prompt was misparsed as an option, record that as an operator / harness prerequisite failure rather than as an 'audit' runtime regression. If the direct fresh-session 'paper' smoke on a quoted OneDrive absolute path with spaces collapses to a prefix directory, record it as the documented platform limitation and also run one mitigated 'paper' smoke via a staged no-space path or 'audit_object_temp.md'."
@@ -637,7 +635,6 @@ print_manuals() {
 # M1. File layout
 ROOT_FILES=(
   "$SKILL_EN"
-  "$SKILL_ZH"
   "$README_FILE"
   "$PACKAGE_ROOT/pitfalls.md"
   "$PACKAGE_ROOT/release-checklist.md"
@@ -735,7 +732,6 @@ fi
 
 # M2. Frontmatter
 check_frontmatter_shape "$SKILL_EN" "FEN" "English entry"
-check_frontmatter_shape "$SKILL_ZH" "FZH" "Chinese entry"
 
 # M3. Entry boundary anchors
 EN_ANCHORS=(
@@ -758,43 +754,15 @@ EN_ANCHORS=(
   '- `--lang [zh/en]` forces report language.'
   '- `--lite` reduces round limits but must not skip critical verification:'
   '- If no audit target can be identified, stop and prompt the user to specify one.'
-  'When any normal-path assumption breaks, follow `references/degradation-and-limitations.md`.'
+  '## Failure Modes'
+  '**Discovery-verification conflation**'
+  'Verify finding count is non-decreasing across rounds'
+  '**Review entry-point bias**'
   'If big rounds are `>=6` or the target is large, merge-phase context pressure is likely; prefer Context Mode MCP when available.'
-  'Any degraded path must be declared explicitly and must not be presented as equivalent to normal parallel isolated execution.'
-  'Sequential fallback lowers the independence guarantee and must be reported as such.'
-  '- platform limitations'
-)
-ZH_ANCHORS=(
-  '仅在用户以任意大小写形式显式输入 `---audit` 时激活。'
-  '首先按引号感知方式捕获参数。任何被成对引号包住的子串，在进一步解释前都算一个原始参数。'
-  '当存在带引号参数、或路径解析有歧义时，必须把 `---audit` 后面的原始参数串通过 stdin 或单个字符串参数喂给 `python scripts/parse-audit-args.py`，并把它输出的 JSON 结果当作后续启发式之前的 canonical parse。'
-  '- `paper` / `论文`'
-  '- `code` / `代码`'
-  '- `plan` / `方案`'
-  '- `data` / `数据`'
-  '- `mixed` / `混合`'
-  '- 如果没有提供参数，识别当前对话中最近的 substantive deliverable。'
-  '- 带空格的加引号 target 路径必须保留为单个路径参数，不得在目标识别阶段被拆成多个 token。'
-  '- 如果类型关键字后面跟着带引号的路径，只能去掉最外层引号并校验完整路径字符串；不得把 `C:/Users/jdoe/OneDrive` 之类的内部片段当成独立 target 去探测。'
-  '- 引号内部的完整原始子串才是 authoritative target path；在校验时不得把它重写成一个更短、但恰好存在的前缀目录。'
-  '- 只要 target 或 output 路径带引号且含空格，就要在真正校验前先显式输出一行 parse preflight，例如：`Parsed Args: type=paper | target=C:/.../paper_target.md | out=C:/.../paper_report.md`。'
-  '- 如果这行 parse preflight 没能保留完整的引号 target 子串，就必须停止并重新解析，而不是继续诊断路径片段。'
-  '- `--focus [theme]` 每次添加一个重点主题，可重复使用。'
-  '- `--out [path]` 设置报告路径。若省略，则使用默认相对报告路径；若路径已存在，则自动追加 `_2`、`_3` 等后缀。'
-  '- `--lang [zh/en]` 强制指定报告语言；否则按审计对象语言自动匹配。'
-  '- `--lite` 会缩减轮次上限，但不得跳过关键验证：'
-  '- 如果无法识别审计对象，停止并提示用户明确指定。'
-  '当正常路径的任一前提失效时，遵循 `references/degradation-and-limitations.md`。'
-  '如果 big rounds `>=6` 或审计对象很大，merge 阶段更容易出现 context pressure；若可用，优先启用 Context Mode MCP。'
-  '任何降级路径都必须显式声明，不得伪装成与正常并行隔离执行等价。'
-  '顺序 fallback 会降低独立性保证，必须明确告知这一点。'
   '- platform limitations'
 )
 for needle in "${EN_ANCHORS[@]}"; do
-  check_literal FAIL E001 "$SKILL_EN" "$needle" "missing required English entry anchor: $needle"
-done
-for needle in "${ZH_ANCHORS[@]}"; do
-  check_literal FAIL E002 "$SKILL_ZH" "$needle" "missing required Chinese entry anchor: $needle"
+  check_literal FAIL EA001 "$SKILL_EN" "$needle" "missing required English entry anchor: $needle"
 done
 
 # M4. Canonical source map
@@ -806,7 +774,7 @@ mapfile -t CANONICAL_MAP_LITERAL_ROWS < <(contract_rest_lines canonical_map_row)
 if [[ ${#CANONICAL_MAP_LITERAL_ROWS[@]} -eq 0 ]]; then
   record_finding FAIL C008 "$CONTRACTS_FILE" "maintenance contracts file does not define any canonical_map_row entries"
 fi
-check_expected_count C009 "$CONTRACTS_FILE" "canonical_map_row" "${#CANONICAL_MAP_LITERAL_ROWS[@]}" 13
+check_expected_count C009 "$CONTRACTS_FILE" "canonical_map_row" "${#CANONICAL_MAP_LITERAL_ROWS[@]}" 12
 for row in "${CANONICAL_MAP_LITERAL_ROWS[@]}"; do
   check_literal FAIL C003 "$README_FILE" "$row" "README canonical source map is missing or drifting from expected responsibility row: $row"
 done
@@ -925,16 +893,18 @@ else
 fi
 # ── Rule ID Registry ──────────────────────────────────────────────
 # Static checks:  L001-L091, S001-S106 (excl. S025-S033 reserved for self-probes), S125   (file existence, literals, contracts)
-# Self-probes:    S025-S033 (checker), S130-S133 (golden), S134 (smoke-bad-root)
-# Smoke probes:   S120-S124, S126                   (smoke-evidence)
+# Self-probes:    S025-S033 (checker), S130-S133 (golden)
+# Smoke probes:   S120-S124, S126, S134-S136         (smoke-evidence)
 # Fixtures:       T001-T050                          (test-scenarios fixed-line)
 # Anchors:        R001-R022                          (reference/template section headings)
 # Coverage:       A001+, A015-A018                   (checklist, regex, scenario, example)
+# Entry anchors: EA001                               (EN entry anchor check)
 # Execution tests (scripts/execution-test.sh — separate checker, listed here for cross-reference):
 #                 E001-E014 (config-check), E020-E028 (config-optimize),
 #                 E030-E040 (config-restore), E050-E055 (validate-report),
 #                 E060-E070 (parse-audit-args)
-# Note: check-smoke-evidence.sh also uses E001-E002 in its own context (separate output)
+# Smoke evidence (scripts/check-smoke-evidence.sh — separate checker):
+#                 SE001-SE002
 # ──────────────────────────────────────────────────────────────────
 
 # Run nested self-probes only for the live package that this script belongs to.
@@ -959,6 +929,8 @@ if [[ "${AUDIT_SELF_CHECK_SELFTEST_DEPTH:-0}" == "0" && "$PACKAGE_ROOT" == "$PAC
   self_smoke_ok_out="$self_tmp_dir/smoke-ok.txt"
   self_smoke_stale_out="$self_tmp_dir/smoke-stale.txt"
   self_smoke_error_out="$self_tmp_dir/smoke-error.txt"
+  self_smoke_empty_dir="$self_tmp_dir/smoke-empty"
+  self_smoke_empty_out="$self_tmp_dir/smoke-empty.txt"
 
   run_self_probe "$PACKAGE_ROOT" "$self_ok_out" "$self_ok_rc"
   if [[ "$(cat "$self_ok_rc")" == "0" ]]; then
@@ -1048,7 +1020,7 @@ if [[ "${AUDIT_SELF_CHECK_SELFTEST_DEPTH:-0}" == "0" && "$PACKAGE_ROOT" == "$PAC
   else
     record_finding FAIL S123 "$CHECK_SMOKE_EVIDENCE" "stale smoke-evidence probe should exit 1 but returned $smoke_stale_rc; see $self_smoke_stale_out"
   fi
-  check_regex FAIL S124 "$self_smoke_stale_out" 'FAIL E002 .*archived markdown smoke report is stale under the current validator:' "stale smoke-evidence probe should emit an E002 stale finding"
+  check_regex FAIL S124 "$self_smoke_stale_out" 'FAIL SE002 .*archived markdown smoke report is stale under the current validator:' "stale smoke-evidence probe should emit an SE002 stale finding"
 
   if bash "$CHECK_SMOKE_EVIDENCE" "$self_tmp_dir/does-not-exist" >"$self_smoke_error_out" 2>&1; then
     smoke_error_rc=0
@@ -1061,6 +1033,19 @@ if [[ "${AUDIT_SELF_CHECK_SELFTEST_DEPTH:-0}" == "0" && "$PACKAGE_ROOT" == "$PAC
     record_finding FAIL S134 "$CHECK_SMOKE_EVIDENCE" "bad-root smoke-evidence probe should exit 2 but returned $smoke_error_rc; see $self_smoke_error_out"
   fi
   check_literal FAIL S126 "$self_smoke_error_out" 'ERROR: smoke root not found or unreadable:' "bad-root smoke-evidence probe should surface the invocation error message"
+
+  mkdir -p "$self_smoke_empty_dir"
+  if bash "$CHECK_SMOKE_EVIDENCE" "$self_smoke_empty_dir" >"$self_smoke_empty_out" 2>&1; then
+    smoke_empty_rc=0
+  else
+    smoke_empty_rc=$?
+  fi
+  if [[ "$smoke_empty_rc" == "1" ]]; then
+    record_pass
+  else
+    record_finding FAIL S135 "$CHECK_SMOKE_EVIDENCE" "empty-root smoke-evidence probe should exit 1 but returned $smoke_empty_rc; see $self_smoke_empty_out"
+  fi
+  check_regex FAIL S136 "$self_smoke_empty_out" 'FAIL SE001 .*no archived markdown smoke reports were found under this root' "empty-root smoke-evidence probe should emit an SE001 empty-root finding"
 
   rm -rf "$self_tmp_dir"
 fi
@@ -1083,9 +1068,6 @@ check_literal FAIL S052 "$TEST_SCENARIOS" 'mixed-target verification remains com
 check_literal FAIL S053 "$SKILL_EN" 'When any normal-path assumption breaks, follow `references/degradation-and-limitations.md`.' "SKILL.md no longer preserves the entry-layer degradation handoff summary"
 check_literal FAIL S054 "$SKILL_EN" 'Any degraded path must be declared explicitly and must not be presented as equivalent to normal parallel isolated execution.' "SKILL.md no longer preserves the explicit degraded-path declaration summary"
 check_literal FAIL S055 "$SKILL_EN" 'Sequential fallback lowers the independence guarantee and must be reported as such.' "SKILL.md no longer preserves the sequential-fallback independence summary"
-check_literal FAIL S056 "$SKILL_ZH" '当正常路径的任一前提失效时，遵循 `references/degradation-and-limitations.md`。' "SKILL_ZH.md no longer preserves the entry-layer degradation handoff summary"
-check_literal FAIL S057 "$SKILL_ZH" '任何降级路径都必须显式声明，不得伪装成与正常并行隔离执行等价。' "SKILL_ZH.md no longer preserves the explicit degraded-path declaration summary"
-check_literal FAIL S058 "$SKILL_ZH" '顺序 fallback 会降低独立性保证，必须明确告知这一点。' "SKILL_ZH.md no longer preserves the sequential-fallback independence summary"
 check_literal FAIL S059 "$PACKAGE_ROOT/templates/report-template.md" '**Audit Target**: [name/path]' "report template no longer preserves the fixed report metadata opening line"
 check_literal FAIL S060 "$PACKAGE_ROOT/templates/report-template.md" '**Model**: [actual model used, if known from session context; omit if unavailable] | Extended thinking: [ON/OFF, if determinable; omit if unavailable]' "report template no longer preserves the fixed model metadata line"
 check_literal FAIL S061 "$PACKAGE_ROOT/templates/report-template.md" '| Field | Content |' "report template no longer preserves the fixed issue-table scaffold"
@@ -1099,7 +1081,6 @@ check_literal FAIL S068 "$PACKAGE_ROOT/references/phase-0-planning.md" '- [file/
 check_literal FAIL S069 "$TEST_SCENARIOS" 'surfaces canonical per-file mapping lines of the form `- [file/path] -> [primary / secondary / supporting component] -> relevant big rounds: R1 | R2 | ...`' "test-scenarios no longer guards the canonical per-file Target Components mapping scaffold"
 check_literal FAIL S070 "$README_FILE" 'Treat `C:/Windows/system32/bash.exe` or a WSL bash whose `~/.claude` does not match the running session as incompatible; that branch should enter the documented script-error fallback.' "README no longer preserves the explicit incompatible-Windows-bash example"
 check_literal FAIL S071 "$SKILL_EN" 'On Windows, prefer Git Bash; treat `C:/Windows/system32/bash.exe` or a WSL bash that cannot see the active `~/.claude` profile as incompatible and route that branch to the documented script-error fallback' "SKILL.md no longer preserves the explicit incompatible-Windows-bash summary"
-check_literal FAIL S072 "$SKILL_ZH" '在 Windows 上优先使用 Git Bash；若 `bash` 实际解析到 `C:/Windows/system32/bash.exe`，或解析到看不到当前活动 `~/.claude` 配置的 WSL bash，应视为不兼容并进入文档规定的 script-error fallback' "SKILL_ZH.md no longer preserves the explicit incompatible-Windows-bash summary"
 check_literal FAIL S073 "$PACKAGE_ROOT/references/phase-0-planning.md" 'A quoted target path containing spaces must remain a single target argument through parameter parsing, readability checks, and pre-planning target loading.' "phase-0 planning no longer preserves the quoted-target-path parsing boundary"
 check_literal FAIL S074 "$PACKAGE_ROOT/references/phase-0-planning.md" 'On Windows, `C:/Windows/system32/bash.exe` or a WSL bash whose `~/.claude` does not match the active session profile is incompatible and belongs to the documented script-error fallback branch.' "phase-0 planning no longer preserves the explicit incompatible-Windows-bash branch"
 check_literal FAIL S075 "$TEST_SCENARIOS" 'the quoted target path remains one target argument instead of being split into multiple tokens' "test-scenarios no longer guards the quoted-target-path parsing boundary"
@@ -1225,22 +1206,6 @@ check_section_literal_order FAIL A002 "$SKILL_EN" '## Support File Load Order' \
   '- Phase 2: `references/phase-2-merge.md`, then `templates/report-template.md`' \
   '### Exceptional Execution' \
   '- Any failure, degradation, or platform-limitation branch: `references/degradation-and-limitations.md`'
-ZH_LOAD_ORDER_LITERALS=(
-  '- 阶段 0：`references/phase-0-planning.md`'
-  '- 阶段 1：先读 `references/phase-1-dispatch.md`，再读 `templates/subagent-template.md`'
-  '- 阶段 2：先读 `references/phase-2-merge.md`，再读 `templates/report-template.md`'
-  '- 任何失败、降级或平台限制分支：`references/degradation-and-limitations.md`'
-)
-for needle in "${ZH_LOAD_ORDER_LITERALS[@]}"; do
-  check_literal FAIL A003 "$SKILL_ZH" "$needle" "SKILL_ZH.md is missing required support-file load-order literal: $needle"
-done
-check_section_literal_order FAIL A003 "$SKILL_ZH" '## 支持文件加载顺序' \
-  '### 正常执行' \
-  '- 阶段 0：`references/phase-0-planning.md`' \
-  '- 阶段 1：先读 `references/phase-1-dispatch.md`，再读 `templates/subagent-template.md`' \
-  '- 阶段 2：先读 `references/phase-2-merge.md`，再读 `templates/report-template.md`' \
-  '### 异常执行' \
-  '- 任何失败、降级或平台限制分支：`references/degradation-and-limitations.md`'
 mapfile -t CHECKLIST_ITEMS < <(contract_rest_lines coverage_item_literal)
 if [[ ${#CHECKLIST_ITEMS[@]} -eq 0 ]]; then
   record_finding FAIL A130 "$CONTRACTS_FILE" "maintenance contracts file does not define any coverage_item_literal entries"

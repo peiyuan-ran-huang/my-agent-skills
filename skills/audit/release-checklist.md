@@ -18,7 +18,6 @@ Severity: `Blocker`
 
 - [ ] The root package still contains:
   - `SKILL.md`
-  - `SKILL_ZH.md`
   - `README.md`
   - `pitfalls.md`
   - `release-checklist.md`
@@ -66,15 +65,12 @@ Severity: `Blocker`
   - `resolved`
   - `stale`
 
-## 2. Entry-Layer Parity
+## 2. Entry-Layer Boundaries
 
 Severity: `Blocker`
 
 - [ ] [SKILL.md](SKILL.md) frontmatter still uses only `name` and `description`.
 - [ ] [SKILL.md](SKILL.md) description still describes when to use the skill, not how the workflow works.
-- [ ] [SKILL_ZH.md](SKILL_ZH.md) frontmatter still remains a valid entry-file frontmatter block rather than drifting into ad hoc metadata.
-- [ ] [SKILL_ZH.md](SKILL_ZH.md) still describes when to use the Chinese entry reference rather than summarising workflow.
-- [ ] [SKILL_ZH.md](SKILL_ZH.md) remains semantically aligned with [SKILL.md](SKILL.md) at the entry-protocol level.
 - [ ] The entry layer still clearly covers the supported target families:
   - `paper`
   - `code`

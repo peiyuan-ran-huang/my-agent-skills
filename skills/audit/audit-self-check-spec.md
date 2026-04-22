@@ -31,7 +31,6 @@ This checker is a maintenance aid, not a substitute for real smoke tests.
 
 ### Out Of Scope
 
-- proving true semantic equivalence between English and Chinese entry files
 - proving the skill is still "heavyweight enough" in tone and rigor
 - proving MCP, LSP, or Context Mode MCP is available at runtime
 - replacing fresh-session smoke tests
@@ -60,24 +59,18 @@ The core logic should stay in Bash to align with the existing script layer.
 |--------|---------|-------------------|
 | **M1. File Layout Check** | Verify live package matches declared layout | `README.md` |
 | **M1b. Verification Ledger Schema Check** | Ensure V2 close condition remains machine-checkable (header shape, allowed severity/status values, unique IDs) | `verification-v2.md`, `verification-issue-ledger.md`, `contracts/maintenance-contracts.tsv` |
-| **M2. Entry Frontmatter Check** | Ensure entry files follow skill-format constraints | `SKILL.md`, `SKILL_ZH.md` |
-| **M3. Entry Boundary Anchor Check** | Catch silent loss of critical entry-layer boundaries (triggers, type keywords, flags, degradation policy) | `SKILL.md`, `SKILL_ZH.md` |
+| **M2. Entry Frontmatter Check** | Ensure entry files follow skill-format constraints | `SKILL.md` |
+| **M3. Entry Boundary Anchor Check** | Catch silent loss of critical entry-layer boundaries (triggers, type keywords, flags, degradation policy) | `SKILL.md` |
 | **M4. Canonical Source Map Check** | Ensure one clear authority per runtime domain; detect README overreach | `README.md`, `contracts/maintenance-contracts.tsv` |
 | **M5. Script Contract Check** | Catch script-layer drift via key output-contract strings and structural invariants | All `scripts/*.sh` files |
 | **M6. Reference And Template Anchor Check** | Verify execution layers expose expected anchor sections and entry files preserve the support-file load-order contract | `references/*.md`, `templates/*.md` |
 | **M7. Fixed-Line Fixture Check** | Protect highest-value text-level regression fixtures via literal-presence checking | `test-scenarios.md` |
 | **M8. Scenario And Calibration Asset Presence Check** | Ensure maintenance assets expose minimum intended coverage (checklist items, scenario headings, example calibration) | `test-scenarios.md`, `examples.md`, `contracts/maintenance-contracts.tsv` |
-| **M9. Self-Probe And Harness Checks** | Verify the checker, golden harness, and smoke-evidence scripts behave correctly under clean, broken, and error conditions by running nested probes | `scripts/audit-self-check.sh`, `scripts/test-golden.sh`, `scripts/check-smoke-evidence.sh` |
+| **M9. Self-Probe And Harness Checks** | Verify the checker, golden harness, and smoke-evidence scripts behave correctly under clean, broken, stale, empty, and error conditions by running nested probes | `scripts/audit-self-check.sh`, `scripts/test-golden.sh`, `scripts/check-smoke-evidence.sh` |
 
 ## Manual Review Modules
 
 The checker should always emit a manual follow-up list for the items below.
-
-### R1. Entry Semantic Parity
-
-Manual reviewer question:
-
-- Are [SKILL.md](SKILL.md) and [SKILL_ZH.md](SKILL_ZH.md) still meaningfully aligned, not just superficially similar?
 
 ### R2. Heavyweight Strength Review
 
@@ -148,12 +141,11 @@ Manual reviewer follow-ups are not a third finding severity. They are emitted se
 Each run emits three sections:
 
 1. **Summary** — package path, timestamp, total/pass/fail/warn/manual counts
-2. **Findings** — severity, rule id, file, message. Rule id prefixes: `L`=layout, `F`=frontmatter, `E`=entry, `C`=canonical-source, `S`=script, `R`=reference/template, `T`=text fixture, `A`=asset/scenario
-3. **Manual Follow-Ups** — semantic parity, heavyweight-strength, example calibration, fresh-session smoke tests (including quoted-OneDrive limitation + mitigated smoke), archived smoke revalidation, environment reality, canonical-source-ownership, fixture-coverage/smoke-decision
+2. **Findings** — severity, rule id, file, message. Rule id prefixes: `L`=layout, `F`=frontmatter, `EA`=entry-anchor, `C`=canonical-source, `S`=script, `R`=reference/template, `T`=text fixture, `A`=asset/scenario
+3. **Manual Follow-Ups** — heavyweight-strength, example calibration, fresh-session smoke tests (including quoted-OneDrive limitation + mitigated smoke), archived smoke revalidation, environment reality, canonical-source-ownership, fixture-coverage/smoke-decision
 
 ## Known Non-Automatable Areas
 
-- Cannot prove semantic equivalence between English and Chinese entry files
 - Cannot prove the skill still feels heavyweight or product-grade
 - Cannot prove examples are pedagogically safe
 - Cannot replace live smoke tests
