@@ -14,6 +14,8 @@ commands/
   handoff.md      ← session handoff generator (/handoff)
   rus.md          ← lightweight self-review "r u sure?" (/rus)
   prompt.md       ← session continuation prompt (/prompt)
+  necess.md       ← 5-gate necessity review of Claude's own proposals (/necess)
+  pre-compact.md  ← context backup before /compact (/pre-compact)
 ```
 
 ## First-time setup (new device)
@@ -45,5 +47,7 @@ Lightweight single-file tools that complement the skills above.
 |------|---------|-------------|
 | work | `/work` | Read-only session summary: completed, pending, remaining items |
 | handoff | `/handoff [path]` | 4-phase session handoff document generator with QC review |
-| rus | `/rus` | Lightweight critical self-review ("r u sure?") of last response (v1.2.0) |
+| rus | `/rus [--N]` | Critical self-review ("r u sure?") of last response — angle rotation + 3-dim check + optional N-pass counterfactual aggregation (v1.4.0) |
 | prompt | `/prompt [desc] [--file [path]]` | Session continuation prompt generator (v0.1.0) |
+| necess | `/necess [--N]` | 5-gate necessity review of Claude's own proposals — guards against action bias and drilldown trap, with optional N-pass counterfactual (v1.1.0) |
+| pre-compact | `/pre-compact` | Pre-compaction context backup — extracts critical context-only content before `/compact` to prevent loss (v0.1.0) |
