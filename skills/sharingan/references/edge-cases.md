@@ -27,3 +27,13 @@
 | LE-4 写入 ai-dev-idea-todo.md 失败 | 报告失败，仅在输出中展示 proposals |
 | `--explore` + abort 终止的主流程 | LE 不运行（abort 跳过 LE） |
 | `--explore --no-ref` | LE 运行但 "Related ref" 字段始终省略（无 RVA ref）；回溯交叉引用步骤完全跳过 |
+| LE-1 Calibration 所需文件不可用（`pitfalls.md` 或 `references/leverage-exploration.md § E`） | LE-1 正常枚举 opportunities，输出标注 `[degraded: LE calibration skipped]`；LE-2/3/4 不受影响。symmetric to QC Sub-Procedure Calibration 的 "proceed without" 降级路径 |
+| Secondary source with traceable primary URLs | Source Provenance Assessment 触发回溯，fetch primary sources，Phase 3 Insight 以 primary 为基础 |
+| Primary source inaccessible (dead URL / paywall / auth) | 记录 `[degraded: primary inaccessible]`，降级至 secondary-only + provenance 标注 |
+| Pressure valve already active before provenance assessment | Primary tracing cap 降至 1（最高引用频率的 source），标注 `[degraded: pressure valve active before provenance tracing]` |
+| 循环引用（A cites B, B cites A） | 以原创内容最多的一方为 Primary；无法判定时双方均为 Secondary，标注 `[provenance: circular reference]` |
+| Secondary references >3 primary sources | 按 discussion weight（mention frequency + section length，ties by citation order）选 top-3；其余 noted but not traced |
+| Traced "primary" turns out to be another secondary after fetch | Reclassify，不递归追溯（tracing depth: 1 level only），标注 `provenance: secondary (traced source also secondary)` |
+| Secondary mentions tool by name but provides no URL | 视为 `secondary (no traceable primary)`，不执行 speculative search；用户提供 URL 后可 re-classify |
+| Tertiary+ aggregation source (listicle, awesome-list) | Phase 1 标注 `Provenance: Tertiary+`。按 Decision Rule 4 逐项分类；每条 insight 的 Phase 3 `Source provenance` 基于该项自身的追溯结果（Primary/Secondary/etc.），不继承 Tertiary+ 标签 |
+| Pressure valve activated mid-tracing (>15 Reads crossed during primary tracing) | 完成当前 primary source 的读取，跳过剩余 primary sources，标注 `[degraded: pressure valve activated mid-tracing]`。与 S-20 (pre-active) 不同：S-20 是追溯前已激活，本场景是追溯中途激活 |

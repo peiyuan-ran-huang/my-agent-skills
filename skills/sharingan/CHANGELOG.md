@@ -6,6 +6,89 @@ Dates represent when the version was committed, not when development started.
 
 本文件记录所有重要变更。0.1 及以上的版本增量有独立标题。日期为提交时间，非开发开始时间。
 
+## [v0.11.2] — 2026-04-20
+
+### Added
+
+- **LE-1 Calibration pre-read gate**: new `**Calibration**:` paragraph at the start of LE-1 Opportunity Scan (symmetric to QC Sub-Procedure Calibration pattern). Before enumerating opportunities, agent reads `pitfalls.md` entries tagged `[le]` plus `references/leverage-exploration.md` § E (LE Anti-Bias Rules). Degradation path: "If unavailable, proceed without and note `[degraded: LE calibration skipped]` in LE output." Closes the Declaration-execution gap (pitfall #15) for pitfalls #23 Opportunity inflation + #25 Build Now 门槛过低, which were declared in pitfalls.md but not inlined at the LE-1 execution point — tag-based trigger mechanism resists pitfall renumbering drift.
+- **Test scenario S-22** (`references/test-scenarios.md`): new scenario covering LE-1 Calibration Pre-read Gate (happy path + degradation path).
+- **Edge-cases.md degradation row**: new table row for "LE-1 Calibration 所需文件不可用" matching the SKILL.md degradation text.
+
+### Design notes
+
+Discovered via `/rus` second-order review of a 2026-04-20 sharingan `--explore` session whose LE-1 produced an Incubate proposal ("skill-inventory 轻量脚本") that was withdrawn — the proposal hit pitfalls #23/#25 but LE-1 enumeration had not read them first. Post-fix L4 `---qc --loop --sub` surfaced three additional scope misses (test-scenarios.md, edge-cases.md, this CHANGELOG.md) that weren't in the handoff Step 2 "dependent files" enumeration — expanded Three-check scope to 7 files total. Chose option α' (tag-based pre-read) over α (hardcoded `#23/#25`), β (抽 LE Sub-Procedure), γ (counterfactual 问句), δ (混合) — α' is minimal within scope, matches QC Sub-Procedure Calibration pattern, and avoids pitfall number hardcoding.
+
+## [v0.11.1] — 2026-04-19
+
+### Added
+
+- **Rationale Evidence Triple**: Phase 5 Proposal Format's `Rationale` bullet is expanded from a single line into three sub-bullets — `Evidence (current state)`, `Baseline (common alternative)`, `Reasoning (user-adapted)` — forcing each proposal to ground its justification in verifiable present state, a baseline comparison, and user-specific reasoning. Addresses the failure mode where single-line Rationale silently conflates "what currently is" with "why this user".
+- **Per-proposal `Without this:` counterfactual field**: new one-sentence field under each proposal's Rationale block, stating what concretely degrades or fails if the proposal is not applied. Forces the author to articulate skipping cost at proposal-authoring time rather than deferring to the downstream Phase 6 cumulative counterfactual. Semantically orthogonal to Phase 6 QC's `"Without this source, would I still propose these changes?"` (per-proposal degradation vs cumulative source-dependency test).
+
+### Changed
+
+- **Phase 5 Rationale requirement wording (Phase 3 External Research block)**: loosened from "MUST cite the external finding in one line" to "typically within the `Reasoning (user-adapted)` bullet, or appended as a dedicated line inside the Rationale block" — preserving the audit-trail requirement while accommodating the new multi-sub-bullet Rationale structure. Fix discovered via three-check within-file sweep after the L347-351 expansion.
+
+### Design notes
+
+- **Backward compatibility**: existing proposals using single-line Rationale still parse — the expansion is additive. Patch bump (v0.11.0 → v0.11.1), not minor.
+- **Naming collision with Phase 6 `Without this source`**: the two `Without this...` labels are semantically distinct (per-proposal vs cumulative) and deliberately left as-is per user approval. Future v0.12+ may unify if refactor pressure warrants.
+- **Derivation**: Evidence-triple and per-proposal counterfactual patterns derived from repo-analyzer's 8-phase workflow analysis, validated via L4 `---qc --loop --sub` 5-round loop (history `[m, m(R2 subagent-reopen), P, P, P]`). R2 subagent independently caught 2 blind spots — source conflation (L211-216 vs L86-95) and undefined scope metric for Trade-off Triangle trigger — that inline R1 review missed, empirically demonstrating `--sub`'s anti-self-review-bias value.
+
+## [v0.11.0] — 2026-04-18
+
+### Added
+
+- **Conditional External Research (Phase 3 pre-step)**: When Phase 2 primary classification is `tool-acquisition`, auto-trigger supplemental external research before insight extraction. Three checks: maintenance signals (search for "no longer maintained / archived / abandoned" patterns), community reception (search for reviews / alternatives / comparisons), known issues (conditional GitHub issues fetch). Budget: 3 searches + 1 fetch per invocation. Auto-skipped if pressure valve already active.
+- **Phase 5 Rationale requirement**: When external findings materially affect a Phase 5 proposal's Priority, the proposal's Rationale MUST cite the external finding in one line (e.g., `"Priority lowered to Low per external search: last maintained commit 2022, 47 open issues"`). Ensures external research leaves a structured audit trail rather than drifting into undocumented judgment.
+- **Phase 1 Output Read scope line** (variant by source type): Multi-file source → `Read scope: <N of M files read> (<X>%); focus: [...]; skipped: [...]`. Single-document source → `Read scope: <N sections/pages read>; skipped: [...]`. Omitted for trivially small sources fully read. If Conditional External Research ran, append one line: `External research: <N> searches, key finding: <one sentence>`.
+- **1 new Hard Limits row**: `External research budget per invocation | 3 searches + 1 fetch | Tool-acquisition evaluation (Phase 3 pre-step); prevent unbounded web calls`.
+
+### Changed
+
+- Phase 1 Output section gains the Read scope block between the Provenance line and Phase 2.
+- Phase 3 Extract Insights section gains the Conditional Pre-Step subsection between the lead-in paragraph and `### Format`.
+
+### Design notes
+
+- **YAGNI on opt-out**: No `--no-research` flag in this version. Auto-trigger is narrow (only `tool-acquisition` primary classification) + auto-skip on pressure valve; if user feedback demands opt-out, add flag in future release.
+- **YAGNI on `git log -1`**: Earlier draft included a local shallow-clone `git log -1` for last-commit-date as a maintenance signal, dropped because `--depth=1` clone only returns HEAD (single commit date ≠ commit-frequency history signal); search #1 already captures "no longer maintained" patterns with stronger signal.
+- **Placement rationale**: External Research sits in Phase 3 (not `references/source-handling.md` § GitHub Repo Special Handling) because it requires Phase 2 classification and informs Phase 3 insight extraction — it's a Phase 3 concern, not a source-type-handling concern.
+
+## [v0.10.0] — 2026-04-06
+
+### Added
+
+- **Source Provenance Assessment**: New Phase 1 subsection that classifies external sources as Primary/Secondary/Tertiary+ and traces secondary sources back to their primary origins before analysis. Prevents insights from being dominated by secondary information bias.
+- 7 decision rules for provenance boundary scenarios (author self-post, fork classification, no-traceable-primary, aggregation, circular reference, tracing depth limit, name-only reference).
+- 3-level degradation path for inaccessible primary sources (single inaccessible → format barrier → all inaccessible).
+- Anti-bias safeguard: secondary claims about primary sources are verified item by item.
+- Terminology note disambiguating provenance Primary/Secondary from Phase 2 taxonomy classification primary/secondary.
+- `Source provenance` field in Phase 3 Insight template.
+- Provenance line in Phase 1 Output.
+- 2 new Hard Limits: primary source tracing per invocation (3, degraded: 1), per-primary-source read cap (6).
+- Pre-tracing and mid-tracing pressure valve interaction rules in Context Management.
+- 7 new edge cases (provenance scenarios) in `references/edge-cases.md`.
+- 3 new test scenarios (S-18, S-19, S-20) in `references/test-scenarios.md`.
+- 1 new pitfall entry: Provenance misclassification `[all]`.
+
+### Changed
+
+- `references/source-handling.md`: gains § Source Provenance Assessment (classification, tracing, degradation, anti-bias, terminology note).
+- File Map: source-handling.md description updated; edge-cases count 23→30; test-scenarios count 17+2→20+2.
+- Context Management Strategy: Phase 1 bullet gains provenance tracing clause with pressure valve interaction.
+
+### Post-QC Cleanup (2026-04-06)
+
+- `pitfalls.md`: #27 Provenance misclassification added (was only in qc/pitfalls.md; now in both). Total: 27 entries.
+- `SKILL.md`: Phase 1 Output + Phase 3 Insight provenance templates extended with `Secondary (traced source also secondary)` and `Secondary (circular reference)`. Phase 2 gains provenance basis note (declaration-execution gap fix). Verification section gains "source provenance assessment". File Map edge-cases 30→32; test-scenarios 20+2→21+2.
+- `references/source-handling.md`: Tracing Mechanism step 1 gains >3 source selection rule. Cleanup section clarified for traced primary repos. Version string clarified (tool names v0.9.0, file updated v0.10.0).
+- `references/edge-cases.md`: +2 rows (Tertiary+ aggregation, mid-tracing pressure valve). Total: 32 scenarios.
+- `references/test-scenarios.md`: S-21 added (Secondary with no traceable primary, Decision Rule 3/7).
+- `examples.md`: Source Provenance Assessment good-example + anti-pattern added. Phase 3 Extract Insights example updated to 7-field format (was stale since v0.8.0).
+- `README.md`: version v0.9.0→v0.10.0, date 2026-03-28→2026-04-06; EN+ZH feature bullet for Source Provenance Assessment.
+- `memory/plugin-details.md`: edge-cases 30→32; test-scenarios S-1~S-20→S-1~S-21.
+
 ## [v0.9.0] — 2026-03-28
 
 ### Added

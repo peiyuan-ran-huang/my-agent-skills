@@ -4,7 +4,10 @@ description: "Use when user explicitly invokes ---sharingan or ---写轮眼 to i
 ---
 
 # SHARINGAN: Self-Optimisation via External Resources
-<!-- v0.9.0 (2026-03-28) — Leverage Exploration mode: post-pipeline capability-building proposals (SKILL/TOOL/FLOW/INFRA/ENHANCE), feasibility matrix, ai-dev-idea-todo.md integration, RVA-LE cross-reference -->
+<!-- v0.11.2 (2026-04-20) — LE-1 Calibration (pre-read pitfalls [le] + references/leverage-exploration.md § E before opportunity enumeration); symmetric to QC Sub-Procedure Calibration; closes Declaration-execution gap for pitfalls #23/#25
+     v0.11.1 (2026-04-19) — Rationale Evidence Triple (Evidence/Baseline/Reasoning) + per-proposal "Without this:" counterfactual field
+     v0.11.0 (2026-04-18) — Conditional external research for tool-acquisition + Phase 1 scope coverage transparency
+     v0.10.0 (2026-04-06) — Source Provenance Assessment: secondary→primary tracing, 7 decision rules, degradation paths, per-source read cap, anti-bias verification -->
 
 ## Problem
 
@@ -30,9 +33,9 @@ You now assume the role of **Self-Optimisation Architect**. Critically evaluate 
 | `pitfalls.md` | Pitfall checklist (starter entries; extend with your own) | Phase 6/9 QC calibration |
 | `examples.md` | Good/anti-pattern examples | Phase 6/9 QC calibration |
 | `references/parameter-parsing.md` | Full CLI spec, source detection, error handling | Pre-phase / before Phase 1 (parameter parsing) |
-| `references/source-handling.md` | Tool selection table, GitHub handling, degradation | Phase 1 |
-| `references/edge-cases.md` | 23 edge case scenarios | As needed |
-| `references/test-scenarios.md` | 17 scenarios + 2 pressure tests | Verification |
+| `references/source-handling.md` | Tool selection table, GitHub handling, degradation, **source provenance assessment** | Phase 1 |
+| `references/edge-cases.md` | 33 edge case scenarios | As needed |
+| `references/test-scenarios.md` | 22 scenarios + 2 pressure tests | Verification |
 | `references/tdd-summary.md` | Rationalization Table + Red Flags summary | Reference |
 | `references/leverage-exploration.md` | LE framework: opportunity types, feasibility, proposal format | Leverage Exploration phase |
 
@@ -84,9 +87,20 @@ Before reading external sources:
 
 Read `references/source-handling.md` for the tool selection table, GitHub repo post-clone security scan, and context-mode degradation strategy.
 
+### Source Provenance Assessment
+
+Read `references/source-handling.md` § Source Provenance Assessment for provenance classification, tracing rules, and degradation paths.
+
 ### Output
 
-Brief summary: title, source type, length/scope, main topic.
+Brief summary: title, source type, length/scope, main topic. Provenance: [Primary / Secondary (N primary sources traced; M also secondary) / Secondary-only (no traceable primary) / Secondary (circular reference) / Tertiary+].
+
+Read scope (choose variant by source type):
+- **Multi-file source** (GitHub repo / local dir): `Read scope: <N of M files read> (<X>%); focus: [categories]; skipped: [file (reason)]`
+- **Single-document source** (URL / PDF / single markdown): `Read scope: <N sections/pages read>; skipped: [section (reason)]`
+- Omit entirely if source is trivially small and fully read.
+
+If Phase 3 Conditional External Research ran, append one line: `External research: <N> searches, key finding: <one sentence>`.
 
 ## Phase 2: Classification
 
@@ -100,7 +114,7 @@ Before classifying, briefly read MEMORY.md User Profile section (through "Techni
 
 Reference by section headers (not line numbers) for robustness against MEMORY.md restructuring. This context informs classification breadth: an insight about "data pipeline automation" may be directly relevant to a user who does EHR analysis, even if the source framed it for software engineering.
 
-Read `taxonomy.md` from this skill's directory for the full classification taxonomy (14 categories, with target files, typical insights, review points, and three-check implications).
+Read `taxonomy.md` from this skill's directory for the full classification taxonomy (14 categories, with target files, typical insights, review points, and three-check implications). When provenance tracing identified primary sources (see source-handling.md § Tracing step 4), classify based on primary source content, not the secondary source's framing.
 
 - Multiple categories allowed (primary + secondary)
 - `other` → pause for user confirmation. If user rejects → `abort(user-rejected)` with classification summary.
@@ -112,12 +126,31 @@ Output: `Classification: [cat1] (primary), [cat2] (secondary)`
 
 Structured extraction of actionable information from the source.
 
+### Conditional Pre-Step: External Research (tool-acquisition only)
+
+If Phase 2 primary classification is `tool-acquisition`, **supplement** source reading with external context before extracting insights. External findings inform Priority assignments in downstream Phase 5 proposals, not themselves produced as separate insights.
+
+Trigger:
+- Auto-triggered when primary = `tool-acquisition`
+- Auto-skipped if pressure valve already active (tag: `[degraded: external research skipped due to pressure valve]`)
+- No opt-out flag in this version (YAGNI — add `--no-research` if user feedback demands it)
+
+Checks (budget per Hard Limits table; tool preference: `ctx_fetch_and_index` > WebSearch per user preference):
+1. **Maintenance signals**: search `<repo-name> "no longer maintained" OR archived OR abandoned`. Skim first 3 results for stale-project indicators.
+2. **Community reception**: search `<repo-name> review OR alternative OR comparison`. Capture 1-2 contrasting opinions.
+3. **Known issues** (conditional): if source is a GitHub repo with README mentioning active issues, fetch GitHub issues endpoint once for recent bug patterns.
+
+Integration:
+- Phase 1 Output gains one line: `External research: <N> searches, key finding: <one sentence>` (omitted if skipped)
+- **Phase 5 Rationale requirement**: When external findings materially affect a downstream Phase 5 proposal's Priority, the proposal's Rationale MUST cite the external finding in one line (typically within the `Reasoning (user-adapted)` bullet, or appended as a dedicated line inside the Rationale block; e.g., `"Priority lowered to Low per external search: last maintained commit 2022, 47 open issues"`). This ensures external research leaves a structured audit trail rather than drifting into undocumented judgment.
+
 ### Format
 
 ```
 ### Extracted Insights
 1. **[Title]** — [one-line description]
    - Source: [reference location]
+   - Source provenance: [Primary / Secondary (verified against primary) / Secondary (traced source also secondary) / Secondary-only (primary inaccessible/untraceable) / Secondary (circular reference)]
    - Direct applicability: [maps to specific config target file:section, or "None"]
    - Transferable pattern: [underlying principle applicable to existing mechanisms — must name specific target, or "None"]
    - User growth: [how this expands user capability or agent-user synergy, or "None"]
@@ -169,6 +202,7 @@ Aggregation rule: **lowest dimension wins**. If ANY dimension has a gap → L1. 
 For each insight classified L1, answer: "Does the two-column comparison show ≥1 dimension with a **substantive** gap? Cite: current state [file:line], source offering [section/paragraph]."
 - Evidence standard: L1 must cite specific file:line for current state AND specific source section for source offering. One-word annotations or vague summaries do not qualify.
 - No evidence → default L2 (filter the insight).
+  - **Low-intervention-cost exception**: When accept error is cheaply reversible (~100 tokens; e.g., text append to config/rules/pitfalls), invert: no evidence → L1 (pass forward). Demand per-dimension cited no-gap evidence to justify filtering. Full framework + operational classifier: `feedback_filter_calibration_asymmetric_cost.md`.
 - Substantive = the gap would make a user-noticeable difference in practice, not just a theoretical improvement.
 
 ### Filter Rules (remaining, applied after depth assessment)
@@ -206,7 +240,7 @@ In `--dry-run` mode: output the assessment but do not create `ref_*.md` even if 
 **Step 1: Essence Extraction**
 Answer two questions:
 - What is the **single most valuable transferable insight** from this resource? (1 sentence)
-- Based on MEMORY.md Research References pointers, does this appear to overlap with any existing `ref_*.md`? (preliminary check — formal scan in Step 3)
+- Based on MEMORY.md References pointers, does this appear to overlap with any existing `ref_*.md`? (preliminary check — formal scan in Step 3)
 If you cannot state the essence concisely → "No reference value identified." — terminate.
 
 **Step 2: Application Mapping**
@@ -251,7 +285,7 @@ The ref_*.md file must follow this structure:
 Requirements:
 - Every line must be **load-bearing** — no throat-clearing, no restating what's obvious from the title
 - Patterns use **inline ecosystem mapping** (italics) showing how each relates to user's system
-- Triggers are **specific and scenario-based**, not abstract categories ("data analysis" ✗ → "When building a CPRD cohort extraction pipeline" ✓)
+- Triggers are **specific and scenario-based**, not abstract categories ("data analysis" ✗ → "When building an EHR cohort extraction pipeline" ✓)
 - Aim for **shortest length that preserves full actionable value** — A-tier refs average 35 lines
 
 If no reference value identified: output one line — "No reference value identified." — and terminate.
@@ -269,7 +303,7 @@ All three must pass. Present the draft to user only after passing: `Save as refe
 ### On User Approval
 
 1. Create `ref_<name>.md` in `memory/` with YAML frontmatter (`type: reference`)
-2. Add pointer to MEMORY.md Research References section
+2. Add pointer to MEMORY.md References section
 3. Log to `memory/changelog.md`
 
 (Steps 1–3 above constitute the three-check for `ref_*.md` creation.)
@@ -312,7 +346,11 @@ Phase 5 consumes this structured output directly. Do not re-read files already r
 **Category**: [taxonomy category]
 **Change Type**: [Add / Modify / Remove / Create]
 Proposed Changes: [specific changes with before/after]
-Rationale: [why this improves ecosystem, citing source insight]
+Rationale:
+  - Evidence (current state): [what currently exists, file:line]
+  - Baseline (common alternative): [default or mainstream approach]
+  - Reasoning (user-adapted): [why this fits user workflow/constraint per MEMORY.md, AND why the pattern itself is sound]
+Without this: [1 sentence: what concretely degrades/fails if not applied]
 Three-Check Impact: [within-file | MEMORY.md | dependent files]
 Risk Assessment: [regression risk | conflict | reversibility]
 ```
@@ -366,7 +404,7 @@ Execute QC inline (following qc SKILL.md 5-dimension framework), not by invoking
 
 **Self-review note**: Inline QC is performed by the same agent that created the proposal; confirmation bias is possible. The Counterfactual prompt partially mitigates this. For write-deny file changes, independent user verification is recommended.
 
-**Completion bias awareness**: v0.8.0 added more pathways for insights to pass Phase 3 (L1, patterns, user growth). This increases the volume entering Phase 4-5, amplifying completion bias pressure ("must produce proposals"). Be especially vigilant: L1 pass-through is permission to *evaluate deeper*, not permission to *propose automatically*. The Phase 5 EXIT POINT 2 remains the correct outcome when deeper evaluation confirms current config is adequate.
+**Completion bias awareness**: v0.8.0 added more pathways for insights to pass Phase 3 (L1, patterns, user growth); the L177 low-intervention-cost exception further widens L1 entry. This increases the volume entering Phase 4-5, amplifying completion bias pressure ("must produce proposals"). Be especially vigilant: L1 pass-through is permission to *evaluate deeper*, not permission to *propose automatically*. The Phase 5 EXIT POINT 2 remains the correct outcome when deeper evaluation confirms current config is adequate.
 
 **L1 attrition metric** (structural check, not just a warning): In the Phase 5 output, report: "L1 insights (N direct + M reclassified) entering Phase 4: N+M → Proposals generated: P (attrition: [N+M-P]/[N+M])." Zero attrition (all L1 insights become proposals) is a completion bias red flag — flag it explicitly. Some attrition is expected and healthy.
 
@@ -483,6 +521,9 @@ Read `references/leverage-exploration.md` for the full framework (opportunity ty
 ### Workflow (4 steps)
 
 **LE-1: Opportunity Scan**
+
+**Calibration**: Before enumerating opportunities, read `pitfalls.md` entries tagged `[le]` and `references/leverage-exploration.md` § E (LE Anti-Bias Rules) from this skill's directory. If unavailable, proceed without and note `[degraded: LE calibration skipped]` in LE output. Purpose: pre-commit to the Skip/Incubate bar before output-generation pressure kicks in. Symmetric to QC Sub-Procedure Calibration.
+
 Re-examine the source holistically — not insight-by-insight, but as a whole:
 - What approaches, philosophies, or patterns could inspire NEW capabilities in our ecosystem?
 - Consider ALL extracted insights (including L2-filtered), plus broader source themes. Note: if pressure valve was active during Phase 3 (>15 Reads, truncated to top-5), LE-1 operates on the truncated set and should note `[degraded: pressure valve]` in output.
@@ -521,7 +562,7 @@ If RVA created a ref_*.md in THIS invocation (skip when `--no-ref` is active or 
 
 ## Context Management Strategy
 
-- **Phase 1**: Web → `ctx_fetch_and_index`; local → Read with limit
+- **Phase 1**: Web → `ctx_fetch_and_index`; local → Read with limit; secondary sources → provenance assessment + primary source tracing (reads count toward global budget). If pressure valve already active before provenance tracing → cap primary tracing to 1 source, tag `[degraded: pressure valve active before provenance tracing]`. If >15 Reads threshold crossed during tracing → complete current primary source, skip remaining, tag `[degraded: pressure valve activated mid-tracing]`
 - **Phase 2-3**: `ctx_search` queries; compact Insights list
 - **Phase 4-5**: Only Read classified targets; no speculative reads
 - **Phase 6, 9**: QC on proposal/diff only; no source re-read
@@ -546,6 +587,9 @@ If RVA created a ref_*.md in THIS invocation (skip when `--no-ref` is active or 
 | `ref_*.md` creation per invocation | 1 | One source = one reference file |
 | LE opportunities limit | 5 | Focus on quality |
 | ai-dev-idea-todo.md additions per invocation | 3 | Prevent todo bloat |
+| Primary source tracing per invocation | 3 (degraded: 1 if pressure valve already active) | Prevent aggregation sources from overwhelming context; >3 select top-3 by discussion weight (mention frequency + section length; ties by citation order) |
+| Per-primary-source read cap | 6 | Matches source-handling.md default scope (5-6 files). GitHub repos: full default scope. Non-repo: 1 fetch + up to 5 section reads |
+| External research budget per invocation | 3 searches + 1 fetch | Tool-acquisition evaluation (Phase 3 pre-step); prevent unbounded web calls |
 
 ## Key Principles
 
@@ -559,7 +603,7 @@ If RVA created a ref_*.md in THIS invocation (skip when `--no-ref` is active or 
 
 ## Verification
 
-Test scenarios in `references/test-scenarios.md` cover EXIT POINTs, security preflight, dry-run, three-check, write-deny, structured checklist, rule liveness, and Leverage Exploration. Run after major version bumps.
+Test scenarios in `references/test-scenarios.md` cover EXIT POINTs, security preflight, dry-run, three-check, write-deny, structured checklist, rule liveness, Leverage Exploration, and source provenance assessment. Run after major version bumps.
 
 **Deprecation criteria**: Deprecate when Claude Code provides native structured config optimisation, or when the ecosystem stabilises to the point where ad-hoc optimisation is sufficient.
 

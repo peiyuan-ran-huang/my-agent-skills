@@ -13,7 +13,7 @@
 | S-5 | 2026-03-26 | PASS (regression) | v0.5.0 run: 3 insights → Phase 7-10 executed, three-check verified. v0.8.0 regression (code review): Phase 8-10 execution logic unchanged; three-check protocol unchanged; Blast Radius/MEMORY.md audit steps unchanged. New Phase 5 Reference-Value Candidates section is additive (does not alter proposal execution path). |
 | S-6 | 2026-03-26 | PASS (regression) | v0.5.0 run: 3 write-deny tips → Phase 3 filter. v0.8.0 regression (code review): Filter Rules (SKILL.md § Filter Rules) unchanged. Calibrated Acceptance (SKILL.md § Calibrated Acceptance Principle): "Hard filters remain absolute." |
 | S-7 | 2026-03-26 | PASS (regression) | v0.5.0 run: 6 checkboxes checked, 2 QC rounds, dry-run. v0.8.0 regression (code review): QC Sub-Procedure (SKILL.md § QC Sub-Procedure) gains two-sided counterfactual + completion bias note + L1 attrition metric, but mandatory 6-checkbox format (SKILL.md § QC Sub-Procedure, Mandatory format) unchanged; Write-deny compliance was already the 6th checkbox pre-v0.8.0. |
-| S-8 | 2026-03-28 | PASS | Post v0.9.0 liveness check. 23 mechanisms (13 v0.8.0 + 10 LE: LE-1 Opportunity Scan, LE-2 Feasibility, LE-3 Proposal Synthesis, LE-4 Integration, Build Test gate, LE EXIT POINT, LE activation logic, RVA-LE Cross-Reference, LE sub-states, Anti-Bias Rules): 23 live, 0 dead. 26 pitfall entries (22+4 `[le]`). 23 edge cases (17+6 LE). 10 cross-file refs valid. Coverage gaps addressed: S-13 PASS, S-14 PASS (behavioral, 2026-03-29), S-15 PASS, S-16 PASS (behavioral, 2026-03-29). |
+| S-8 | 2026-04-06 | PASS | Post v0.10.0 liveness check. 33 mechanisms (13 v0.8.0 + 10 LE + 10 provenance: Source Provenance Classification, 7 Decision Rules, Tracing Mechanism, Degradation Paths, Anti-Bias Safeguard, Phase 1 Provenance Output, Phase 3 Provenance Field, Phase 2 Provenance Basis, Context Management Provenance, Hard Limits Provenance Caps): 33 live, 0 dead. 27 pitfall entries (22+4 `[le]` +1 provenance). 32 edge cases (17+6 LE+9 provenance). 12 cross-file refs valid. Provenance test coverage: S-18/S-19/S-20/S-21 cover happy path + degradation + pressure valve + no-traceable-primary. Coverage gaps noted: Decision Rules 4/5/6 and mid-tracing pressure valve have edge-case rows but no individual test scenarios; Decision Rules 1/2 have decision-rule definitions only (Rule 1 also in examples.md anti-pattern) and no test scenarios (all inherently hard to trigger synthetically). Previous v0.9.0 coverage gaps all resolved: S-13 PASS, S-14 PASS (behavioral), S-15 PASS, S-16 PASS (behavioral). |
 | P-1 | 2026-03-26 | PASS (regression) | v0.5.0 run: 10/10 filtered. v0.8.0 regression (code review): 7 already-implemented → L2 (3-dim no-gap); 2 sufficient → L2; 1 not viable → platform/tool-gate. L1 Verification Gate (default-L2) prevents false L1 classification. |
 | S-9 | 2026-03-26 | PASS (×4 + regression) | v0.7.0 runs: (a) `--no-ref` suppressed ✅ (b) dry-run+Y no file ✅ (c) irrelevant "No reference value" ✅ (d) normal+Y ref_*.md created ✅. v0.8.0 regression (code review): Enhanced 4-step Distillation + Self-Critique Gate are internal process changes; external contract (suppress/output/create) unchanged; --no-ref bypass (SKILL.md § Reference Value Assessment, --no-ref skip) unchanged. |
 | S-10 | 2026-03-26 | PASS | Synthetic input (4 tips: 1 L1 + 3 L2). L1 correctly passed Phase 3 filter with two-column comparison + gap evidence. Phase 4 deeper evaluation → attrition (gap not actionable). EXIT POINT 2. --dry-run. |
@@ -180,3 +180,44 @@
 - **验证**: 确认 (a) proposals 内容完整呈现（Title / Type / Feasibility 等字段齐全），(b) 输出含 `[LE-4: todo file not found — proposals displayed only]` 标记，(c) 运行后目录中无新建 `ai-dev-idea-todo.md` 文件
 - **测试模式**: `--dry-run --explore`（在临时目录或非项目目录执行）
 - **来源**: leverage-exploration.md § Section D, not-found fallback rule (2026-03-29)
+
+## S-18: Source Provenance — Secondary with Traceable Primary (Happy Path)
+
+- **输入**: 一篇公众号/博客文章介绍某个 GitHub skill，包含 repo URL
+- **预期行为**: Phase 1 Source Provenance Assessment 分类为 Secondary → 提取 primary source URL → fetch primary repo（缩略深度，max 6 Reads）→ Phase 3 Insight 的 `Source provenance` 标注为 `Secondary (verified against primary)` → Depth Assessment 两列对比的 "Source offering" 锚定在 primary source
+- **验证**: 确认 (a) Phase 1 Output 含 `Provenance: Secondary (1 primary sources traced)`，(b) Phase 3 每条 Insight 含 `Source provenance` 字段，(c) primary source 的 Security Preflight 独立执行
+- **测试模式**: `--dry-run`
+- **来源**: Source Provenance Assessment, v0.10.0 (2026-04-06)
+
+## S-19: Source Provenance — Primary Inaccessible (Degradation Path)
+
+- **输入**: 一篇博客文章引用的 primary source URL 已失效（404）
+- **预期行为**: Tracing 尝试 fetch → 1-retry-then-fail-fast → 记录 `[degraded: primary inaccessible — 404]` → 降级至 secondary-only 分析 → Phase 3 Insight 标注 `provenance: secondary-only (primary inaccessible)`
+- **验证**: 确认 (a) 降级 tag 出现在 Phase 1 Output，(b) Phase 3 Insight provenance 标注正确，(c) 分析未因 fetch 失败而 abort
+- **测试模式**: `--dry-run`
+- **来源**: Source Provenance Assessment, v0.10.0 (2026-04-06)
+
+## S-20: Source Provenance — Pressure Valve Pre-Active
+
+- **输入**: 大型 GitHub repo 作为 secondary source（>15 files read 触发 pressure valve），repo README 引用另一个 primary repo
+- **预期行为**: Pressure valve 在 provenance assessment 前已激活 → primary tracing cap 降至 1 → 仅 trace 引用频率最高的 1 个 primary source → 输出含 `[degraded: pressure valve active before provenance tracing]`
+- **验证**: 确认 (a) 仅 1 个 primary source 被 traced（而非默认 3），(b) degradation tag 存在，(c) 其余 primary references noted but not traced
+- **测试模式**: `--dry-run`
+- **来源**: Source Provenance Assessment, v0.10.0 (2026-04-06)
+
+## S-21: Source Provenance — Secondary with No Traceable Primary (Decision Rule 3/7)
+
+- **输入**: 一篇博客文章提到多个工具名但未提供任何 URL（如"我用 tool-X 和 tool-Y 来处理数据"）
+- **预期行为**: Phase 1 Provenance Assessment 分类为 Secondary → Decision Rule 3/7 判定无 traceable primary → 不触发 tracing → Phase 1 Output 标注 `Provenance: Secondary-only (no traceable primary)` → Phase 3 Insight 标注 `Source provenance: Secondary-only (primary inaccessible/untraceable)` (untraceable 变体)
+- **验证**: 确认 (a) tracing 未触发（无额外 fetch），(b) Phase 1 Output 含 `Secondary-only`，(c) Phase 3 Insight provenance 使用 untraceable 变体
+- **测试模式**: `--dry-run`
+- **来源**: QC Post-QC Cleanup, v0.10.0 (2026-04-06)
+
+## S-22: LE-1 Calibration Pre-read Gate (Happy Path + Degradation)
+
+- **输入**: 含广泛主题的外部资料 + `--explore` flag，触发 Leverage Exploration
+- **预期行为（happy path）**: LE-1 起始触发 Calibration pre-read — agent 读 `pitfalls.md` 的 `[le]`-tagged entries 与 `references/leverage-exploration.md § E`（LE Anti-Bias Rules），然后再执行 opportunity enumeration
+- **预期行为（degradation path）**: 若 `pitfalls.md` 或 `leverage-exploration.md § E` 不可用（文件缺失、损坏），LE-1 仍正常枚举但输出标注 `[degraded: LE calibration skipped]`；LE-2/3/4 不受影响
+- **验证**: (a) happy path — Calibration 读取在 opportunity 枚举之前发生（检查 agent 推理轨迹或 tool-call 顺序）；(b) degradation path — 输出含 `[degraded: LE calibration skipped]` 标注；(c) Calibration 跳过不阻塞 LE 后续步骤
+- **测试模式**: 正常 `--explore` / 篡改文件路径模拟 unavailable
+- **来源**: sharingan v0.11.2 (2026-04-20) — LE-1 Calibration pre-read gate
